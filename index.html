@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADDRESS Dashboard - BSC</title>
+<style>
+/* ── Reset & Base ── */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#fef3e2;--bg2:#fff8ef;--card:#ffffff;
+  --accent:#e8732a;--accent2:#d4621e;--accent3:#f5a623;
+  --text:#3d2c1a;--text2:#7a5c3a;--border:#f0d9b5;
+  --green:#4caf50;--red:#e53935;--blue:#42a5f5;
+  --shadow:0 4px 20px rgba(232,115,42,.12);
+  --radius:16px;
+}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;overflow-x:hidden;
+}
+/* ── Shiba pattern bg ── */
+body::before{
+  content:'';position:fixed;top:0;left:0;right:0;bottom:0;
+  background:
+    radial-gradient(circle at 15% 20%,rgba(232,115,42,.06) 0%,transparent 50%),
+    radial-gradient(circle at 85% 80%,rgba(245,166,35,.06) 0%,transparent 50%),
+    radial-gradient(circle at 50% 50%,rgba(255,248,239,.3) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── Header ── */
+.header{
+  background:linear-gradient(135deg,#e8732a 0%,#f5a623 50%,#e8732a 100%);
+  padding:24px 32px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 4px 24px rgba(232,115,42,.25);
+}
+.header-left{display:flex;align-items:center;gap:16px}
+.shiba-logo{
+  width:56px;height:56px;border-radius:50%;
+  background:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:36px;box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.header h1{color:#fff;font-size:28px;font-weight:800;letter-spacing:-.5px;text-shadow:0 2px 4px rgba(0,0,0,.15)}
+.header .subtitle{color:rgba(255,255,255,.85);font-size:14px;font-weight:500}
+.header-right{display:flex;align-items:center;gap:12px}
+.lang-btn{
+  background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);
+  color:#fff;padding:8px 16px;border-radius:24px;cursor:pointer;
+  font-size:14px;font-weight:700;transition:all .2s;
+}
+.lang-btn:hover{background:rgba(255,255,255,.35)}
+.lang-btn.active{background:#fff;color:var(--accent)}
+.bsc-badge{
+  background:#f0b90b;color:#1a1a2e;padding:6px 14px;border-radius:20px;
+  font-size:13px;font-weight:800;letter-spacing:.5px;
+}
+.refresh-btn{
+  background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);
+  color:#fff;padding:8px 16px;border-radius:24px;cursor:pointer;
+  font-size:14px;font-weight:700;transition:all .2s;display:flex;align-items:center;gap:6px;
+}
+.refresh-btn:hover{background:rgba(255,255,255,.35)}
+.refresh-btn.spinning svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Container ── */
+.container{max-width:1400px;margin:0 auto;padding:24px 20px;position:relative;z-index:1}
+
+/* ── Status bar ── */
+.status-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--card);border-radius:12px;padding:12px 20px;margin-bottom:20px;
+  border:1px solid var(--border);font-size:14px;color:var(--text2);
+}
+.status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px}
+.status-dot.ok{background:var(--green);box-shadow:0 0 6px rgba(76,175,80,.5)}
+.status-dot.err{background:var(--red);box-shadow:0 0 6px rgba(229,57,53,.5)}
+.status-dot.loading{background:var(--accent3);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── Section Title ── */
+.section-title{
+  font-size:22px;font-weight:800;color:var(--accent);margin:28px 0 16px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-title .icon{font-size:26px}
+
+/* ── Cards Grid ── */
+.cards{display:grid;gap:16px;margin-bottom:8px}
+.cards.c4{grid-template-columns:repeat(4,1fr)}
+.cards.c3{grid-template-columns:repeat(3,1fr)}
+.cards.c2{grid-template-columns:repeat(2,1fr)}
+
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:24px;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s;
+  position:relative;overflow:hidden;
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(232,115,42,.18)}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent3));
+}
+.card .label{font-size:14px;color:var(--text2);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.card .value{font-size:32px;font-weight:800;color:var(--text);line-height:1.2;word-break:break-all}
+.card .value.small{font-size:22px}
+.card .value.mono{font-family:'SF Mono',Monaco,Consolas,monospace;font-size:18px}
+.card .sub{font-size:13px;color:var(--text2);margin-top:6px}
+.card .tag{
+  display:inline-block;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:700;margin-top:6px;
+}
+.tag.green{background:#e8f5e9;color:#2e7d32}
+.tag.orange{background:#fff3e0;color:#e65100}
+.tag.blue{background:#e3f2fd;color:#1565c0}
+
+/* ── Address cards ── */
+.addr-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;box-shadow:var(--shadow);margin-bottom:16px;
+}
+.addr-card .addr-title{font-size:18px;font-weight:800;color:var(--accent);margin-bottom:8px}
+.addr-card .addr-val{
+  font-family:'SF Mono',Monaco,Consolas,monospace;font-size:16px;
+  color:var(--text);word-break:break-all;
+  background:var(--bg);padding:10px 14px;border-radius:10px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+.addr-card .addr-val a{color:var(--accent);text-decoration:none;font-size:13px;white-space:nowrap;font-weight:700}
+.addr-card .addr-val a:hover{text-decoration:underline}
+.addr-card .verified{color:var(--green);font-size:13px;font-weight:700;margin-top:6px}
+.copy-btn{
+  background:none;border:1px solid var(--border);border-radius:6px;
+  padding:4px 8px;cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s;
+}
+.copy-btn:hover{background:var(--bg);border-color:var(--accent);color:var(--accent)}
+
+/* ── Wallet lookup ── */
+.lookup-section{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:24px;box-shadow:var(--shadow);margin-top:8px;
+}
+.lookup-row{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.lookup-input{
+  flex:1;min-width:280px;padding:14px 18px;border:2px solid var(--border);border-radius:12px;
+  font-size:16px;font-family:inherit;color:var(--text);background:var(--bg);
+  transition:border-color .2s;
+}
+.lookup-input:focus{outline:none;border-color:var(--accent)}
+.lookup-btn{
+  background:linear-gradient(135deg,var(--accent),var(--accent3));
+  color:#fff;border:none;padding:14px 28px;border-radius:12px;
+  font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s;
+}
+.lookup-btn:hover{opacity:.9}
+.lookup-btn:disabled{opacity:.5;cursor:not-allowed}
+.lookup-result{
+  background:var(--bg);border-radius:12px;padding:20px;
+  display:none;margin-top:12px;
+}
+.lookup-result.show{display:block}
+.lookup-result .lr-row{
+  display:flex;justify-content:space-between;padding:10px 0;
+  border-bottom:1px solid var(--border);font-size:16px;
+}
+.lookup-result .lr-row:last-child{border:none}
+.lookup-result .lr-label{color:var(--text2);font-weight:600}
+.lookup-result .lr-value{font-weight:700;color:var(--text);word-break:break-all;text-align:right;max-width:60%}
+
+/* ── Mining rules ── */
+.rules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.rule-card{
+  background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:20px;text-align:center;
+}
+.rule-card .rule-icon{font-size:36px;margin-bottom:8px}
+.rule-card .rule-title{font-size:16px;font-weight:800;color:var(--accent);margin-bottom:6px}
+.rule-card .rule-desc{font-size:14px;color:var(--text2);line-height:1.5}
+.rule-card .rule-val{font-size:28px;font-weight:800;color:var(--text);margin:6px 0}
+
+/* ── Shiba decoration ── */
+.shiba-paw{position:fixed;bottom:20px;right:20px;font-size:60px;opacity:.15;z-index:0;pointer-events:none}
+
+/* ── Error message ── */
+.error-msg{background:#ffebee;color:#c62828;padding:16px;border-radius:12px;margin:12px 0;font-size:15px;font-weight:600;display:none}
+.error-msg.show{display:block}
+
+/* ── Responsive ── */
+@media(max-width:1024px){
+  .cards.c4{grid-template-columns:repeat(2,1fr)}
+  .cards.c3{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:640px){
+  .header{flex-direction:column;gap:12px;text-align:center;padding:16px}
+  .header-right{flex-wrap:wrap;justify-content:center}
+  .cards.c4,.cards.c3,.cards.c2{grid-template-columns:1fr}
+  .card .value{font-size:24px}
+  .lookup-row{flex-direction:column}
+  .container{padding:16px 12px}
+}
+/* ── Loading skeleton ── */
+.skeleton{background:linear-gradient(90deg,#f0d9b5 25%,#fef3e2 50%,#f0d9b5 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;color:transparent!important}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── Footer ── */
+.footer{text-align:center;padding:32px 20px;color:var(--text2);font-size:13px;position:relative;z-index:1}
+.footer a{color:var(--accent);text-decoration:none;font-weight:700}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="shiba-logo">&#x1F436;</div>
+    <div>
+      <h1>ADDRESS <span style="font-weight:400;font-size:20px">Dashboard</span></h1>
+      <div class="subtitle" data-i18n="subtitle">Premium Address Mining on BSC</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="bsc-badge">BSC Mainnet</span>
+    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" id="btn-zh" onclick="setLang('zh')">&#x4E2D;&#x6587;</button>
+    <button class="refresh-btn" id="refreshBtn" onclick="loadAll()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      <span data-i18n="refresh">Refresh</span>
+    </button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <div><span class="status-dot loading" id="statusDot"></span><span id="statusText" data-i18n="status_loading">Connecting to BSC...</span></div>
+    <div id="lastUpdate"></div>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- ══ TOKEN OVERVIEW ══ -->
+  <div class="section-title"><span class="icon">&#x1F4B0;</span><span data-i18n="sec_token">Token Overview</span></div>
+  <div class="cards c4">
+    <div class="card"><div class="label" data-i18n="l_supply">Circulating Supply</div><div class="value" id="totalSupply">--</div><div class="sub" id="supplyPct"></div></div>
+    <div class="card"><div class="label" data-i18n="l_minted">Total Minted</div><div class="value" id="totalMinted">--</div><div class="sub" id="mintedPct"></div></div>
+    <div class="card"><div class="label" data-i18n="l_burned">Total Burned</div><div class="value" id="totalBurned">--</div><div class="sub" id="burnedPct"></div></div>
+    <div class="card"><div class="label" data-i18n="l_maxsupply">Max Supply</div><div class="value" id="maxSupply">--</div><div class="sub">ADDRESS (ERC-20)</div></div>
+  </div>
+
+  <!-- ══ MINING STATUS ══ -->
+  <div class="section-title"><span class="icon">&#x26CF;&#xFE0F;</span><span data-i18n="sec_mining">Mining Status</span></div>
+  <div class="cards c4">
+    <div class="card"><div class="label" data-i18n="l_reward">Current Reward</div><div class="value" id="currentReward">--</div><div class="sub" data-i18n="l_per_mine">ADDRESS per mine</div></div>
+    <div class="card"><div class="label" data-i18n="l_era">Halving Era</div><div class="value" id="era">--</div><div class="sub" id="eraSub"></div></div>
+    <div class="card"><div class="label" data-i18n="l_mined_count">Addresses Mined</div><div class="value" id="totalMined">--</div><div class="sub" data-i18n="l_unique_addr">unique vanity addresses</div></div>
+    <div class="card"><div class="label" data-i18n="l_window">Window Activity</div><div class="value" id="windowCount">--</div><div class="sub" data-i18n="l_last10">mines in last 10 blocks</div></div>
+  </div>
+
+  <!-- ══ ADDRESS MANAGEMENT ══ -->
+  <div class="section-title"><span class="icon">&#x1F3E0;</span><span data-i18n="sec_addr">Address Management</span></div>
+  <div class="cards c3">
+    <div class="card"><div class="label" data-i18n="l_registered">Registered Addresses</div><div class="value" id="totalRegistered">--</div></div>
+    <div class="card"><div class="label" data-i18n="l_claim_price">Claim Price</div><div class="value" id="purchasePrice">--</div><div class="sub">ADDRESS</div></div>
+    <div class="card"><div class="label" data-i18n="l_next_wid">Next Wallet ID</div><div class="value" id="nextWalletId">--</div></div>
+  </div>
+
+  <!-- ══ MINING RULES ══ -->
+  <div class="section-title"><span class="icon">&#x1F4DC;</span><span data-i18n="sec_rules">Mining Rules</span></div>
+  <div class="rules-grid">
+    <div class="rule-card">
+      <div class="rule-icon">&#x1F3AF;</div>
+      <div class="rule-title" data-i18n="r_min8">Min Total 8s</div>
+      <div class="rule-val" id="minTotal8s">--</div>
+      <div class="rule-desc" data-i18n="r_min8_desc">Minimum total count of hex digit "8" in the address</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-icon">&#x27A1;&#xFE0F;</div>
+      <div class="rule-title" data-i18n="r_trail">Trailing-Only Min</div>
+      <div class="rule-val" id="trailingOnlyMin">--</div>
+      <div class="rule-desc" data-i18n="r_trail_desc">Min trailing 8s for trailing-only pattern</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-icon">&#x1F969;</div>
+      <div class="rule-title" data-i18n="r_sw_lead">Sandwich Lead Min</div>
+      <div class="rule-val" id="sandwichLeadMin">--</div>
+      <div class="rule-desc" data-i18n="r_sw_lead_desc">Min leading 8s for sandwich pattern</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-icon">&#x1F969;</div>
+      <div class="rule-title" data-i18n="r_sw_trail">Sandwich Trail Min</div>
+      <div class="rule-val" id="sandwichTrailMin">--</div>
+      <div class="rule-desc" data-i18n="r_sw_trail_desc">Min trailing 8s for sandwich pattern</div>
+    </div>
+  </div>
+
+  <!-- ══ MARKETPLACE ══ -->
+  <div class="section-title"><span class="icon">&#x1F6D2;</span><span data-i18n="sec_market">Marketplace</span></div>
+  <div class="cards c3">
+    <div class="card"><div class="label" data-i18n="l_fee">Trading Fee</div><div class="value" id="feeBps">--</div><div class="sub" data-i18n="l_fee_split">50% burn + 50% treasury</div></div>
+    <div class="card"><div class="label" data-i18n="l_treasury">Treasury</div><div class="value mono" id="treasury">--</div></div>
+    <div class="card"><div class="label" data-i18n="l_mkt_owner">Marketplace Owner</div><div class="value mono" id="mktOwner">--</div></div>
+  </div>
+
+  <!-- ══ CONTRACT ADDRESSES ══ -->
+  <div class="section-title"><span class="icon">&#x1F4CB;</span><span data-i18n="sec_contracts">Contract Addresses</span></div>
+  <div id="contractCards"></div>
+
+  <!-- ══ WALLET LOOKUP ══ -->
+  <div class="section-title"><span class="icon">&#x1F50D;</span><span data-i18n="sec_lookup">Wallet Lookup</span></div>
+  <div class="lookup-section">
+    <div class="lookup-row">
+      <input class="lookup-input" id="lookupInput" placeholder="Enter Wallet ID (e.g. 1)" type="number" min="1">
+      <button class="lookup-btn" id="lookupBtn" onclick="lookupWallet()"><span data-i18n="btn_lookup">Search</span></button>
+    </div>
+    <div class="lookup-result" id="lookupResult"></div>
+  </div>
+
+  <!-- ══ USER BALANCE ══ -->
+  <div class="section-title"><span class="icon">&#x1F464;</span><span data-i18n="sec_user">User Balance Check</span></div>
+  <div class="lookup-section">
+    <div class="lookup-row">
+      <input class="lookup-input" id="userAddrInput" placeholder="Enter wallet address (0x...)" type="text">
+      <button class="lookup-btn" onclick="checkUserBalance()"><span data-i18n="btn_check">Check</span></button>
+    </div>
+    <div class="lookup-result" id="userResult"></div>
+  </div>
+
+</div>
+
+<div class="footer">
+  ADDRESS Dashboard &middot; BSC Mainnet &middot; Chain ID 56<br>
+  <span data-i18n="footer_data">Data from on-chain RPC calls</span> &middot;
+  <a href="https://bscscan.com" target="_blank">BscScan</a>
+</div>
+
+<div class="shiba-paw">&#x1F43E;</div>
+
+<script>
+// ── Contract addresses ──
+const CONTRACTS = {
+  PremiumNumber:      '0x2ec80BbaAB0A9F9C6c5de35808D39da34755467B',
+  AddressManager:     '0xe7c0535696B21F78a0D13408C68358Cb78881cF2',
+  PremiumNumberQuery: '0x74df62f32f2f3db8d0DAb68a432b77ad10Fd9d99',
+  Marketplace:        '0x43228150cA72430f1F087f6c9435B92D6549f876',
+  SmartWallet:        '0xE5066F516ab44F5167b563a08D97FAC06cB95746',
+};
+
+const RPC = 'https://bsc-dataseed1.binance.org';
+let callId = 1;
+
+// ── i18n ──
+const I18N = {
+  en: {
+    subtitle:'Premium Address Mining on BSC',
+    refresh:'Refresh',
+    status_loading:'Connecting to BSC...',
+    status_ok:'Connected to BSC Mainnet',
+    status_err:'Connection error',
+    last_update:'Last update: ',
+    sec_token:'Token Overview',
+    sec_mining:'Mining Status',
+    sec_addr:'Address Management',
+    sec_rules:'Mining Rules',
+    sec_market:'Marketplace',
+    sec_contracts:'Contract Addresses',
+    sec_lookup:'Wallet Lookup',
+    sec_user:'User Balance Check',
+    l_supply:'Circulating Supply',l_minted:'Total Minted',l_burned:'Total Burned',l_maxsupply:'Max Supply',
+    l_reward:'Current Reward',l_per_mine:'ADDRESS per mine',l_era:'Halving Era',
+    l_mined_count:'Addresses Mined',l_unique_addr:'unique vanity addresses',
+    l_window:'Window Activity',l_last10:'mines in last 10 blocks',
+    l_registered:'Registered Addresses',l_claim_price:'Claim Price',l_next_wid:'Next Wallet ID',
+    r_min8:'Min Total 8s',r_min8_desc:'Minimum total count of hex digit "8" in the address',
+    r_trail:'Trailing-Only Min',r_trail_desc:'Min trailing 8s for trailing-only pattern',
+    r_sw_lead:'Sandwich Lead Min',r_sw_lead_desc:'Min leading 8s for sandwich pattern',
+    r_sw_trail:'Sandwich Trail Min',r_sw_trail_desc:'Min trailing 8s for sandwich pattern',
+    l_fee:'Trading Fee',l_fee_split:'50% burn + 50% treasury',
+    l_treasury:'Treasury',l_mkt_owner:'Marketplace Owner',
+    btn_lookup:'Search',btn_check:'Check',
+    footer_data:'Data from on-chain RPC calls',
+    era_sub_prefix:'Reward halved ',era_sub_suffix:' time(s)',
+    pct_of_max:'of max supply',
+    lk_wid:'Wallet ID',lk_tid:'Token ID',lk_salt:'Salt',lk_miner:'Miner',
+    lk_owner:'Current Owner',lk_trail:'Trailing 8s',lk_total:'Total 8s',
+    lk_wallet:'Wallet Address',lk_reward:'Mining Reward',lk_approved:'Approved',
+    lk_purchasable:'Purchasable',lk_yes:'Yes',lk_no:'No',lk_none:'None',lk_unclaimed:'Unclaimed',
+    u_token:'ADDRESS Balance',u_bnb:'BNB Balance',
+    verified:'Verified on BscScan',
+  },
+  zh: {
+    subtitle:'BSC 链上靓号地址挖矿',
+    refresh:'刷新',
+    status_loading:'正在连接 BSC...',
+    status_ok:'已连接 BSC 主网',
+    status_err:'连接错误',
+    last_update:'上次更新：',
+    sec_token:'代币概览',
+    sec_mining:'挖矿状态',
+    sec_addr:'地址管理',
+    sec_rules:'挖矿规则',
+    sec_market:'交易市场',
+    sec_contracts:'合约地址',
+    sec_lookup:'钱包查询',
+    sec_user:'用户余额查询',
+    l_supply:'流通供应量',l_minted:'总铸造量',l_burned:'总销毁量',l_maxsupply:'最大供应量',
+    l_reward:'当前奖励',l_per_mine:'ADDRESS / 次',l_era:'减半纪元',
+    l_mined_count:'已挖矿地址数',l_unique_addr:'个靓号地址',
+    l_window:'窗口活跃度',l_last10:'最近 10 个区块内的挖矿次数',
+    l_registered:'已注册地址数',l_claim_price:'认领价格',l_next_wid:'下一个钱包 ID',
+    r_min8:'最少 8 总数',r_min8_desc:'地址中十六进制数字 "8" 的最少总数',
+    r_trail:'纯尾部最少',r_trail_desc:'纯尾部模式所需的最少尾部 8 数量',
+    r_sw_lead:'三明治前缀最少',r_sw_lead_desc:'三明治模式所需的最少前缀 8 数量',
+    r_sw_trail:'三明治尾部最少',r_sw_trail_desc:'三明治模式所需的最少尾部 8 数量',
+    l_fee:'交易手续费',l_fee_split:'50% 销毁 + 50% 国库',
+    l_treasury:'国库地址',l_mkt_owner:'市场所有者',
+    btn_lookup:'查询',btn_check:'查询',
+    footer_data:'数据来自链上 RPC 调用',
+    era_sub_prefix:'奖励已减半 ',era_sub_suffix:' 次',
+    pct_of_max:'占最大供应量',
+    lk_wid:'钱包 ID',lk_tid:'Token ID',lk_salt:'Salt',lk_miner:'矿工',
+    lk_owner:'当前所有者',lk_trail:'尾部 8 数',lk_total:'总 8 数',
+    lk_wallet:'钱包地址',lk_reward:'挖矿奖励',lk_approved:'已授权',
+    lk_purchasable:'可购买',lk_yes:'是',lk_no:'否',lk_none:'无',lk_unclaimed:'未认领',
+    u_token:'ADDRESS 余额',u_bnb:'BNB 余额',
+    verified:'已在 BscScan 验证',
+  }
+};
+let lang = 'en';
+
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  document.getElementById('btn-zh').classList.toggle('active', l==='zh');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (I18N[l][key]) el.textContent = I18N[l][key];
+  });
+  // re-render dynamic subs
+  if (window._lastGlobal) renderGlobal(window._lastGlobal);
+  renderContracts();
+}
+
+function t(key) { return I18N[lang][key] || key; }
+
+// ── RPC helper ──
+async function rpcCall(to, data) {
+  const res = await fetch(RPC, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({jsonrpc:'2.0',method:'eth_call',params:[{to,data},'latest'],id:callId++})
+  });
+  const json = await res.json();
+  if (json.error) throw new Error(json.error.message);
+  return json.result;
+}
+
+function encodeCall(sig, ...args) {
+  // simple ABI encoder for no-arg and single uint/address calls
+  const hash = keccak256Selector(sig);
+  let data = '0x' + hash;
+  for (const a of args) {
+    if (typeof a === 'string' && a.startsWith('0x')) {
+      data += a.slice(2).toLowerCase().padStart(64,'0');
+    } else {
+      data += BigInt(a).toString(16).padStart(64,'0');
+    }
+  }
+  return data;
+}
+
+function keccak256Selector(sig) {
+  // minimal keccak for function selectors
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(sig);
+  return keccak256Bytes(bytes).slice(0,8);
+}
+
+// Keccak-256 (minimal implementation for function selectors)
+function keccak256Bytes(msgBytes) {
+  const RC = [
+    0x0000000000000001n,0x0000000000008082n,0x800000000000808An,0x8000000080008000n,
+    0x000000000000808Bn,0x0000000080000001n,0x8000000080008081n,0x8000000000008009n,
+    0x000000000000008An,0x0000000000000088n,0x0000000080008009n,0x000000008000000An,
+    0x000000008000808Bn,0x800000000000008Bn,0x8000000000008089n,0x8000000000008003n,
+    0x8000000000008002n,0x8000000000000080n,0x000000000000800An,0x800000008000000An,
+    0x8000000080008081n,0x8000000000008080n,0x0000000080000001n,0x8000000080008008n
+  ];
+  const ROTC = [
+    1,3,6,10,15,21,28,36,45,55,2,14,27,41,56,8,25,43,62,18,39,61,20,44
+  ];
+  const PI = [10,7,11,17,18,3,5,16,8,21,24,4,15,23,19,13,12,2,20,14,22,9,6,1];
+
+  const rate = 136;
+  const msg = new Uint8Array(msgBytes);
+
+  // padding
+  const q = rate - (msg.length % rate);
+  const padded = new Uint8Array(msg.length + q);
+  padded.set(msg);
+  padded[msg.length] = 0x01;
+  padded[padded.length - 1] |= 0x80;
+
+  const state = new Array(25).fill(0n);
+
+  for (let off = 0; off < padded.length; off += rate) {
+    for (let i = 0; i < rate/8; i++) {
+      let v = 0n;
+      for (let b = 0; b < 8; b++) v |= BigInt(padded[off + i*8 + b]) << BigInt(b*8);
+      state[i] ^= v;
+    }
+    // 24 rounds
+    for (let round = 0; round < 24; round++) {
+      // theta
+      const C = [];
+      for (let x = 0; x < 5; x++) C[x] = state[x] ^ state[x+5] ^ state[x+10] ^ state[x+15] ^ state[x+20];
+      const D = [];
+      for (let x = 0; x < 5; x++) D[x] = C[(x+4)%5] ^ rot64(C[(x+1)%5], 1);
+      for (let x = 0; x < 5; x++) for (let y = 0; y < 25; y += 5) state[x+y] ^= D[x];
+      // rho + pi
+      let t2 = state[1];
+      for (let i = 0; i < 24; i++) {
+        const j = PI[i]; const tmp = state[j]; state[j] = rot64(t2, ROTC[i]); t2 = tmp;
+      }
+      // chi
+      for (let y = 0; y < 25; y += 5) {
+        const t0 = [state[y],state[y+1],state[y+2],state[y+3],state[y+4]];
+        for (let x = 0; x < 5; x++) state[y+x] = t0[x] ^ ((~t0[(x+1)%5]) & t0[(x+2)%5]);
+      }
+      // iota
+      state[0] ^= RC[round];
+    }
+  }
+
+  // squeeze 32 bytes
+  let hex = '';
+  for (let i = 0; i < 4; i++) {
+    let v = state[i];
+    for (let b = 0; b < 8; b++) {
+      hex += (Number(v & 0xffn)).toString(16).padStart(2,'0');
+      v >>= 8n;
+    }
+  }
+  return hex;
+
+  function rot64(x, n) {
+    x = BigInt.asUintN(64, x);
+    return BigInt.asUintN(64, (x << BigInt(n)) | (x >> BigInt(64-n)));
+  }
+}
+
+function decodeUint(hex) {
+  if (!hex || hex === '0x') return 0n;
+  // strip 0x and take last 64 chars for single value
+  const clean = hex.replace('0x','');
+  return BigInt('0x' + (clean || '0'));
+}
+
+function decodeMultiUint(hex, count) {
+  const clean = hex.replace('0x','').padStart(count*64,'0');
+  const vals = [];
+  for (let i = 0; i < count; i++) {
+    vals.push(BigInt('0x' + clean.slice(i*64, (i+1)*64)));
+  }
+  return vals;
+}
+
+function decodeAddress(hex, wordIndex) {
+  const clean = hex.replace('0x','');
+  const word = clean.slice(wordIndex*64, (wordIndex+1)*64);
+  return '0x' + word.slice(24);
+}
+
+function formatToken(wei) {
+  const v = Number(wei) / 1e18;
+  if (v >= 1e6) return (v/1e6).toFixed(2) + 'M';
+  if (v >= 1e3) return (v/1e3).toFixed(2) + 'K';
+  return v.toFixed(2);
+}
+
+function formatTokenFull(wei) {
+  return (Number(wei) / 1e18).toLocaleString(undefined, {maximumFractionDigits:4});
+}
+
+function shortAddr(a) {
+  if (!a || a === '0x0000000000000000000000000000000000000000') return '---';
+  return a.slice(0,8) + '...' + a.slice(-6);
+}
+
+// ── Render contracts ──
+function renderContracts() {
+  const el = document.getElementById('contractCards');
+  el.innerHTML = Object.entries(CONTRACTS).map(([name, addr]) => `
+    <div class="addr-card">
+      <div class="addr-title">${name}</div>
+      <div class="addr-val">
+        <span>${addr}</span>
+        <span style="display:flex;gap:6px;align-items:center">
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('${addr}')">Copy</button>
+          <a href="https://bscscan.com/address/${addr}#code" target="_blank">BscScan &rarr;</a>
+        </span>
+      </div>
+      <div class="verified">&#x2705; ${t('verified')}</div>
+    </div>
+  `).join('');
+}
+
+// ── Load global info ──
+async function loadGlobalInfo() {
+  const Q = CONTRACTS.PremiumNumberQuery;
+  const data = encodeCall('getGlobalInfo()');
+  const raw = await rpcCall(Q, data);
+  // Returns GlobalInfo struct: 18 fields
+  const clean = raw.replace('0x','');
+  const fields = [];
+  for (let i = 0; i < 18; i++) {
+    fields.push(clean.slice(i*64, (i+1)*64));
+  }
+  return {
+    totalSupply:     BigInt('0x'+fields[0]),
+    totalMinted:     BigInt('0x'+fields[1]),
+    totalBurned:     BigInt('0x'+fields[2]),
+    maxSupply:       BigInt('0x'+fields[3]),
+    totalMined:      BigInt('0x'+fields[4]),
+    totalRegistered: BigInt('0x'+fields[5]),
+    nextWalletId:    BigInt('0x'+fields[6]),
+    minTotal8s:      BigInt('0x'+fields[7]),
+    trailingOnlyMin: BigInt('0x'+fields[8]),
+    sandwichLeadMin: BigInt('0x'+fields[9]),
+    sandwichTrailMin:BigInt('0x'+fields[10]),
+    currentReward:   BigInt('0x'+fields[11]),
+    era:             BigInt('0x'+fields[12]),
+    windowCount:     BigInt('0x'+fields[13]),
+    purchasePrice:   BigInt('0x'+fields[14]),
+    walletBytecodeHash: '0x'+fields[15],
+    addressManager:  '0x'+fields[16].slice(24),
+    amOwner:         '0x'+fields[17].slice(24),
+  };
+}
+
+async function loadMarketInfo() {
+  const M = CONTRACTS.Marketplace;
+  const [feeRaw, treasuryRaw, ownerRaw] = await Promise.all([
+    rpcCall(M, encodeCall('feeBps()')),
+    rpcCall(M, encodeCall('treasury()')),
+    rpcCall(M, encodeCall('owner()')),
+  ]);
+  return {
+    feeBps: Number(decodeUint(feeRaw)),
+    treasury: '0x' + treasuryRaw.replace('0x','').slice(24),
+    owner: '0x' + ownerRaw.replace('0x','').slice(24),
+  };
+}
+
+function renderGlobal(g) {
+  window._lastGlobal = g;
+  const maxN = Number(g.maxSupply);
+  const mintedN = Number(g.totalMinted);
+  const burnedN = Number(g.totalBurned);
+  const supplyN = Number(g.totalSupply);
+
+  document.getElementById('totalSupply').textContent = formatToken(g.totalSupply);
+  document.getElementById('totalMinted').textContent = formatToken(g.totalMinted);
+  document.getElementById('totalBurned').textContent = formatToken(g.totalBurned);
+  document.getElementById('maxSupply').textContent = '21,000,000';
+
+  document.getElementById('supplyPct').textContent = ((supplyN/maxN)*100).toFixed(4) + '% ' + t('pct_of_max');
+  document.getElementById('mintedPct').textContent = ((mintedN/maxN)*100).toFixed(4) + '% ' + t('pct_of_max');
+  document.getElementById('burnedPct').textContent = burnedN > 0 ? ((burnedN/mintedN)*100).toFixed(2) + '% of minted' : '';
+
+  document.getElementById('currentReward').textContent = formatTokenFull(g.currentReward);
+  document.getElementById('era').textContent = g.era.toString();
+  document.getElementById('eraSub').textContent = t('era_sub_prefix') + g.era.toString() + t('era_sub_suffix');
+  document.getElementById('totalMined').textContent = g.totalMined.toString();
+  document.getElementById('windowCount').textContent = g.windowCount.toString();
+
+  document.getElementById('totalRegistered').textContent = g.totalRegistered.toString();
+  document.getElementById('purchasePrice').textContent = formatTokenFull(g.purchasePrice);
+  document.getElementById('nextWalletId').textContent = g.nextWalletId.toString();
+
+  document.getElementById('minTotal8s').textContent = g.minTotal8s.toString();
+  document.getElementById('trailingOnlyMin').textContent = g.trailingOnlyMin.toString();
+  document.getElementById('sandwichLeadMin').textContent = g.sandwichLeadMin.toString();
+  document.getElementById('sandwichTrailMin').textContent = g.sandwichTrailMin.toString();
+}
+
+function renderMarket(m) {
+  document.getElementById('feeBps').textContent = (m.feeBps / 100).toFixed(1) + '%';
+  document.getElementById('treasury').textContent = shortAddr(m.treasury);
+  document.getElementById('mktOwner').textContent = shortAddr(m.owner);
+}
+
+// ── Wallet lookup ──
+async function lookupWallet() {
+  const id = document.getElementById('lookupInput').value;
+  if (!id || id < 1) return;
+  const el = document.getElementById('lookupResult');
+  el.className = 'lookup-result show';
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2)">Loading...</div>';
+
+  try {
+    const Q = CONTRACTS.PremiumNumberQuery;
+    const data = encodeCall('getByWalletId(uint256)', id);
+    const raw = await rpcCall(Q, data);
+    const clean = raw.replace('0x','');
+    const fields = [];
+    for (let i = 0; i < 11; i++) fields.push(clean.slice(i*64,(i+1)*64));
+
+    const wid = BigInt('0x'+fields[0]);
+    const tid = BigInt('0x'+fields[1]);
+    const salt = '0x'+fields[2];
+    const miner = '0x'+fields[3].slice(24);
+    const owner = '0x'+fields[4].slice(24);
+    const trail = BigInt('0x'+fields[5]);
+    const total = BigInt('0x'+fields[6]);
+    const wallet = '0x'+fields[7].slice(24);
+    const reward = BigInt('0x'+fields[8]);
+    const approved = '0x'+fields[9].slice(24);
+    const purchasable = BigInt('0x'+fields[10]) !== 0n;
+
+    const isZero = a => a === '0x0000000000000000000000000000000000000000';
+    const ownerDisplay = isZero(owner) ? t('lk_unclaimed') : owner;
+
+    el.innerHTML = `
+      <div class="lr-row"><span class="lr-label">${t('lk_wid')}</span><span class="lr-value">${wid}</span></div>
+      <div class="lr-row"><span class="lr-label">${t('lk_tid')}</span><span class="lr-value">${tid}</span></div>
+      <div class="lr-row"><span class="lr-label">${t('lk_wallet')}</span><span class="lr-value"><a href="https://bscscan.com/address/${wallet}" target="_blank" style="color:var(--accent)">${wallet}</a></span></div>
+      <div class="lr-row"><span class="lr-label">${t('lk_trail')}</span><span class="lr-value">${trail}</span></div>
+      <div class="lr-row"><span class="lr-label">${t('lk_total')}</span><span class="lr-value">${total}</span></div>
+      <div class="lr-row"><span class="lr-label">${t('lk_miner')}</span><span class="lr-value">${shortAddr(miner)}</span></div>
+      <div class="lr-row"><span class="lr-label">${t('lk_owner')}</span><span class="lr-value">${isZero(owner) ? ownerDisplay : shortAddr(owner)}</span></div>
+      <div class="lr-row"><span class="lr-label">${t('lk_reward')}</span><span class="lr-value">${formatTokenFull(reward)} ADDRESS</span></div>
+      <div class="lr-row"><span class="lr-label">${t('lk_approved')}</span><span class="lr-value">${isZero(approved) ? t('lk_none') : shortAddr(approved)}</span></div>
+      <div class="lr-row"><span class="lr-label">${t('lk_purchasable')}</span><span class="lr-value">${purchasable ? '&#x2705; '+t('lk_yes') : '&#x274C; '+t('lk_no')}</span></div>
+    `;
+  } catch(e) {
+    el.innerHTML = `<div style="color:var(--red);padding:12px;font-weight:600">${e.message}</div>`;
+  }
+}
+
+// ── User balance check ──
+async function checkUserBalance() {
+  const addr = document.getElementById('userAddrInput').value.trim();
+  if (!addr || !addr.startsWith('0x')) return;
+  const el = document.getElementById('userResult');
+  el.className = 'lookup-result show';
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2)">Loading...</div>';
+
+  try {
+    const Q = CONTRACTS.PremiumNumberQuery;
+    const data = encodeCall('getUserDashboard(address)', addr);
+    const raw = await rpcCall(Q, data);
+    const vals = decodeMultiUint(raw, 2);
+
+    // Also get BNB balance directly
+    const bnbRes = await fetch(RPC, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({jsonrpc:'2.0',method:'eth_getBalance',params:[addr,'latest'],id:callId++})
+    });
+    const bnbJson = await bnbRes.json();
+    const bnbWei = BigInt(bnbJson.result || '0x0');
+
+    el.innerHTML = `
+      <div class="lr-row"><span class="lr-label">${t('u_token')}</span><span class="lr-value" style="font-size:20px;font-weight:800">${formatTokenFull(vals[0])} ADDRESS</span></div>
+      <div class="lr-row"><span class="lr-label">${t('u_bnb')}</span><span class="lr-value" style="font-size:20px;font-weight:800">${formatTokenFull(bnbWei)} BNB</span></div>
+    `;
+  } catch(e) {
+    el.innerHTML = `<div style="color:var(--red);padding:12px;font-weight:600">${e.message}</div>`;
+  }
+}
+
+// ── Main load ──
+async function loadAll() {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  const err = document.getElementById('errorMsg');
+  const btn = document.getElementById('refreshBtn');
+
+  dot.className = 'status-dot loading';
+  txt.textContent = t('status_loading');
+  err.className = 'error-msg';
+  btn.classList.add('spinning');
+
+  try {
+    const [global, market] = await Promise.all([loadGlobalInfo(), loadMarketInfo()]);
+    renderGlobal(global);
+    renderMarket(market);
+    dot.className = 'status-dot ok';
+    txt.textContent = t('status_ok');
+    document.getElementById('lastUpdate').textContent = t('last_update') + new Date().toLocaleTimeString();
+  } catch(e) {
+    dot.className = 'status-dot err';
+    txt.textContent = t('status_err');
+    err.textContent = e.message;
+    err.className = 'error-msg show';
+  } finally {
+    btn.classList.remove('spinning');
+  }
+}
+
+// ── Enter key support ──
+document.getElementById('lookupInput').addEventListener('keydown', e => { if(e.key==='Enter') lookupWallet(); });
+document.getElementById('userAddrInput').addEventListener('keydown', e => { if(e.key==='Enter') checkUserBalance(); });
+
+// ── Init ──
+renderContracts();
+loadAll();
+// Auto-refresh every 30s
+setInterval(loadAll, 30000);
+</script>
+</body>
+</html>
