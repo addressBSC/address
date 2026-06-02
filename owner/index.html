@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>柴犬管理台 · Premium Address</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f0e0c;--bg2:#1a1815;--bg3:#252219;
+  --amber:#e8a634;--amber-dim:#b8842a;--amber-glow:rgba(232,166,52,.15);
+  --orange:#d4702c;--cream:#f5e6c8;--cream-dim:#a89878;
+  --red:#c44;--green:#4a4;
+  --card-bg:linear-gradient(135deg,#1e1b16 0%,#16140f 100%);
+  --border:rgba(232,166,52,.12);
+  --text:#e8dcc8;--text-dim:#8a7e6a;
+  --radius:16px;--radius-sm:10px;
+  --font:'Noto Sans SC',sans-serif;--mono:'Space Mono',monospace;
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{
+  font-family:var(--font);color:var(--text);background:var(--bg);
+  min-height:100vh;overflow-x:hidden;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 20% 10%,rgba(232,166,52,.04) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 90%,rgba(212,112,44,.03) 0%,transparent 60%);
+}
+
+/* ── paw print bg pattern ── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ctext x='40' y='48' text-anchor='middle' font-size='20' opacity='.025'%3E🐾%3C/text%3E%3C/svg%3E");
+  background-size:80px 80px;
+}
+
+/* ── scrollbar ── */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--amber-dim);border-radius:3px}
+
+/* ── header ── */
+.header{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 32px;
+  background:rgba(15,14,12,.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{font-size:2rem;filter:drop-shadow(0 0 8px rgba(232,166,52,.4))}
+.logo h1{
+  font-size:1.25rem;font-weight:900;letter-spacing:-.02em;
+  background:linear-gradient(135deg,var(--amber),var(--orange));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.logo .sub{font-size:.7rem;color:var(--text-dim);font-weight:400;margin-top:2px}
+
+.wallet-area{display:flex;align-items:center;gap:12px}
+.chain-badge{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:20px;font-size:.72rem;font-weight:500;
+  background:rgba(232,166,52,.08);border:1px solid var(--border);color:var(--amber);
+}
+.chain-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
+
+.btn-connect{
+  padding:10px 24px;border:none;border-radius:24px;cursor:pointer;
+  font-family:var(--font);font-size:.85rem;font-weight:700;
+  color:#0f0e0c;
+  background:linear-gradient(135deg,var(--amber),var(--orange));
+  box-shadow:0 4px 20px rgba(232,166,52,.3);
+  transition:all .25s;
+}
+.btn-connect:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(232,166,52,.45)}
+.btn-connect:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-connect.connected{
+  background:var(--bg3);color:var(--amber);border:1px solid var(--border);
+  box-shadow:none;font-family:var(--mono);font-size:.75rem;
+}
+
+/* ── main layout ── */
+.main{
+  max-width:1100px;margin:0 auto;padding:40px 24px 80px;
+  position:relative;z-index:1;
+}
+
+/* ── stats bar ── */
+.stats-bar{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;
+  margin-bottom:36px;
+}
+.stat-card{
+  padding:18px 20px;border-radius:var(--radius-sm);
+  background:var(--card-bg);border:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.stat-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--amber),transparent);opacity:.4;
+}
+.stat-label{font-size:.7rem;color:var(--text-dim);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.stat-value{font-family:var(--mono);font-size:1.05rem;color:var(--amber);font-weight:700}
+.stat-value.loading{color:var(--text-dim);font-style:italic;font-family:var(--font);font-size:.85rem;font-weight:400}
+
+/* ── contract cards ── */
+.contract-section{margin-bottom:32px}
+.contract-card{
+  border-radius:var(--radius);overflow:hidden;
+  background:var(--card-bg);border:1px solid var(--border);
+  box-shadow:0 8px 40px rgba(0,0,0,.3);
+  transition:border-color .3s;
+}
+.contract-card:hover{border-color:rgba(232,166,52,.25)}
+
+.card-header{
+  padding:24px 28px 20px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(135deg,rgba(232,166,52,.04),transparent);
+}
+.card-title-group{display:flex;align-items:center;gap:14px}
+.card-icon{
+  width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:1.4rem;
+  background:linear-gradient(135deg,rgba(232,166,52,.15),rgba(212,112,44,.1));
+  border:1px solid rgba(232,166,52,.2);
+}
+.card-title{font-size:1.1rem;font-weight:700;color:var(--cream)}
+.card-subtitle{font-size:.7rem;color:var(--text-dim);margin-top:3px}
+.card-address{
+  font-family:var(--mono);font-size:.72rem;color:var(--amber-dim);
+  padding:6px 12px;border-radius:8px;cursor:pointer;
+  background:rgba(232,166,52,.06);border:1px solid var(--border);
+  transition:all .2s;display:flex;align-items:center;gap:6px;
+}
+.card-address:hover{background:rgba(232,166,52,.12);color:var(--amber)}
+.card-address .copy-icon{font-size:.65rem;opacity:.5}
+
+.card-body{padding:24px 28px 28px}
+
+/* ── info grid ── */
+.info-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;
+  margin-bottom:28px;
+}
+.info-item{
+  padding:14px 16px;border-radius:var(--radius-sm);
+  background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);
+}
+.info-label{font-size:.68rem;color:var(--text-dim);font-weight:500;margin-bottom:4px}
+.info-value{font-family:var(--mono);font-size:.85rem;color:var(--cream);word-break:break-all}
+
+/* ── action sections ── */
+.actions{display:flex;flex-direction:column;gap:16px}
+.action-group{
+  padding:20px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:rgba(0,0,0,.15);
+}
+.action-title{
+  font-size:.82rem;font-weight:700;color:var(--cream);margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.action-title .tag{
+  font-size:.6rem;padding:2px 8px;border-radius:4px;font-weight:500;
+  background:rgba(232,166,52,.1);color:var(--amber);border:1px solid rgba(232,166,52,.15);
+}
+.action-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.field{flex:1;min-width:200px}
+.field label{display:block;font-size:.7rem;color:var(--text-dim);margin-bottom:6px;font-weight:500}
+.field input,.field select{
+  width:100%;padding:10px 14px;border-radius:var(--radius-sm);
+  background:var(--bg);border:1px solid var(--border);
+  color:var(--text);font-family:var(--mono);font-size:.82rem;
+  transition:border-color .2s;outline:none;
+}
+.field input:focus,.field select:focus{border-color:var(--amber)}
+.field input::placeholder{color:var(--text-dim);font-family:var(--font);font-size:.75rem}
+.field .hint{font-size:.62rem;color:var(--text-dim);margin-top:4px}
+
+.btn-action{
+  padding:10px 22px;border:none;border-radius:var(--radius-sm);cursor:pointer;
+  font-family:var(--font);font-size:.8rem;font-weight:600;
+  color:#0f0e0c;white-space:nowrap;height:40px;
+  background:linear-gradient(135deg,var(--amber),var(--orange));
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.btn-action:hover{box-shadow:0 4px 16px rgba(232,166,52,.3);transform:translateY(-1px)}
+.btn-action:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-action.danger{background:linear-gradient(135deg,#b33,#922)}
+.btn-action.danger:hover{box-shadow:0 4px 16px rgba(180,50,50,.3)}
+
+.btn-action.loading{pointer-events:none;color:transparent}
+.btn-action.loading::after{
+  content:'';position:absolute;inset:0;margin:auto;
+  width:18px;height:18px;border:2px solid rgba(0,0,0,.2);border-top-color:#0f0e0c;
+  border-radius:50%;animation:spin .6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── toast ── */
+.toast-container{
+  position:fixed;top:80px;right:24px;z-index:9999;
+  display:flex;flex-direction:column;gap:8px;pointer-events:none;
+}
+.toast{
+  pointer-events:auto;
+  padding:14px 20px;border-radius:var(--radius-sm);
+  font-size:.8rem;font-weight:500;max-width:380px;
+  backdrop-filter:blur(16px);
+  border:1px solid;
+  animation:toastIn .35s ease-out;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.toast.success{background:rgba(68,170,68,.12);border-color:rgba(68,170,68,.3);color:#6d6}
+.toast.error{background:rgba(204,68,68,.12);border-color:rgba(204,68,68,.3);color:#e66}
+.toast.info{background:rgba(232,166,52,.12);border-color:rgba(232,166,52,.3);color:var(--amber)}
+.toast .toast-icon{font-size:1rem;flex-shrink:0}
+.toast .toast-msg{flex:1;line-height:1.4;word-break:break-all}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{to{opacity:0;transform:translateX(30px)}}
+
+/* ── decorative shiba ── */
+.shiba-deco{
+  position:fixed;bottom:-10px;right:-10px;font-size:8rem;opacity:.04;
+  pointer-events:none;z-index:0;transform:rotate(-15deg);
+}
+
+/* ── section title ── */
+.section-title{
+  font-size:.75rem;font-weight:700;color:var(--text-dim);
+  text-transform:uppercase;letter-spacing:.1em;
+  margin-bottom:16px;padding-left:4px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-title::before{content:'';width:3px;height:14px;border-radius:2px;background:var(--amber)}
+
+/* ── disabled overlay ── */
+.disabled-overlay{position:relative}
+.disabled-overlay::before{
+  content:'请先连接钱包';
+  position:absolute;inset:0;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(15,14,12,.7);backdrop-filter:blur(4px);
+  border-radius:var(--radius);
+  color:var(--text-dim);font-size:.9rem;font-weight:500;
+}
+
+/* ── footer ── */
+.footer{
+  text-align:center;padding:32px;
+  font-size:.7rem;color:var(--text-dim);
+}
+.footer a{color:var(--amber-dim);text-decoration:none}
+.footer a:hover{color:var(--amber)}
+
+/* ── responsive ── */
+@media(max-width:640px){
+  .header{padding:12px 16px}
+  .main{padding:20px 12px 60px}
+  .card-header{padding:16px 18px 14px}
+  .card-body{padding:16px 18px 20px}
+  .action-row{flex-direction:column}
+  .field{min-width:100%}
+  .stats-bar{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<!-- header -->
+<header class="header">
+  <div class="logo">
+    <span class="logo-icon">🐕</span>
+    <div>
+      <h1>柴犬管理台</h1>
+      <div class="sub">Premium Address · Owner Panel</div>
+    </div>
+  </div>
+  <div class="wallet-area">
+    <div class="chain-badge" id="chainBadge" style="display:none">
+      <span class="chain-dot"></span>BSC Mainnet
+    </div>
+    <button class="btn-connect" id="btnConnect" onclick="connectWallet()">连接钱包</button>
+  </div>
+</header>
+
+<!-- toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- main -->
+<main class="main">
+
+  <!-- stats -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">合约余额 (AddressManager)</div>
+      <div class="stat-value loading" id="statBalance">等待连接...</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">当前购买价格</div>
+      <div class="stat-value loading" id="statPrice">等待连接...</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">收款地址</div>
+      <div class="stat-value loading" id="statPayout" style="font-size:.72rem">等待连接...</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">额外相同数字要求</div>
+      <div class="stat-value loading" id="statExtra">等待连接...</div>
+    </div>
+  </div>
+
+  <!-- AddressManager -->
+  <div class="contract-section">
+    <div class="section-title">合约一</div>
+    <div class="contract-card" id="cardAM">
+      <div class="card-header">
+        <div class="card-title-group">
+          <div class="card-icon">📋</div>
+          <div>
+            <div class="card-title">AddressManager</div>
+            <div class="card-subtitle">地址注册 · NFT管理 · ERC-721</div>
+          </div>
+        </div>
+        <div class="card-address" onclick="copyAddr('0xa5ef140471486a25a71cd75AE38A26e945D2E3c4')">
+          0xa5ef...e3c4 <span class="copy-icon">复制</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">当前 Owner</div>
+            <div class="info-value" id="amOwner">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">购买价格</div>
+            <div class="info-value" id="amPrice">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">收款地址</div>
+            <div class="info-value" id="amPayout">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">合约 BNB 余额</div>
+            <div class="info-value" id="amBalance">-</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <!-- 设置购买价格 -->
+          <div class="action-group">
+            <div class="action-title">设置购买价格 <span class="tag">WRITE</span></div>
+            <div class="action-row">
+              <div class="field">
+                <label>新价格 (BNB)</label>
+                <input type="number" id="inputPrice" min="0.001" max="1" step="0.001" placeholder="0.001 ~ 1 BNB，步长 0.001">
+                <div class="hint">范围: 0.001 - 1 BNB，必须是 0.001 的整数倍</div>
+              </div>
+              <button class="btn-action" id="btnSetPrice" onclick="setPurchasePrice()">确认设置</button>
+            </div>
+          </div>
+
+          <!-- 设置收款地址 -->
+          <div class="action-group">
+            <div class="action-title">设置收款地址 <span class="tag">WRITE</span></div>
+            <div class="action-row">
+              <div class="field">
+                <label>收款地址</label>
+                <input type="text" id="inputPayout" placeholder="0x...">
+              </div>
+              <button class="btn-action" id="btnSetPayout" onclick="setPayoutAddress()">确认设置</button>
+            </div>
+          </div>
+
+          <!-- 提取余额 -->
+          <div class="action-group">
+            <div class="action-title">提取合约余额 <span class="tag">WRITE</span></div>
+            <div class="action-row">
+              <div class="field">
+                <label>当前余额</label>
+                <input type="text" id="inputSweep" disabled placeholder="连接钱包后显示">
+                <div class="hint">将合约中所有 BNB 转至收款地址</div>
+              </div>
+              <button class="btn-action" id="btnSweep" onclick="sweep()">提取全部</button>
+            </div>
+          </div>
+
+          <!-- 转让所有权 -->
+          <div class="action-group">
+            <div class="action-title">转让所有权 <span class="tag" style="background:rgba(204,68,68,.1);color:#e66;border-color:rgba(204,68,68,.15)">危险</span></div>
+            <div class="action-row">
+              <div class="field">
+                <label>新 Owner 地址</label>
+                <input type="text" id="inputAmNewOwner" placeholder="0x...">
+                <div class="hint">此操作不可逆，请务必确认地址正确</div>
+              </div>
+              <button class="btn-action danger" id="btnAmTransfer" onclick="transferOwnershipAM()">转让</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PremiumNumber -->
+  <div class="contract-section">
+    <div class="section-title">合约二</div>
+    <div class="contract-card" id="cardPN">
+      <div class="card-header">
+        <div class="card-title-group">
+          <div class="card-icon">⛏️</div>
+          <div>
+            <div class="card-title">PremiumNumber</div>
+            <div class="card-subtitle">ERC-20 ADDRESS 代币 · 挖矿核心</div>
+          </div>
+        </div>
+        <div class="card-address" onclick="copyAddr('0x91420708D79D8751bf1d4350aa12311790B3C888')">
+          0x9142...c888 <span class="copy-icon">复制</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">当前 Owner</div>
+            <div class="info-value" id="pnOwner">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">额外相同数字要求</div>
+            <div class="info-value" id="pnExtra">-</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <!-- 设置额外相同数字要求 -->
+          <div class="action-group">
+            <div class="action-title">设置额外相同数字要求 <span class="tag">WRITE</span></div>
+            <div class="action-row">
+              <div class="field">
+                <label>数值 (0 - 10)</label>
+                <input type="number" id="inputExtra" min="0" max="10" step="1" placeholder="0 ~ 10">
+                <div class="hint">增大此值会提高挖矿难度，0 = 无额外要求</div>
+              </div>
+              <button class="btn-action" id="btnSetExtra" onclick="setExtraSame()">确认设置</button>
+            </div>
+          </div>
+
+          <!-- 转让所有权 -->
+          <div class="action-group">
+            <div class="action-title">转让所有权 <span class="tag" style="background:rgba(204,68,68,.1);color:#e66;border-color:rgba(204,68,68,.15)">危险</span></div>
+            <div class="action-row">
+              <div class="field">
+                <label>新 Owner 地址</label>
+                <input type="text" id="inputPnNewOwner" placeholder="0x...">
+                <div class="hint">此操作不可逆，请务必确认地址正确</div>
+              </div>
+              <button class="btn-action danger" id="btnPnTransfer" onclick="transferOwnershipPN()">转让</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="shiba-deco">🐕</div>
+
+<footer class="footer">
+  柴犬管理台 · Premium Address Owner Panel · BSC Mainnet
+</footer>
+<script>
+const AM_ADDR = '0xa5ef140471486a25a71cd75AE38A26e945D2E3c4';
+const PN_ADDR = '0x91420708D79D8751bf1d4350aa12311790B3C888';
+const BSC_CHAIN_ID = 56;
+
+const AM_ABI = [
+  'function owner() view returns (address)',
+  'function purchasePrice() view returns (uint256)',
+  'function payoutAddress() view returns (address)',
+  'function transferOwnership(address newOwner)',
+  'function setPurchasePrice(uint256 newPrice)',
+  'function setPayoutAddress(address newPayout)',
+  'function sweep()'
+];
+
+const PN_ABI = [
+  'function owner() view returns (address)',
+  'function extraSameRequired() view returns (uint256)',
+  'function transferOwnership(address newOwner)',
+  'function setExtraSameRequired(uint256 n)'
+];
+
+let provider, signer, amContract, pnContract, userAddr;
+
+// ── Toast ──
+function toast(msg, type = 'info', duration = 5000) {
+  const c = document.getElementById('toastContainer');
+  const icons = { success: '✓', error: '✗', info: '🐕' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-msg">${msg}</span>`;
+  c.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'toastOut .3s ease-in forwards';
+    setTimeout(() => el.remove(), 300);
+  }, duration);
+}
+
+function copyAddr(addr) {
+  navigator.clipboard.writeText(addr).then(() => toast('地址已复制', 'success', 2000));
+}
+
+function shortAddr(addr) {
+  if (!addr || addr === '0x0000000000000000000000000000000000000000') return '未设置';
+  return addr.slice(0, 6) + '...' + addr.slice(-4);
+}
+
+// ── Connect Wallet ──
+async function connectWallet() {
+  if (!window.ethereum) { toast('请安装 MetaMask', 'error'); return; }
+  try {
+    provider = new ethers.BrowserProvider(window.ethereum);
+    const network = await provider.getNetwork();
+    if (Number(network.chainId) !== BSC_CHAIN_ID) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x38' }]
+        });
+        provider = new ethers.BrowserProvider(window.ethereum);
+      } catch (e) {
+        toast('请切换到 BSC 主网 (Chain ID: 56)', 'error'); return;
+      }
+    }
+    signer = await provider.getSigner();
+    userAddr = await signer.getAddress();
+    amContract = new ethers.Contract(AM_ADDR, AM_ABI, signer);
+    pnContract = new ethers.Contract(PN_ADDR, PN_ABI, signer);
+
+    document.getElementById('btnConnect').textContent = shortAddr(userAddr);
+    document.getElementById('btnConnect').classList.add('connected');
+    document.getElementById('chainBadge').style.display = 'flex';
+
+    toast('钱包已连接: ' + shortAddr(userAddr), 'success');
+    await loadData();
+  } catch (e) {
+    toast('连接失败: ' + (e.reason || e.message), 'error');
+  }
+}
+
+// ── Load Data ──
+async function loadData() {
+  try {
+    const [amOwner, price, payout, balance, pnOwner, extra] = await Promise.all([
+      amContract.owner(),
+      amContract.purchasePrice(),
+      amContract.payoutAddress(),
+      provider.getBalance(AM_ADDR),
+      pnContract.owner(),
+      pnContract.extraSameRequired()
+    ]);
+
+    const priceEth = ethers.formatEther(price);
+    const balEth = ethers.formatEther(balance);
+    const payoutStr = payout === '0x0000000000000000000000000000000000000000' ? '未设置' : payout;
+
+    document.getElementById('amOwner').textContent = shortAddr(amOwner);
+    document.getElementById('amOwner').title = amOwner;
+    document.getElementById('amPrice').textContent = priceEth + ' BNB';
+    document.getElementById('amPayout').textContent = shortAddr(payoutStr);
+    document.getElementById('amPayout').title = payoutStr;
+    document.getElementById('amBalance').textContent = balEth + ' BNB';
+    document.getElementById('inputSweep').value = balEth + ' BNB';
+
+    document.getElementById('pnOwner').textContent = shortAddr(pnOwner);
+    document.getElementById('pnOwner').title = pnOwner;
+    document.getElementById('pnExtra').textContent = extra.toString();
+
+    // stats bar
+    const s = (id, v, loading) => {
+      const el = document.getElementById(id);
+      el.textContent = v;
+      el.classList.toggle('loading', !!loading);
+    };
+    s('statBalance', balEth + ' BNB');
+    s('statPrice', priceEth + ' BNB');
+    s('statPayout', shortAddr(payoutStr));
+    s('statExtra', extra.toString());
+
+  } catch (e) {
+    toast('读取数据失败: ' + (e.reason || e.message), 'error');
+  }
+}
+
+// ── helpers ──
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.classList.toggle('loading', loading);
+  btn.disabled = loading;
+}
+
+async function execTx(btnId, fn, successMsg) {
+  setLoading(btnId, true);
+  try {
+    const tx = await fn();
+    toast('交易已提交，等待确认...', 'info');
+    await tx.wait();
+    toast(successMsg, 'success');
+    await loadData();
+  } catch (e) {
+    const msg = e.reason || e.message || '交易失败';
+    toast('失败: ' + msg, 'error');
+  } finally {
+    setLoading(btnId, false);
+  }
+}
+
+function requireConnected() {
+  if (!signer) { toast('请先连接钱包', 'error'); return false; }
+  return true;
+}
+
+function validateAddr(val, name) {
+  if (!val || !ethers.isAddress(val)) {
+    toast(name + ': 请输入有效的地址', 'error'); return false;
+  }
+  if (val === '0x0000000000000000000000000000000000000000') {
+    toast(name + ': 不能为零地址', 'error'); return false;
+  }
+  return true;
+}
+
+// ── Actions ──
+async function setPurchasePrice() {
+  if (!requireConnected()) return;
+  const val = parseFloat(document.getElementById('inputPrice').value);
+  if (isNaN(val) || val < 0.001 || val > 1) {
+    toast('价格必须在 0.001 - 1 BNB 之间', 'error'); return;
+  }
+  if (Math.round(val * 1000) !== val * 1000) {
+    toast('价格必须是 0.001 的整数倍', 'error'); return;
+  }
+  const wei = ethers.parseEther(val.toString());
+  await execTx('btnSetPrice', () => amContract.setPurchasePrice(wei), '购买价格已更新为 ' + val + ' BNB');
+}
+
+async function setPayoutAddress() {
+  if (!requireConnected()) return;
+  const addr = document.getElementById('inputPayout').value.trim();
+  if (!validateAddr(addr, '收款地址')) return;
+  await execTx('btnSetPayout', () => amContract.setPayoutAddress(addr), '收款地址已更新');
+}
+
+async function sweep() {
+  if (!requireConnected()) return;
+  await execTx('btnSweep', () => amContract.sweep(), '合约余额已提取');
+}
+
+async function transferOwnershipAM() {
+  if (!requireConnected()) return;
+  const addr = document.getElementById('inputAmNewOwner').value.trim();
+  if (!validateAddr(addr, '新Owner地址')) return;
+  if (!confirm('确定要将 AddressManager 的所有权转让给\n' + addr + '\n\n此操作不可逆！')) return;
+  await execTx('btnAmTransfer', () => amContract.transferOwnership(addr), 'AddressManager 所有权已转让');
+}
+
+async function setExtraSame() {
+  if (!requireConnected()) return;
+  const val = parseInt(document.getElementById('inputExtra').value);
+  if (isNaN(val) || val < 0 || val > 10) {
+    toast('数值必须在 0 - 10 之间', 'error'); return;
+  }
+  await execTx('btnSetExtra', () => pnContract.setExtraSameRequired(val), '额外相同数字要求已更新为 ' + val);
+}
+
+async function transferOwnershipPN() {
+  if (!requireConnected()) return;
+  const addr = document.getElementById('inputPnNewOwner').value.trim();
+  if (!validateAddr(addr, '新Owner地址')) return;
+  if (!confirm('确定要将 PremiumNumber 的所有权转让给\n' + addr + '\n\n此操作不可逆！')) return;
+  await execTx('btnPnTransfer', () => pnContract.transferOwnership(addr), 'PremiumNumber 所有权已转让');
+}
+
+// ── account change listener ──
+if (window.ethereum) {
+  window.ethereum.on('accountsChanged', () => location.reload());
+  window.ethereum.on('chainChanged', () => location.reload());
+}
+</script>
+</body>
+</html>
