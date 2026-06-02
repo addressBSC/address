@@ -28,20 +28,14 @@ body{
     radial-gradient(ellipse 80% 60% at 20% 10%,rgba(232,166,52,.04) 0%,transparent 60%),
     radial-gradient(ellipse 60% 50% at 80% 90%,rgba(212,112,44,.03) 0%,transparent 60%);
 }
-
-/* ── paw print bg pattern ── */
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ctext x='40' y='48' text-anchor='middle' font-size='20' opacity='.025'%3E🐾%3C/text%3E%3C/svg%3E");
   background-size:80px 80px;
 }
-
-/* ── scrollbar ── */
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--amber-dim);border-radius:3px}
-
-/* ── header ── */
 .header{
   position:sticky;top:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
@@ -57,7 +51,6 @@ body::before{
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
 .logo .sub{font-size:.7rem;color:var(--text-dim);font-weight:400;margin-top:2px}
-
 .wallet-area{display:flex;align-items:center;gap:12px}
 .chain-badge{
   display:flex;align-items:center;gap:6px;
@@ -65,7 +58,6 @@ body::before{
   background:rgba(232,166,52,.08);border:1px solid var(--border);color:var(--amber);
 }
 .chain-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
-
 .btn-connect{
   padding:10px 24px;border:none;border-radius:24px;cursor:pointer;
   font-family:var(--font);font-size:.85rem;font-weight:700;
@@ -80,14 +72,10 @@ body::before{
   background:var(--bg3);color:var(--amber);border:1px solid var(--border);
   box-shadow:none;font-family:var(--mono);font-size:.75rem;
 }
-
-/* ── main layout ── */
 .main{
   max-width:1100px;margin:0 auto;padding:40px 24px 80px;
   position:relative;z-index:1;
 }
-
-/* ── stats bar ── */
 .stats-bar{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;
   margin-bottom:36px;
@@ -104,8 +92,6 @@ body::before{
 .stat-label{font-size:.7rem;color:var(--text-dim);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
 .stat-value{font-family:var(--mono);font-size:1.05rem;color:var(--amber);font-weight:700}
 .stat-value.loading{color:var(--text-dim);font-style:italic;font-family:var(--font);font-size:.85rem;font-weight:400}
-
-/* ── contract cards ── */
 .contract-section{margin-bottom:32px}
 .contract-card{
   border-radius:var(--radius);overflow:hidden;
@@ -114,7 +100,6 @@ body::before{
   transition:border-color .3s;
 }
 .contract-card:hover{border-color:rgba(232,166,52,.25)}
-
 .card-header{
   padding:24px 28px 20px;
   display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
@@ -138,10 +123,7 @@ body::before{
 }
 .card-address:hover{background:rgba(232,166,52,.12);color:var(--amber)}
 .card-address .copy-icon{font-size:.65rem;opacity:.5}
-
 .card-body{padding:24px 28px 28px}
-
-/* ── info grid ── */
 .info-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;
   margin-bottom:28px;
@@ -152,8 +134,6 @@ body::before{
 }
 .info-label{font-size:.68rem;color:var(--text-dim);font-weight:500;margin-bottom:4px}
 .info-value{font-family:var(--mono);font-size:.85rem;color:var(--cream);word-break:break-all}
-
-/* ── action sections ── */
 .actions{display:flex;flex-direction:column;gap:16px}
 .action-group{
   padding:20px;border-radius:var(--radius-sm);
@@ -179,7 +159,6 @@ body::before{
 .field input:focus,.field select:focus{border-color:var(--amber)}
 .field input::placeholder{color:var(--text-dim);font-family:var(--font);font-size:.75rem}
 .field .hint{font-size:.62rem;color:var(--text-dim);margin-top:4px}
-
 .btn-action{
   padding:10px 22px;border:none;border-radius:var(--radius-sm);cursor:pointer;
   font-family:var(--font);font-size:.8rem;font-weight:600;
@@ -191,7 +170,6 @@ body::before{
 .btn-action:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
 .btn-action.danger{background:linear-gradient(135deg,#b33,#922)}
 .btn-action.danger:hover{box-shadow:0 4px 16px rgba(180,50,50,.3)}
-
 .btn-action.loading{pointer-events:none;color:transparent}
 .btn-action.loading::after{
   content:'';position:absolute;inset:0;margin:auto;
@@ -199,8 +177,6 @@ body::before{
   border-radius:50%;animation:spin .6s linear infinite;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── toast ── */
 .toast-container{
   position:fixed;top:80px;right:24px;z-index:9999;
   display:flex;flex-direction:column;gap:8px;pointer-events:none;
@@ -221,14 +197,10 @@ body::before{
 .toast .toast-msg{flex:1;line-height:1.4;word-break:break-all}
 @keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
 @keyframes toastOut{to{opacity:0;transform:translateX(30px)}}
-
-/* ── decorative shiba ── */
 .shiba-deco{
   position:fixed;bottom:-10px;right:-10px;font-size:8rem;opacity:.04;
   pointer-events:none;z-index:0;transform:rotate(-15deg);
 }
-
-/* ── section title ── */
 .section-title{
   font-size:.75rem;font-weight:700;color:var(--text-dim);
   text-transform:uppercase;letter-spacing:.1em;
@@ -236,8 +208,6 @@ body::before{
   display:flex;align-items:center;gap:8px;
 }
 .section-title::before{content:'';width:3px;height:14px;border-radius:2px;background:var(--amber)}
-
-/* ── disabled overlay ── */
 .disabled-overlay{position:relative}
 .disabled-overlay::before{
   content:'请先连接钱包';
@@ -247,16 +217,12 @@ body::before{
   border-radius:var(--radius);
   color:var(--text-dim);font-size:.9rem;font-weight:500;
 }
-
-/* ── footer ── */
 .footer{
   text-align:center;padding:32px;
   font-size:.7rem;color:var(--text-dim);
 }
 .footer a{color:var(--amber-dim);text-decoration:none}
 .footer a:hover{color:var(--amber)}
-
-/* ── responsive ── */
 @media(max-width:640px){
   .header{padding:12px 16px}
   .main{padding:20px 12px 60px}
@@ -269,7 +235,6 @@ body::before{
 </style>
 </head>
 <body>
-<!-- header -->
 <header class="header">
   <div class="logo">
     <span class="logo-icon">🐕</span>
@@ -285,14 +250,8 @@ body::before{
     <button class="btn-connect" id="btnConnect" onclick="connectWallet()">连接钱包</button>
   </div>
 </header>
-
-<!-- toast container -->
 <div class="toast-container" id="toastContainer"></div>
-
-<!-- main -->
 <main class="main">
-
-  <!-- stats -->
   <div class="stats-bar">
     <div class="stat-card">
       <div class="stat-label">合约余额 (AddressManager)</div>
@@ -307,7 +266,7 @@ body::before{
       <div class="stat-value loading" id="statPayout" style="font-size:.72rem">等待连接...</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">额外相同数字要求</div>
+      <div class="stat-label">Required Run (挖矿难度)</div>
       <div class="stat-value loading" id="statExtra">等待连接...</div>
     </div>
   </div>
@@ -324,8 +283,8 @@ body::before{
             <div class="card-subtitle">地址注册 · NFT管理 · ERC-721</div>
           </div>
         </div>
-        <div class="card-address" onclick="copyAddr('0xa5ef140471486a25a71cd75AE38A26e945D2E3c4')">
-          0xa5ef...e3c4 <span class="copy-icon">复制</span>
+        <div class="card-address" onclick="copyAddr('0x78B11198268619728E4b53c642E8d68941004c11')">
+          0x78B1...4c11 <span class="copy-icon">复制</span>
         </div>
       </div>
       <div class="card-body">
@@ -347,9 +306,7 @@ body::before{
             <div class="info-value" id="amBalance">-</div>
           </div>
         </div>
-
         <div class="actions">
-          <!-- 设置购买价格 -->
           <div class="action-group">
             <div class="action-title">设置购买价格 <span class="tag">WRITE</span></div>
             <div class="action-row">
@@ -361,8 +318,6 @@ body::before{
               <button class="btn-action" id="btnSetPrice" onclick="setPurchasePrice()">确认设置</button>
             </div>
           </div>
-
-          <!-- 设置收款地址 -->
           <div class="action-group">
             <div class="action-title">设置收款地址 <span class="tag">WRITE</span></div>
             <div class="action-row">
@@ -373,8 +328,6 @@ body::before{
               <button class="btn-action" id="btnSetPayout" onclick="setPayoutAddress()">确认设置</button>
             </div>
           </div>
-
-          <!-- 提取余额 -->
           <div class="action-group">
             <div class="action-title">提取合约余额 <span class="tag">WRITE</span></div>
             <div class="action-row">
@@ -386,8 +339,6 @@ body::before{
               <button class="btn-action" id="btnSweep" onclick="sweep()">提取全部</button>
             </div>
           </div>
-
-          <!-- 转让所有权 -->
           <div class="action-group">
             <div class="action-title">转让所有权 <span class="tag" style="background:rgba(204,68,68,.1);color:#e66;border-color:rgba(204,68,68,.15)">危险</span></div>
             <div class="action-row">
@@ -413,11 +364,11 @@ body::before{
           <div class="card-icon">⛏️</div>
           <div>
             <div class="card-title">PremiumNumber</div>
-            <div class="card-subtitle">ERC-20 ADDRESS 代币 · 挖矿核心</div>
+            <div class="card-subtitle">ERC-20 Address (ADD) 代币 · 挖矿核心</div>
           </div>
         </div>
-        <div class="card-address" onclick="copyAddr('0x91420708D79D8751bf1d4350aa12311790B3C888')">
-          0x9142...c888 <span class="copy-icon">复制</span>
+        <div class="card-address" onclick="copyAddr('0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8')">
+          0x1805...E6d8 <span class="copy-icon">复制</span>
         </div>
       </div>
       <div class="card-body">
@@ -427,26 +378,22 @@ body::before{
             <div class="info-value" id="pnOwner">-</div>
           </div>
           <div class="info-item">
-            <div class="info-label">额外相同数字要求</div>
+            <div class="info-label">Required Run (挖矿难度)</div>
             <div class="info-value" id="pnExtra">-</div>
           </div>
         </div>
-
         <div class="actions">
-          <!-- 设置额外相同数字要求 -->
           <div class="action-group">
-            <div class="action-title">设置额外相同数字要求 <span class="tag">WRITE</span></div>
+            <div class="action-title">设置 Required Run (挖矿难度) <span class="tag">WRITE</span></div>
             <div class="action-row">
               <div class="field">
-                <label>数值 (0 - 10)</label>
-                <input type="number" id="inputExtra" min="0" max="10" step="1" placeholder="0 ~ 10">
-                <div class="hint">增大此值会提高挖矿难度，0 = 无额外要求</div>
+                <label>数值 (9 - 20)</label>
+                <input type="number" id="inputExtra" min="9" max="20" step="1" placeholder="9 ~ 20">
+                <div class="hint">连续相同数字的最低要求长度，增大此值会提高挖矿难度，最小 9，最大 20</div>
               </div>
-              <button class="btn-action" id="btnSetExtra" onclick="setExtraSame()">确认设置</button>
+              <button class="btn-action" id="btnSetExtra" onclick="setRequiredRun()">确认设置</button>
             </div>
           </div>
-
-          <!-- 转让所有权 -->
           <div class="action-group">
             <div class="action-title">转让所有权 <span class="tag" style="background:rgba(204,68,68,.1);color:#e66;border-color:rgba(204,68,68,.15)">危险</span></div>
             <div class="action-row">
@@ -462,17 +409,12 @@ body::before{
       </div>
     </div>
   </div>
-
 </main>
-
 <div class="shiba-deco">🐕</div>
-
-<footer class="footer">
-  柴犬管理台 · Premium Address Owner Panel · BSC Mainnet
-</footer>
+<footer class="footer">柴犬管理台 · Premium Address Owner Panel · BSC Mainnet</footer>
 <script>
-const AM_ADDR = '0xa5ef140471486a25a71cd75AE38A26e945D2E3c4';
-const PN_ADDR = '0x91420708D79D8751bf1d4350aa12311790B3C888';
+const AM_ADDR = '0x78B11198268619728E4b53c642E8d68941004c11';
+const PN_ADDR = '0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8';
 const BSC_CHAIN_ID = 56;
 
 const AM_ABI = [
@@ -487,17 +429,16 @@ const AM_ABI = [
 
 const PN_ABI = [
   'function owner() view returns (address)',
-  'function extraSameRequired() view returns (uint256)',
+  'function requiredRun() view returns (uint256)',
   'function transferOwnership(address newOwner)',
-  'function setExtraSameRequired(uint256 n)'
+  'function setRequiredRun(uint256 n)'
 ];
 
 let provider, signer, amContract, pnContract, userAddr;
 
-// ── Toast ──
 function toast(msg, type = 'info', duration = 5000) {
   const c = document.getElementById('toastContainer');
-  const icons = { success: '✓', error: '✗', info: '🐕' };
+  const icons = { success: '\u2713', error: '\u2717', info: '🐕' };
   const el = document.createElement('div');
   el.className = `toast ${type}`;
   el.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-msg">${msg}</span>`;
@@ -517,7 +458,6 @@ function shortAddr(addr) {
   return addr.slice(0, 6) + '...' + addr.slice(-4);
 }
 
-// ── Connect Wallet ──
 async function connectWallet() {
   if (!window.ethereum) { toast('请安装 MetaMask', 'error'); return; }
   try {
@@ -550,16 +490,15 @@ async function connectWallet() {
   }
 }
 
-// ── Load Data ──
 async function loadData() {
   try {
-    const [amOwner, price, payout, balance, pnOwner, extra] = await Promise.all([
+    const [amOwner, price, payout, balance, pnOwner, reqRun] = await Promise.all([
       amContract.owner(),
       amContract.purchasePrice(),
       amContract.payoutAddress(),
       provider.getBalance(AM_ADDR),
       pnContract.owner(),
-      pnContract.extraSameRequired()
+      pnContract.requiredRun()
     ]);
 
     const priceEth = ethers.formatEther(price);
@@ -576,25 +515,22 @@ async function loadData() {
 
     document.getElementById('pnOwner').textContent = shortAddr(pnOwner);
     document.getElementById('pnOwner').title = pnOwner;
-    document.getElementById('pnExtra').textContent = extra.toString();
+    document.getElementById('pnExtra').textContent = reqRun.toString();
 
-    // stats bar
-    const s = (id, v, loading) => {
+    const s = (id, v) => {
       const el = document.getElementById(id);
       el.textContent = v;
-      el.classList.toggle('loading', !!loading);
+      el.classList.remove('loading');
     };
     s('statBalance', balEth + ' BNB');
     s('statPrice', priceEth + ' BNB');
     s('statPayout', shortAddr(payoutStr));
-    s('statExtra', extra.toString());
-
+    s('statExtra', reqRun.toString());
   } catch (e) {
     toast('读取数据失败: ' + (e.reason || e.message), 'error');
   }
 }
 
-// ── helpers ──
 function setLoading(btnId, loading) {
   const btn = document.getElementById(btnId);
   btn.classList.toggle('loading', loading);
@@ -632,7 +568,6 @@ function validateAddr(val, name) {
   return true;
 }
 
-// ── Actions ──
 async function setPurchasePrice() {
   if (!requireConnected()) return;
   const val = parseFloat(document.getElementById('inputPrice').value);
@@ -666,13 +601,13 @@ async function transferOwnershipAM() {
   await execTx('btnAmTransfer', () => amContract.transferOwnership(addr), 'AddressManager 所有权已转让');
 }
 
-async function setExtraSame() {
+async function setRequiredRun() {
   if (!requireConnected()) return;
   const val = parseInt(document.getElementById('inputExtra').value);
-  if (isNaN(val) || val < 0 || val > 10) {
-    toast('数值必须在 0 - 10 之间', 'error'); return;
+  if (isNaN(val) || val < 9 || val > 20) {
+    toast('数值必须在 9 - 20 之间', 'error'); return;
   }
-  await execTx('btnSetExtra', () => pnContract.setExtraSameRequired(val), '额外相同数字要求已更新为 ' + val);
+  await execTx('btnSetExtra', () => pnContract.setRequiredRun(val), 'Required Run 已更新为 ' + val);
 }
 
 async function transferOwnershipPN() {
@@ -683,7 +618,6 @@ async function transferOwnershipPN() {
   await execTx('btnPnTransfer', () => pnContract.transferOwnership(addr), 'PremiumNumber 所有权已转让');
 }
 
-// ── account change listener ──
 if (window.ethereum) {
   window.ethereum.on('accountsChanged', () => location.reload());
   window.ethereum.on('chainChanged', () => location.reload());
