@@ -3,810 +3,1193 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ADDRESS Dashboard - BSC</title>
+<title>Premium Address - Mine & Own Vanity Addresses on BSC</title>
 <style>
-/* ── Reset & Base ── */
-*{margin:0;padding:0;box-sizing:border-box}
+/* === RESET & BASE === */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#fef3e2;--bg2:#fff8ef;--card:#ffffff;
-  --accent:#e8732a;--accent2:#d4621e;--accent3:#f5a623;
-  --text:#3d2c1a;--text2:#7a5c3a;--border:#f0d9b5;
-  --green:#4caf50;--red:#e53935;--blue:#42a5f5;
-  --shadow:0 4px 20px rgba(232,115,42,.12);
-  --radius:16px;
+  --bg:#0a0e14;--bg2:#111822;--bg3:#182030;--card:#141c28;
+  --border:#1e2a3a;--border2:#2a3a50;
+  --accent:#00e6a0;--accent2:#00c488;--accent-glow:rgba(0,230,160,.15);
+  --text:#e0e8f0;--text2:#8899aa;--text3:#556677;
+  --danger:#ff4466;--warn:#ffaa33;--blue:#4488ff;
+  --radius:12px;--radius-lg:16px;
+  --font:'Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:'SF Mono','Fira Code','Cascadia Code',monospace;
 }
-body{
-  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
-  background:var(--bg);color:var(--text);
-  min-height:100vh;overflow-x:hidden;
-}
-/* ── Shiba pattern bg ── */
-body::before{
-  content:'';position:fixed;top:0;left:0;right:0;bottom:0;
-  background:
-    radial-gradient(circle at 15% 20%,rgba(232,115,42,.06) 0%,transparent 50%),
-    radial-gradient(circle at 85% 80%,rgba(245,166,35,.06) 0%,transparent 50%),
-    radial-gradient(circle at 50% 50%,rgba(255,248,239,.3) 0%,transparent 70%);
-  pointer-events:none;z-index:0;
-}
+html{font-size:18px;scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}
+button{cursor:pointer;font-family:var(--font);border:none;outline:none}
+input{font-family:var(--mono);outline:none}
 
-/* ── Header ── */
-.header{
-  background:linear-gradient(135deg,#e8732a 0%,#f5a623 50%,#e8732a 100%);
-  padding:24px 32px;display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:100;
-  box-shadow:0 4px 24px rgba(232,115,42,.25);
-}
-.header-left{display:flex;align-items:center;gap:16px}
-.shiba-logo{
-  width:56px;height:56px;border-radius:50%;
-  background:#fff;display:flex;align-items:center;justify-content:center;
-  font-size:36px;box-shadow:0 2px 8px rgba(0,0,0,.15);
-}
-.header h1{color:#fff;font-size:28px;font-weight:800;letter-spacing:-.5px;text-shadow:0 2px 4px rgba(0,0,0,.15)}
-.header .subtitle{color:rgba(255,255,255,.85);font-size:14px;font-weight:500}
-.header-right{display:flex;align-items:center;gap:12px}
-.lang-btn{
-  background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);
-  color:#fff;padding:8px 16px;border-radius:24px;cursor:pointer;
-  font-size:14px;font-weight:700;transition:all .2s;
-}
-.lang-btn:hover{background:rgba(255,255,255,.35)}
-.lang-btn.active{background:#fff;color:var(--accent)}
-.bsc-badge{
-  background:#f0b90b;color:#1a1a2e;padding:6px 14px;border-radius:20px;
-  font-size:13px;font-weight:800;letter-spacing:.5px;
-}
-.refresh-btn{
-  background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);
-  color:#fff;padding:8px 16px;border-radius:24px;cursor:pointer;
-  font-size:14px;font-weight:700;transition:all .2s;display:flex;align-items:center;gap:6px;
-}
-.refresh-btn:hover{background:rgba(255,255,255,.35)}
-.refresh-btn.spinning svg{animation:spin 1s linear infinite}
+/* === LAYOUT === */
+.container{max-width:1200px;margin:0 auto;padding:0 20px}
+.section{padding:60px 0}
+.section-title{font-size:1.8rem;font-weight:700;margin-bottom:8px;color:var(--text)}
+.section-sub{font-size:1rem;color:var(--text2);margin-bottom:32px}
+
+/* === HEADER === */
+header{position:sticky;top:0;z-index:100;background:rgba(10,14,20,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:16px 0}
+.header-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;font-size:1.3rem;font-weight:800;color:var(--accent);letter-spacing:1px}
+.logo .diamond{font-size:1.6rem}
+.header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* === BUTTONS === */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:var(--radius);font-size:1rem;font-weight:600;transition:all .2s}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{background:#00ffb0;transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,230,160,.3)}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border2)}
+.btn-secondary:hover{background:var(--border2)}
+.btn-sm{padding:8px 16px;font-size:.85rem}
+.btn-danger{background:rgba(255,68,102,.15);color:var(--danger);border:1px solid rgba(255,68,102,.3)}
+.btn-danger:hover{background:rgba(255,68,102,.25)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.lang-toggle{background:var(--bg3);color:var(--text2);border:1px solid var(--border);padding:8px 14px;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer}
+.lang-toggle:hover{color:var(--accent);border-color:var(--accent)}
+
+/* === HERO === */
+.hero{text-align:center;padding:80px 0 60px;position:relative}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(0,230,160,.08) 0%,transparent 70%);pointer-events:none}
+.hero h1{font-size:3rem;font-weight:800;background:linear-gradient(135deg,#00e6a0,#00aaff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;line-height:1.2}
+.hero p{font-size:1.15rem;color:var(--text2);max-width:640px;margin:0 auto 32px}
+.hero-stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;margin-top:40px}
+.hero-stat{text-align:center}
+.hero-stat .val{font-size:2rem;font-weight:700;color:var(--accent);font-family:var(--mono)}
+.hero-stat .lbl{font-size:.85rem;color:var(--text3);margin-top:4px}
+
+/* === CARDS === */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;transition:border-color .2s}
+.card:hover{border-color:var(--border2)}
+.card-title{font-size:1.2rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+
+/* === STAT ITEMS === */
+.stat{padding:20px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border)}
+.stat .label{font-size:.8rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.stat .value{font-size:1.5rem;font-weight:700;font-family:var(--mono);color:var(--text);word-break:break-all}
+.stat .value.accent{color:var(--accent)}
+
+/* === TABS === */
+.tabs{display:flex;gap:4px;background:var(--bg2);border-radius:var(--radius);padding:4px;margin-bottom:28px;overflow-x:auto}
+.tab{padding:12px 20px;border-radius:8px;font-size:.95rem;font-weight:600;color:var(--text3);background:transparent;white-space:nowrap;transition:all .2s}
+.tab.active{background:var(--accent);color:#000}
+.tab:hover:not(.active){color:var(--text);background:var(--bg3)}
+
+/* === FORMS === */
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:.9rem;font-weight:600;color:var(--text2);margin-bottom:8px}
+.form-input{width:100%;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:1rem;transition:border-color .2s}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.form-input::placeholder{color:var(--text3)}
+.form-row{display:flex;gap:12px;align-items:flex-end}
+.form-row .form-group{flex:1}
+
+/* === NFT CARD === */
+.nft-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.nft-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:all .25s}
+.nft-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,230,160,.1)}
+.nft-header{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.nft-id{font-weight:700;color:var(--accent);font-size:1.1rem}
+.nft-tier{font-size:.8rem;padding:4px 10px;border-radius:20px;font-weight:600}
+.tier-common{background:rgba(100,120,140,.2);color:#8899aa}
+.tier-rare{background:rgba(68,136,255,.15);color:#4488ff}
+.tier-epic{background:rgba(170,68,255,.15);color:#aa44ff}
+.tier-legendary{background:rgba(255,170,0,.15);color:#ffaa00}
+.nft-body{padding:20px}
+.nft-addr{font-family:var(--mono);font-size:.95rem;color:var(--text2);word-break:break-all;margin-bottom:12px;line-height:1.5}
+.nft-addr .hi{color:var(--accent);font-weight:700}
+.nft-meta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.nft-meta span{font-size:.85rem;color:var(--text3)}
+.nft-meta span strong{color:var(--text2)}
+.nft-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.nft-price{font-weight:700;color:var(--warn);font-size:1.1rem}
+.nft-owner{font-size:.8rem;color:var(--text3);font-family:var(--mono)}
+
+/* === TOAST === */
+.toast-container{position:fixed;top:80px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:8px}
+.toast{padding:14px 20px;border-radius:var(--radius);font-size:.9rem;font-weight:500;animation:slideIn .3s;max-width:400px;word-break:break-word}
+.toast-success{background:#0a2a1a;border:1px solid #00e6a0;color:#00e6a0}
+.toast-error{background:#2a0a1a;border:1px solid #ff4466;color:#ff4466}
+.toast-info{background:#0a1a2a;border:1px solid #4488ff;color:#4488ff}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* === WALLET STATUS === */
+.wallet-info{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)}
+.wallet-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.wallet-addr{font-family:var(--mono);font-size:.85rem;color:var(--text2)}
+
+/* === FOOTER === */
+footer{padding:40px 0;border-top:1px solid var(--border);text-align:center;color:var(--text3);font-size:.85rem}
+footer a{color:var(--accent)}
+
+/* === LOADING === */
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay{position:fixed;inset:0;background:rgba(10,14,20,.7);display:flex;align-items:center;justify-content:center;z-index:999;display:none}
+.loading-overlay.show{display:flex}
+.loading-box{text-align:center;color:var(--text)}
+.loading-box .spinner{width:40px;height:40px;border-width:3px;margin-bottom:16px}
 
-/* ── Container ── */
-.container{max-width:1400px;margin:0 auto;padding:24px 20px;position:relative;z-index:1}
+/* === PAGINATION === */
+.pagination{display:flex;justify-content:center;gap:8px;margin-top:24px}
+.pagination button{padding:8px 16px;border-radius:8px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);font-size:.9rem}
+.pagination button.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.pagination button:hover:not(.active):not(:disabled){background:var(--border2)}
 
-/* ── Status bar ── */
-.status-bar{
-  display:flex;align-items:center;justify-content:space-between;
-  background:var(--card);border-radius:12px;padding:12px 20px;margin-bottom:20px;
-  border:1px solid var(--border);font-size:14px;color:var(--text2);
-}
-.status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px}
-.status-dot.ok{background:var(--green);box-shadow:0 0 6px rgba(76,175,80,.5)}
-.status-dot.err{background:var(--red);box-shadow:0 0 6px rgba(229,57,53,.5)}
-.status-dot.loading{background:var(--accent3);animation:pulse 1s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* === NOTICE BOX === */
+.notice{padding:16px 20px;border-radius:var(--radius);background:rgba(0,230,160,.06);border:1px solid rgba(0,230,160,.15);color:var(--text2);font-size:.95rem;margin-bottom:20px;line-height:1.7}
+.notice strong{color:var(--accent)}
 
-/* ── Section Title ── */
-.section-title{
-  font-size:22px;font-weight:800;color:var(--accent);margin:28px 0 16px;
-  display:flex;align-items:center;gap:10px;
+/* === MOBILE === */
+@media(max-width:768px){
+  html{font-size:16px}
+  .hero h1{font-size:2rem}
+  .hero-stats{gap:20px}
+  .hero-stat .val{font-size:1.5rem}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .header-inner{gap:8px}
+  .tabs{flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .form-row{flex-direction:column}
+  .section{padding:40px 0}
+  .nft-list{grid-template-columns:1fr}
+  .hero-stats{flex-direction:column;align-items:center}
+  .container{padding:0 14px}
+  .card{padding:20px}
 }
-.section-title .icon{font-size:26px}
-
-/* ── Cards Grid ── */
-.cards{display:grid;gap:16px;margin-bottom:8px}
-.cards.c4{grid-template-columns:repeat(4,1fr)}
-.cards.c3{grid-template-columns:repeat(3,1fr)}
-.cards.c2{grid-template-columns:repeat(2,1fr)}
-
-.card{
-  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
-  padding:24px;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s;
-  position:relative;overflow:hidden;
+@media(max-width:480px){
+  .hero h1{font-size:1.6rem}
+  .stat .value{font-size:1.2rem}
+  .header-actions{width:100%;justify-content:flex-end}
 }
-.card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(232,115,42,.18)}
-.card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:4px;
-  background:linear-gradient(90deg,var(--accent),var(--accent3));
-}
-.card .label{font-size:14px;color:var(--text2);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
-.card .value{font-size:32px;font-weight:800;color:var(--text);line-height:1.2;word-break:break-all}
-.card .value.small{font-size:22px}
-.card .value.mono{font-family:'SF Mono',Monaco,Consolas,monospace;font-size:18px}
-.card .sub{font-size:13px;color:var(--text2);margin-top:6px}
-.card .tag{
-  display:inline-block;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:700;margin-top:6px;
-}
-.tag.green{background:#e8f5e9;color:#2e7d32}
-.tag.orange{background:#fff3e0;color:#e65100}
-.tag.blue{background:#e3f2fd;color:#1565c0}
-
-/* ── Address cards ── */
-.addr-card{
-  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
-  padding:20px;box-shadow:var(--shadow);margin-bottom:16px;
-}
-.addr-card .addr-title{font-size:18px;font-weight:800;color:var(--accent);margin-bottom:8px}
-.addr-card .addr-val{
-  font-family:'SF Mono',Monaco,Consolas,monospace;font-size:16px;
-  color:var(--text);word-break:break-all;
-  background:var(--bg);padding:10px 14px;border-radius:10px;
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
-}
-.addr-card .addr-val a{color:var(--accent);text-decoration:none;font-size:13px;white-space:nowrap;font-weight:700}
-.addr-card .addr-val a:hover{text-decoration:underline}
-.addr-card .verified{color:var(--green);font-size:13px;font-weight:700;margin-top:6px}
-.copy-btn{
-  background:none;border:1px solid var(--border);border-radius:6px;
-  padding:4px 8px;cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s;
-}
-.copy-btn:hover{background:var(--bg);border-color:var(--accent);color:var(--accent)}
-
-/* ── Wallet lookup ── */
-.lookup-section{
-  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
-  padding:24px;box-shadow:var(--shadow);margin-top:8px;
-}
-.lookup-row{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
-.lookup-input{
-  flex:1;min-width:280px;padding:14px 18px;border:2px solid var(--border);border-radius:12px;
-  font-size:16px;font-family:inherit;color:var(--text);background:var(--bg);
-  transition:border-color .2s;
-}
-.lookup-input:focus{outline:none;border-color:var(--accent)}
-.lookup-btn{
-  background:linear-gradient(135deg,var(--accent),var(--accent3));
-  color:#fff;border:none;padding:14px 28px;border-radius:12px;
-  font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s;
-}
-.lookup-btn:hover{opacity:.9}
-.lookup-btn:disabled{opacity:.5;cursor:not-allowed}
-.lookup-result{
-  background:var(--bg);border-radius:12px;padding:20px;
-  display:none;margin-top:12px;
-}
-.lookup-result.show{display:block}
-.lookup-result .lr-row{
-  display:flex;justify-content:space-between;padding:10px 0;
-  border-bottom:1px solid var(--border);font-size:16px;
-}
-.lookup-result .lr-row:last-child{border:none}
-.lookup-result .lr-label{color:var(--text2);font-weight:600}
-.lookup-result .lr-value{font-weight:700;color:var(--text);word-break:break-all;text-align:right;max-width:60%}
-
-/* ── Mining rules ── */
-.rules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-.rule-card{
-  background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:20px;text-align:center;
-}
-.rule-card .rule-icon{font-size:36px;margin-bottom:8px}
-.rule-card .rule-title{font-size:16px;font-weight:800;color:var(--accent);margin-bottom:6px}
-.rule-card .rule-desc{font-size:14px;color:var(--text2);line-height:1.5}
-.rule-card .rule-val{font-size:28px;font-weight:800;color:var(--text);margin:6px 0}
-
-/* ── Shiba decoration ── */
-.shiba-paw{position:fixed;bottom:20px;right:20px;font-size:60px;opacity:.15;z-index:0;pointer-events:none}
-
-/* ── Error message ── */
-.error-msg{background:#ffebee;color:#c62828;padding:16px;border-radius:12px;margin:12px 0;font-size:15px;font-weight:600;display:none}
-.error-msg.show{display:block}
-
-/* ── Responsive ── */
-@media(max-width:1024px){
-  .cards.c4{grid-template-columns:repeat(2,1fr)}
-  .cards.c3{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:640px){
-  .header{flex-direction:column;gap:12px;text-align:center;padding:16px}
-  .header-right{flex-wrap:wrap;justify-content:center}
-  .cards.c4,.cards.c3,.cards.c2{grid-template-columns:1fr}
-  .card .value{font-size:24px}
-  .lookup-row{flex-direction:column}
-  .container{padding:16px 12px}
-}
-/* ── Loading skeleton ── */
-.skeleton{background:linear-gradient(90deg,#f0d9b5 25%,#fef3e2 50%,#f0d9b5 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;color:transparent!important}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
-/* ── Footer ── */
-.footer{text-align:center;padding:32px 20px;color:var(--text2);font-size:13px;position:relative;z-index:1}
-.footer a{color:var(--accent);text-decoration:none;font-weight:700}
 </style>
 </head>
 <body>
 
-<!-- Header -->
-<div class="header">
-  <div class="header-left">
-    <div class="shiba-logo">&#x1F436;</div>
-    <div>
-      <h1>ADDRESS <span style="font-weight:400;font-size:20px">Dashboard</span></h1>
-      <div class="subtitle" data-i18n="subtitle">Premium Address Mining on BSC</div>
-    </div>
-  </div>
-  <div class="header-right">
-    <span class="bsc-badge">BSC Mainnet</span>
-    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
-    <button class="lang-btn" id="btn-zh" onclick="setLang('zh')">&#x4E2D;&#x6587;</button>
-    <button class="refresh-btn" id="refreshBtn" onclick="loadAll()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-      <span data-i18n="refresh">Refresh</span>
-    </button>
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <div id="loadingText">Processing...</div>
   </div>
 </div>
 
+<!-- HEADER -->
+<header>
+  <div class="container header-inner">
+    <div class="logo"><span class="diamond">&#9670;</span> <span>PREMIUM ADDRESS</span></div>
+    <div class="header-actions">
+      <button class="lang-toggle" onclick="toggleLang()" id="langBtn">CN / 中文</button>
+      <div id="walletStatus"></div>
+      <button class="btn btn-primary btn-sm" id="connectBtn" onclick="connectWallet()">
+        <span data-i18n="connectWallet">Connect Wallet</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="container">
+    <h1 data-i18n="heroTitle">Mine Premium Vanity Addresses on BSC</h1>
+    <p data-i18n="heroDesc">Discover, mine and own beautiful vanity addresses as NFTs. Earn ADDRESS tokens through Bitcoin-style mining with halving mechanics.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="val" id="statTotalMined">--</div><div class="lbl" data-i18n="totalMined">Total Mined</div></div>
+      <div class="hero-stat"><div class="val" id="statTotalSupply">--</div><div class="lbl" data-i18n="tokenSupply">ADDRESS Supply</div></div>
+      <div class="hero-stat"><div class="val" id="statReward">--</div><div class="lbl" data-i18n="currentReward">Current Reward</div></div>
+      <div class="hero-stat"><div class="val" id="statEra">--</div><div class="lbl" data-i18n="miningEra">Mining Era</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN TABS -->
 <div class="container">
-
-  <!-- Status bar -->
-  <div class="status-bar">
-    <div><span class="status-dot loading" id="statusDot"></span><span id="statusText" data-i18n="status_loading">Connecting to BSC...</span></div>
-    <div id="lastUpdate"></div>
+  <div class="tabs" id="mainTabs">
+    <button class="tab active" onclick="switchTab('dashboard')" data-tab="dashboard" data-i18n="tabDashboard">Dashboard</button>
+    <button class="tab" onclick="switchTab('browse')" data-tab="browse" data-i18n="tabBrowse">Browse Addresses</button>
+    <button class="tab" onclick="switchTab('mine')" data-tab="mine" data-i18n="tabMine">Mine</button>
+    <button class="tab" onclick="switchTab('claim')" data-tab="claim" data-i18n="tabClaim">Claim NFT</button>
+    <button class="tab" onclick="switchTab('myassets')" data-tab="myassets" data-i18n="tabMyAssets">My Assets</button>
+    <button class="tab" onclick="switchTab('manage')" data-tab="manage" data-i18n="tabManage">Manage</button>
   </div>
-
-  <div class="error-msg" id="errorMsg"></div>
-
-  <!-- ══ TOKEN OVERVIEW ══ -->
-  <div class="section-title"><span class="icon">&#x1F4B0;</span><span data-i18n="sec_token">Token Overview</span></div>
-  <div class="cards c4">
-    <div class="card"><div class="label" data-i18n="l_supply">Circulating Supply</div><div class="value" id="totalSupply">--</div><div class="sub" id="supplyPct"></div></div>
-    <div class="card"><div class="label" data-i18n="l_minted">Total Minted</div><div class="value" id="totalMinted">--</div><div class="sub" id="mintedPct"></div></div>
-    <div class="card"><div class="label" data-i18n="l_burned">Total Burned</div><div class="value" id="totalBurned">--</div><div class="sub" id="burnedPct"></div></div>
-    <div class="card"><div class="label" data-i18n="l_maxsupply">Max Supply</div><div class="value" id="maxSupply">--</div><div class="sub">ADDRESS (ERC-20)</div></div>
-  </div>
-
-  <!-- ══ MINING STATUS ══ -->
-  <div class="section-title"><span class="icon">&#x26CF;&#xFE0F;</span><span data-i18n="sec_mining">Mining Status</span></div>
-  <div class="cards c4">
-    <div class="card"><div class="label" data-i18n="l_reward">Current Reward</div><div class="value" id="currentReward">--</div><div class="sub" data-i18n="l_per_mine">ADDRESS per mine</div></div>
-    <div class="card"><div class="label" data-i18n="l_era">Halving Era</div><div class="value" id="era">--</div><div class="sub" id="eraSub"></div></div>
-    <div class="card"><div class="label" data-i18n="l_mined_count">Addresses Mined</div><div class="value" id="totalMined">--</div><div class="sub" data-i18n="l_unique_addr">unique vanity addresses</div></div>
-    <div class="card"><div class="label" data-i18n="l_window">Window Activity</div><div class="value" id="windowCount">--</div><div class="sub" data-i18n="l_last10">mines in last 10 blocks</div></div>
-  </div>
-
-  <!-- ══ ADDRESS MANAGEMENT ══ -->
-  <div class="section-title"><span class="icon">&#x1F3E0;</span><span data-i18n="sec_addr">Address Management</span></div>
-  <div class="cards c3">
-    <div class="card"><div class="label" data-i18n="l_registered">Registered Addresses</div><div class="value" id="totalRegistered">--</div></div>
-    <div class="card"><div class="label" data-i18n="l_claim_price">Claim Price</div><div class="value" id="purchasePrice">--</div><div class="sub">ADDRESS</div></div>
-    <div class="card"><div class="label" data-i18n="l_next_wid">Next Wallet ID</div><div class="value" id="nextWalletId">--</div></div>
-  </div>
-
-  <!-- ══ MINING RULES ══ -->
-  <div class="section-title"><span class="icon">&#x1F4DC;</span><span data-i18n="sec_rules">Mining Rules</span></div>
-  <div class="rules-grid">
-    <div class="rule-card">
-      <div class="rule-icon">&#x1F3AF;</div>
-      <div class="rule-title" data-i18n="r_min8">Min Total 8s</div>
-      <div class="rule-val" id="minTotal8s">--</div>
-      <div class="rule-desc" data-i18n="r_min8_desc">Minimum total count of hex digit "8" in the address</div>
-    </div>
-    <div class="rule-card">
-      <div class="rule-icon">&#x27A1;&#xFE0F;</div>
-      <div class="rule-title" data-i18n="r_trail">Trailing-Only Min</div>
-      <div class="rule-val" id="trailingOnlyMin">--</div>
-      <div class="rule-desc" data-i18n="r_trail_desc">Min trailing 8s for trailing-only pattern</div>
-    </div>
-    <div class="rule-card">
-      <div class="rule-icon">&#x1F969;</div>
-      <div class="rule-title" data-i18n="r_sw_lead">Sandwich Lead Min</div>
-      <div class="rule-val" id="sandwichLeadMin">--</div>
-      <div class="rule-desc" data-i18n="r_sw_lead_desc">Min leading 8s for sandwich pattern</div>
-    </div>
-    <div class="rule-card">
-      <div class="rule-icon">&#x1F969;</div>
-      <div class="rule-title" data-i18n="r_sw_trail">Sandwich Trail Min</div>
-      <div class="rule-val" id="sandwichTrailMin">--</div>
-      <div class="rule-desc" data-i18n="r_sw_trail_desc">Min trailing 8s for sandwich pattern</div>
-    </div>
-  </div>
-
-  <!-- ══ MARKETPLACE ══ -->
-  <div class="section-title"><span class="icon">&#x1F6D2;</span><span data-i18n="sec_market">Marketplace</span></div>
-  <div class="cards c3">
-    <div class="card"><div class="label" data-i18n="l_fee">Trading Fee</div><div class="value" id="feeBps">--</div><div class="sub" data-i18n="l_fee_split">50% burn + 50% treasury</div></div>
-    <div class="card"><div class="label" data-i18n="l_treasury">Treasury</div><div class="value mono" id="treasury">--</div></div>
-    <div class="card"><div class="label" data-i18n="l_mkt_owner">Marketplace Owner</div><div class="value mono" id="mktOwner">--</div></div>
-  </div>
-
-  <!-- ══ CONTRACT ADDRESSES ══ -->
-  <div class="section-title"><span class="icon">&#x1F4CB;</span><span data-i18n="sec_contracts">Contract Addresses</span></div>
-  <div id="contractCards"></div>
-
-  <!-- ══ WALLET LOOKUP ══ -->
-  <div class="section-title"><span class="icon">&#x1F50D;</span><span data-i18n="sec_lookup">Wallet Lookup</span></div>
-  <div class="lookup-section">
-    <div class="lookup-row">
-      <input class="lookup-input" id="lookupInput" placeholder="Enter Wallet ID (e.g. 1)" type="number" min="1">
-      <button class="lookup-btn" id="lookupBtn" onclick="lookupWallet()"><span data-i18n="btn_lookup">Search</span></button>
-    </div>
-    <div class="lookup-result" id="lookupResult"></div>
-  </div>
-
-  <!-- ══ USER BALANCE ══ -->
-  <div class="section-title"><span class="icon">&#x1F464;</span><span data-i18n="sec_user">User Balance Check</span></div>
-  <div class="lookup-section">
-    <div class="lookup-row">
-      <input class="lookup-input" id="userAddrInput" placeholder="Enter wallet address (0x...)" type="text">
-      <button class="lookup-btn" onclick="checkUserBalance()"><span data-i18n="btn_check">Check</span></button>
-    </div>
-    <div class="lookup-result" id="userResult"></div>
-  </div>
-
 </div>
 
-<div class="footer">
-  ADDRESS Dashboard &middot; BSC Mainnet &middot; Chain ID 56<br>
-  <span data-i18n="footer_data">Data from on-chain RPC calls</span> &middot;
-  <a href="https://bscscan.com" target="_blank">BscScan</a>
+<!-- TAB: DASHBOARD -->
+<div class="section tab-content" id="content-dashboard">
+  <div class="container">
+    <div class="section-title" data-i18n="globalDashboard">Global Dashboard</div>
+    <div class="section-sub" data-i18n="globalDashboardDesc">Real-time on-chain statistics for the Premium Address protocol</div>
+    <div class="grid-4" id="globalStats">
+      <!-- filled by JS -->
+    </div>
+  </div>
 </div>
 
-<div class="shiba-paw">&#x1F43E;</div>
+<!-- TAB: BROWSE -->
+<div class="section tab-content" id="content-browse" style="display:none">
+  <div class="container">
+    <div class="section-title" data-i18n="browseTitle">Browse Mined Addresses</div>
+    <div class="section-sub" data-i18n="browseDesc">Explore all premium vanity addresses mined on-chain</div>
+    <div class="form-row" style="margin-bottom:24px">
+      <div class="form-group">
+        <label data-i18n="searchById">Search by Token ID</label>
+        <input class="form-input" type="number" id="browseIdInput" placeholder="e.g. 1" min="1">
+      </div>
+      <div class="form-group" style="flex:0">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" onclick="searchById()" data-i18n="search">Search</button>
+      </div>
+    </div>
+    <div class="nft-list" id="browseList"></div>
+    <div class="pagination" id="browsePagination"></div>
+  </div>
+</div>
+
+<!-- TAB: MINE -->
+<div class="section tab-content" id="content-mine" style="display:none">
+  <div class="container">
+    <div class="section-title" data-i18n="mineTitle">Mine New Address</div>
+    <div class="section-sub" data-i18n="mineDesc">Submit a pre-computed salt to mine a premium vanity address and earn ADDRESS tokens</div>
+    <div class="notice" data-i18n="mineNotice">
+      <strong>How Mining Works:</strong> You need to find a <strong>salt</strong> value off-chain that, when combined with your wallet address, produces a vanity address matching the pattern requirements (9+ trailing same digits, or 4+ leading + 5+ trailing sandwich). Use external GPU miners to find valid salts, then submit them here.
+    </div>
+    <div class="card">
+      <div class="card-title" data-i18n="singleMine">Single Mine</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label data-i18n="saltValue">Salt Value</label>
+          <input class="form-input" type="text" id="mineSaltInput" placeholder="Enter salt (uint256)">
+        </div>
+        <div class="form-group" style="flex:0">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary" onclick="doMine()" id="mineBtn" data-i18n="mine">Mine</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <div class="card-title" data-i18n="batchMine">Batch Mine</div>
+      <div class="form-group">
+        <label data-i18n="saltList">Salt Values (comma separated)</label>
+        <input class="form-input" type="text" id="batchSaltInput" placeholder="e.g. 123,456,789">
+      </div>
+      <button class="btn btn-primary" onclick="doBatchMine()" id="batchMineBtn" data-i18n="mineBatch">Mine Batch</button>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <div class="card-title" data-i18n="previewSalt">Preview Salt</div>
+      <div class="section-sub" data-i18n="previewDesc">Check if a salt produces a valid address before mining</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label data-i18n="saltValue">Salt Value</label>
+          <input class="form-input" type="text" id="previewSaltInput" placeholder="Enter salt">
+        </div>
+        <div class="form-group" style="flex:0">
+          <label>&nbsp;</label>
+          <button class="btn btn-secondary" onclick="previewSalt()" data-i18n="preview">Preview</button>
+        </div>
+      </div>
+      <div id="previewResult" style="margin-top:16px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: CLAIM -->
+<div class="section tab-content" id="content-claim" style="display:none">
+  <div class="container">
+    <div class="section-title" data-i18n="claimTitle">Claim an Address NFT</div>
+    <div class="section-sub" data-i18n="claimDesc">Purchase ownership of a mined address by paying BNB. Once claimed, you own the NFT and control the vanity wallet.</div>
+    <div class="notice" id="claimPriceNotice"></div>
+    <div class="card">
+      <div class="card-title" data-i18n="claimByTokenId">Claim by Token ID</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Token ID</label>
+          <input class="form-input" type="number" id="claimIdInput" placeholder="e.g. 1" min="1">
+        </div>
+        <div class="form-group" style="flex:0">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary" onclick="claimById()" data-i18n="claim">Claim</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: MY ASSETS -->
+<div class="section tab-content" id="content-myassets" style="display:none">
+  <div class="container">
+    <div class="section-title" data-i18n="myAssetsTitle">My Assets</div>
+    <div class="section-sub" data-i18n="myAssetsDesc">Your ADDRESS tokens and owned Premium Address NFTs</div>
+    <div class="grid-3" id="userStats" style="margin-bottom:32px"></div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title" data-i18n="tokenActions">Token Actions</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label data-i18n="recipient">Recipient Address</label>
+          <input class="form-input" type="text" id="transferToInput" placeholder="0x...">
+        </div>
+        <div class="form-group">
+          <label data-i18n="amount">Amount (ADDRESS)</label>
+          <input class="form-input" type="text" id="transferAmountInput" placeholder="e.g. 10">
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="transferToken()" data-i18n="transfer">Transfer</button>
+        <button class="btn btn-danger" onclick="burnToken()" data-i18n="burn">Burn</button>
+      </div>
+    </div>
+    <div class="section-title" style="margin-top:32px" data-i18n="myNFTs">My NFTs</div>
+    <div class="nft-list" id="myNftList"></div>
+    <div id="myNftEmpty" style="text-align:center;padding:40px;color:var(--text3)" data-i18n="noNfts">Connect wallet to view your NFTs</div>
+  </div>
+</div>
+
+<!-- TAB: MANAGE -->
+<div class="section tab-content" id="content-manage" style="display:none">
+  <div class="container">
+    <div class="section-title" data-i18n="manageTitle">Manage NFTs</div>
+    <div class="section-sub" data-i18n="manageDesc">Transfer, approve, upgrade or renounce wallet upgrades for your owned NFTs</div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title" data-i18n="transferNFT">Transfer NFT</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Token ID</label>
+          <input class="form-input" type="number" id="nftTransferIdInput" placeholder="e.g. 1" min="1">
+        </div>
+        <div class="form-group">
+          <label data-i18n="toAddress">To Address</label>
+          <input class="form-input" type="text" id="nftTransferToInput" placeholder="0x...">
+        </div>
+        <div class="form-group" style="flex:0">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary" onclick="transferNFT()" data-i18n="transfer">Transfer</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title" data-i18n="approveNFT">Approve NFT</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Token ID</label>
+          <input class="form-input" type="number" id="approveIdInput" placeholder="e.g. 1" min="1">
+        </div>
+        <div class="form-group">
+          <label data-i18n="approvedAddress">Approved Address</label>
+          <input class="form-input" type="text" id="approveToInput" placeholder="0x...">
+        </div>
+        <div class="form-group" style="flex:0">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary" onclick="approveNFT()" data-i18n="approve">Approve</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title" data-i18n="upgradeWallet">Upgrade Wallet Implementation</div>
+      <div class="notice" data-i18n="upgradeNotice">As the NFT owner, you can upgrade the underlying proxy wallet to a custom smart contract implementation. This is an advanced action.</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Token ID</label>
+          <input class="form-input" type="number" id="upgradeIdInput" placeholder="e.g. 1" min="1">
+        </div>
+        <div class="form-group">
+          <label data-i18n="newImpl">New Implementation Address</label>
+          <input class="form-input" type="text" id="upgradeImplInput" placeholder="0x...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-i18n="initData">Init Calldata (hex, optional)</label>
+        <input class="form-input" type="text" id="upgradeDataInput" placeholder="0x">
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="upgradeWallet()" data-i18n="upgrade">Upgrade</button>
+        <button class="btn btn-danger" onclick="renounceUpgrade()" data-i18n="renounceUpgrade">Renounce Upgrade</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p>Premium Address Protocol &mdash; BSC Mainnet</p>
+    <p style="margin-top:8px">
+      <a href="https://bscscan.com/address/0x91420708D79D8751bf1d4350aa12311790B3C888" target="_blank">ADDRESS Token</a> &nbsp;|&nbsp;
+      <a href="https://bscscan.com/address/0xa5ef140471486a25a71cd75AE38A26e945D2E3c4" target="_blank">AddressManager NFT</a> &nbsp;|&nbsp;
+      <a href="https://bscscan.com/address/0x5D99642C8FfDAE0dc9cfBc239cc708c1a6368f1d" target="_blank">Query</a>
+    </p>
+  </div>
+</footer>
 
 <script>
-// ── Contract addresses ──
-const CONTRACTS = {
-  PremiumNumber:      '0x2ec80BbaAB0A9F9C6c5de35808D39da34755467B',
-  AddressManager:     '0xe7c0535696B21F78a0D13408C68358Cb78881cF2',
-  PremiumNumberQuery: '0x74df62f32f2f3db8d0DAb68a432b77ad10Fd9d99',
-  Marketplace:        '0x43228150cA72430f1F087f6c9435B92D6549f876',
-  SmartWallet:        '0xE5066F516ab44F5167b563a08D97FAC06cB95746',
-};
+// ===== CONSTANTS =====
+const CHAIN_ID = 56;
+const CHAIN_HEX = '0x38';
+const RPC_URL = 'https://bsc-dataseed1.binance.org';
+const PREMIUM_NUMBER = '0x91420708D79D8751bf1d4350aa12311790B3C888';
+const ADDRESS_MANAGER = '0xa5ef140471486a25a71cd75AE38A26e945D2E3c4';
+const QUERY_CONTRACT = '0x5D99642C8FfDAE0dc9cfBc239cc708c1a6368f1d';
 
-const RPC = 'https://bsc-dataseed1.binance.org';
-let callId = 1;
+// Minimal ABIs
+const PN_ABI = [
+  'function mine(uint256 salt)',
+  'function mineBatch(uint256[] saltList)',
+  'function computeAddress(address miner, uint256 salt) view returns (address)',
+  'function checkAddress(address addr) view returns (uint256 trailing8s, uint256 leading8s, uint256 total8s, bool valid)',
+  'function currentReward() view returns (uint256)',
+  'function totalSupply() view returns (uint256)',
+  'function totalMinted() view returns (uint256)',
+  'function totalBurned() view returns (uint256)',
+  'function totalMined() view returns (uint256)',
+  'function era() view returns (uint256)',
+  'function windowCount() view returns (uint256)',
+  'function MAX_SUPPLY() view returns (uint256)',
+  'function balanceOf(address) view returns (uint256)',
+  'function transfer(address to, uint256 amount) returns (bool)',
+  'function approve(address spender, uint256 amount) returns (bool)',
+  'function burn(uint256 amount)',
+  'function extraSameRequired() view returns (uint256)'
+];
+const AM_ABI = [
+  'function claim(uint256 salt) payable',
+  'function claimById(uint256 walletId) payable',
+  'function purchasePrice() view returns (uint256)',
+  'function nextWalletId() view returns (uint256)',
+  'function balanceOf(address) view returns (uint256)',
+  'function ownerOf(uint256 tokenId) view returns (address)',
+  'function getAddressInfoById(uint256 walletId) view returns (uint256 salt, address wallet, address currentOwner, uint256 trailing8s, uint256 total8s)',
+  'function approve(address to, uint256 tokenId)',
+  'function transferFrom(address from, address to, uint256 tokenId)',
+  'function safeTransferFrom(address from, address to, uint256 tokenId)',
+  'function isAvailable(uint256 salt) view returns (bool)',
+  'function upgradeWalletToToken(uint256 tokenId, address newImpl, bytes initData)',
+  'function renounceWalletUpgrade(uint256 tokenId)',
+  'function walletIdToSalt(uint256) view returns (uint256)',
+  'function getAddressInfo(uint256 salt) view returns (uint256 walletId, address wallet, address currentOwner, uint256 trailing8s, uint256 total8s)'
+];
+const QUERY_ABI = [
+  'function getGlobalInfo() view returns (tuple(uint256 totalSupply, uint256 totalMinted, uint256 totalBurned, uint256 maxSupply, uint256 totalMined, uint256 totalRegistered, uint256 nextWalletId, uint256 trailingOnlyMin, uint256 sandwichLeadMin, uint256 sandwichTrailMin, uint256 currentReward, uint256 era, uint256 windowCount, uint256 extraSameRequired, address pnOwner, uint256 purchasePrice, uint256 priceMin, uint256 priceMax, uint256 priceTick, address amOwner, bytes32 walletBytecodeHash, address addressManager))',
+  'function getByWalletId(uint256 walletId) view returns (tuple(uint256 walletId, uint256 tokenId, uint256 salt, address currentOwner, uint256 trailing8s, uint256 total8s, address walletAddr, address approved, bool purchasable, uint256 price))',
+  'function getByWalletIdRange(uint256 fromId, uint256 toId) view returns (tuple(uint256 walletId, uint256 tokenId, uint256 salt, address currentOwner, uint256 trailing8s, uint256 total8s, address walletAddr, address approved, bool purchasable, uint256 price)[])',
+  'function getUserDashboard(address user) view returns (uint256 tokenBalance, uint256 bnbBalance)',
+  'function traitsOf(uint256 tokenId) view returns (tuple(uint256 tokenId, address wallet, address currentOwner, string pattern, uint8 digit, uint256 streak, uint256 leading, uint256 trailing, uint256 occurrences, string tier, uint256 rarityScore))'
+];
 
-// ── i18n ──
-const I18N = {
+// ===== I18N =====
+let currentLang = 'en';
+const i18n = {
   en: {
-    subtitle:'Premium Address Mining on BSC',
-    refresh:'Refresh',
-    status_loading:'Connecting to BSC...',
-    status_ok:'Connected to BSC Mainnet',
-    status_err:'Connection error',
-    last_update:'Last update: ',
-    sec_token:'Token Overview',
-    sec_mining:'Mining Status',
-    sec_addr:'Address Management',
-    sec_rules:'Mining Rules',
-    sec_market:'Marketplace',
-    sec_contracts:'Contract Addresses',
-    sec_lookup:'Wallet Lookup',
-    sec_user:'User Balance Check',
-    l_supply:'Circulating Supply',l_minted:'Total Minted',l_burned:'Total Burned',l_maxsupply:'Max Supply',
-    l_reward:'Current Reward',l_per_mine:'ADDRESS per mine',l_era:'Halving Era',
-    l_mined_count:'Addresses Mined',l_unique_addr:'unique vanity addresses',
-    l_window:'Window Activity',l_last10:'mines in last 10 blocks',
-    l_registered:'Registered Addresses',l_claim_price:'Claim Price',l_next_wid:'Next Wallet ID',
-    r_min8:'Min Total 8s',r_min8_desc:'Minimum total count of hex digit "8" in the address',
-    r_trail:'Trailing-Only Min',r_trail_desc:'Min trailing 8s for trailing-only pattern',
-    r_sw_lead:'Sandwich Lead Min',r_sw_lead_desc:'Min leading 8s for sandwich pattern',
-    r_sw_trail:'Sandwich Trail Min',r_sw_trail_desc:'Min trailing 8s for sandwich pattern',
-    l_fee:'Trading Fee',l_fee_split:'50% burn + 50% treasury',
-    l_treasury:'Treasury',l_mkt_owner:'Marketplace Owner',
-    btn_lookup:'Search',btn_check:'Check',
-    footer_data:'Data from on-chain RPC calls',
-    era_sub_prefix:'Reward halved ',era_sub_suffix:' time(s)',
-    pct_of_max:'of max supply',
-    lk_wid:'Wallet ID',lk_tid:'Token ID',lk_salt:'Salt',lk_miner:'Miner',
-    lk_owner:'Current Owner',lk_trail:'Trailing 8s',lk_total:'Total 8s',
-    lk_wallet:'Wallet Address',lk_reward:'Mining Reward',lk_approved:'Approved',
-    lk_purchasable:'Purchasable',lk_yes:'Yes',lk_no:'No',lk_none:'None',lk_unclaimed:'Unclaimed',
-    u_token:'ADDRESS Balance',u_bnb:'BNB Balance',
-    verified:'Verified on BscScan',
+    connectWallet: 'Connect Wallet',
+    disconnect: 'Disconnect',
+    heroTitle: 'Mine Premium Vanity Addresses on BSC',
+    heroDesc: 'Discover, mine and own beautiful vanity addresses as NFTs. Earn ADDRESS tokens through Bitcoin-style mining with halving mechanics.',
+    totalMined: 'Total Mined',
+    tokenSupply: 'ADDRESS Supply',
+    currentReward: 'Current Reward',
+    miningEra: 'Mining Era',
+    tabDashboard: 'Dashboard',
+    tabBrowse: 'Browse',
+    tabMine: 'Mine',
+    tabClaim: 'Claim NFT',
+    tabMyAssets: 'My Assets',
+    tabManage: 'Manage',
+    globalDashboard: 'Global Dashboard',
+    globalDashboardDesc: 'Real-time on-chain statistics for the Premium Address protocol',
+    browseTitle: 'Browse Mined Addresses',
+    browseDesc: 'Explore all premium vanity addresses mined on-chain',
+    searchById: 'Search by Token ID',
+    search: 'Search',
+    mineTitle: 'Mine New Address',
+    mineDesc: 'Submit a pre-computed salt to mine a premium vanity address and earn ADDRESS tokens',
+    mineNotice: '<strong>How Mining Works:</strong> Find a <strong>salt</strong> off-chain that produces a vanity address matching pattern requirements (9+ trailing same digits, or 4+ leading + 5+ trailing sandwich). Use GPU miners to find valid salts, then submit here.',
+    singleMine: 'Single Mine',
+    saltValue: 'Salt Value',
+    mine: 'Mine',
+    batchMine: 'Batch Mine',
+    saltList: 'Salt Values (comma separated)',
+    mineBatch: 'Mine Batch',
+    previewSalt: 'Preview Salt',
+    previewDesc: 'Check if a salt produces a valid address before mining',
+    preview: 'Preview',
+    claimTitle: 'Claim an Address NFT',
+    claimDesc: 'Purchase ownership of a mined address by paying BNB. Once claimed, you own the NFT and control the vanity wallet.',
+    claimByTokenId: 'Claim by Token ID',
+    claim: 'Claim',
+    myAssetsTitle: 'My Assets',
+    myAssetsDesc: 'Your ADDRESS tokens and owned Premium Address NFTs',
+    tokenActions: 'Token Actions',
+    recipient: 'Recipient Address',
+    amount: 'Amount (ADDRESS)',
+    transfer: 'Transfer',
+    burn: 'Burn',
+    myNFTs: 'My NFTs',
+    noNfts: 'Connect wallet to view your NFTs',
+    manageTitle: 'Manage NFTs',
+    manageDesc: 'Transfer, approve, upgrade or renounce wallet upgrades for your owned NFTs',
+    transferNFT: 'Transfer NFT',
+    toAddress: 'To Address',
+    approveNFT: 'Approve NFT',
+    approvedAddress: 'Approved Address',
+    approve: 'Approve',
+    upgradeWallet: 'Upgrade Wallet Implementation',
+    upgradeNotice: 'As the NFT owner, you can upgrade the underlying proxy wallet to a custom smart contract. This is an advanced action.',
+    newImpl: 'New Implementation Address',
+    initData: 'Init Calldata (hex, optional)',
+    upgrade: 'Upgrade',
+    renounceUpgrade: 'Renounce Upgrade',
+    totalSupplyLabel: 'Total Supply',
+    totalMintedLabel: 'Total Minted',
+    totalBurnedLabel: 'Total Burned',
+    maxSupply: 'Max Supply',
+    totalRegistered: 'Total Registered',
+    purchasePrice: 'Claim Price',
+    trailingMin: 'Trailing Min',
+    sandwichLead: 'Sandwich Lead Min',
+    sandwichTrail: 'Sandwich Trail Min',
+    extraSame: 'Extra Same Required',
+    windowCount: 'Window Count',
+    tokenBalance: 'ADDRESS Balance',
+    nftBalance: 'NFT Count',
+    bnbBalance: 'BNB Balance',
+    available: 'Available',
+    owned: 'Owned',
+    owner: 'Owner',
+    trailing: 'Trailing',
+    total: 'Total',
+    claimNow: 'Claim Now',
+    prev: 'Prev',
+    next: 'Next',
+    valid: 'Valid',
+    invalid: 'Invalid',
+    predictedAddr: 'Predicted Address',
+    reward: 'Reward',
+    processing: 'Processing...',
+    txSuccess: 'Transaction successful!',
+    txFailed: 'Transaction failed',
+    walletRequired: 'Please connect wallet first',
+    wrongNetwork: 'Please switch to BSC Mainnet',
+    page: 'Page',
+    noResults: 'No results found',
+    pattern: 'Pattern',
+    streak: 'Streak',
+    digit: 'Digit',
+    tier: 'Tier',
+    rarityScore: 'Rarity'
   },
   zh: {
-    subtitle:'BSC 链上靓号地址挖矿',
-    refresh:'刷新',
-    status_loading:'正在连接 BSC...',
-    status_ok:'已连接 BSC 主网',
-    status_err:'连接错误',
-    last_update:'上次更新：',
-    sec_token:'代币概览',
-    sec_mining:'挖矿状态',
-    sec_addr:'地址管理',
-    sec_rules:'挖矿规则',
-    sec_market:'交易市场',
-    sec_contracts:'合约地址',
-    sec_lookup:'钱包查询',
-    sec_user:'用户余额查询',
-    l_supply:'流通供应量',l_minted:'总铸造量',l_burned:'总销毁量',l_maxsupply:'最大供应量',
-    l_reward:'当前奖励',l_per_mine:'ADDRESS / 次',l_era:'减半纪元',
-    l_mined_count:'已挖矿地址数',l_unique_addr:'个靓号地址',
-    l_window:'窗口活跃度',l_last10:'最近 10 个区块内的挖矿次数',
-    l_registered:'已注册地址数',l_claim_price:'认领价格',l_next_wid:'下一个钱包 ID',
-    r_min8:'最少 8 总数',r_min8_desc:'地址中十六进制数字 "8" 的最少总数',
-    r_trail:'纯尾部最少',r_trail_desc:'纯尾部模式所需的最少尾部 8 数量',
-    r_sw_lead:'三明治前缀最少',r_sw_lead_desc:'三明治模式所需的最少前缀 8 数量',
-    r_sw_trail:'三明治尾部最少',r_sw_trail_desc:'三明治模式所需的最少尾部 8 数量',
-    l_fee:'交易手续费',l_fee_split:'50% 销毁 + 50% 国库',
-    l_treasury:'国库地址',l_mkt_owner:'市场所有者',
-    btn_lookup:'查询',btn_check:'查询',
-    footer_data:'数据来自链上 RPC 调用',
-    era_sub_prefix:'奖励已减半 ',era_sub_suffix:' 次',
-    pct_of_max:'占最大供应量',
-    lk_wid:'钱包 ID',lk_tid:'Token ID',lk_salt:'Salt',lk_miner:'矿工',
-    lk_owner:'当前所有者',lk_trail:'尾部 8 数',lk_total:'总 8 数',
-    lk_wallet:'钱包地址',lk_reward:'挖矿奖励',lk_approved:'已授权',
-    lk_purchasable:'可购买',lk_yes:'是',lk_no:'否',lk_none:'无',lk_unclaimed:'未认领',
-    u_token:'ADDRESS 余额',u_bnb:'BNB 余额',
-    verified:'已在 BscScan 验证',
+    connectWallet: '连接钱包',
+    disconnect: '断开连接',
+    heroTitle: '在 BSC 上挖掘靓号地址',
+    heroDesc: '发现、挖掘并拥有精美的靓号地址 NFT。通过比特币式减半机制挖矿获取 ADDRESS 代币。',
+    totalMined: '已挖掘总数',
+    tokenSupply: 'ADDRESS 供应量',
+    currentReward: '当前奖励',
+    miningEra: '挖矿纪元',
+    tabDashboard: '仪表盘',
+    tabBrowse: '浏览地址',
+    tabMine: '挖矿',
+    tabClaim: '认领 NFT',
+    tabMyAssets: '我的资产',
+    tabManage: '管理',
+    globalDashboard: '全局仪表盘',
+    globalDashboardDesc: 'Premium Address 协议的实时链上统计数据',
+    browseTitle: '浏览已挖掘的地址',
+    browseDesc: '探索链上所有的靓号地址',
+    searchById: '按 Token ID 搜索',
+    search: '搜索',
+    mineTitle: '挖掘新地址',
+    mineDesc: '提交预计算的 salt 来挖掘靓号地址并获取 ADDRESS 代币',
+    mineNotice: '<strong>挖矿原理：</strong>在链下找到一个 <strong>salt</strong> 值，使其与你的钱包地址组合后产生符合模式要求的靓号地址（9+ 尾部相同数字，或 4+ 前导 + 5+ 尾部三明治模式）。使用 GPU 矿工寻找有效 salt，然后在此提交。',
+    singleMine: '单次挖矿',
+    saltValue: 'Salt 值',
+    mine: '挖矿',
+    batchMine: '批量挖矿',
+    saltList: 'Salt 值（逗号分隔）',
+    mineBatch: '批量挖矿',
+    previewSalt: '预览 Salt',
+    previewDesc: '挖矿前检查 salt 是否能产生有效地址',
+    preview: '预览',
+    claimTitle: '认领地址 NFT',
+    claimDesc: '通过支付 BNB 购买已挖掘地址的所有权。认领后，你将拥有该 NFT 并控制靓号钱包。',
+    claimByTokenId: '通过 Token ID 认领',
+    claim: '认领',
+    myAssetsTitle: '我的资产',
+    myAssetsDesc: '你的 ADDRESS 代币和拥有的靓号地址 NFT',
+    tokenActions: '代币操作',
+    recipient: '接收地址',
+    amount: '数量 (ADDRESS)',
+    transfer: '转账',
+    burn: '销毁',
+    myNFTs: '我的 NFT',
+    noNfts: '请连接钱包查看你的 NFT',
+    manageTitle: '管理 NFT',
+    manageDesc: '转让、授权、升级或放弃已拥有 NFT 的钱包升级权限',
+    transferNFT: '转让 NFT',
+    toAddress: '目标地址',
+    approveNFT: '授权 NFT',
+    approvedAddress: '被授权地址',
+    approve: '授权',
+    upgradeWallet: '升级钱包实现',
+    upgradeNotice: '作为 NFT 持有者，你可以将底层代理钱包升级为自定义智能合约实现。这是一个高级操作。',
+    newImpl: '新实现合约地址',
+    initData: '初始化数据 (hex, 可选)',
+    upgrade: '升级',
+    renounceUpgrade: '放弃升级权',
+    totalSupplyLabel: '当前总供应',
+    totalMintedLabel: '已铸造总量',
+    totalBurnedLabel: '已销毁总量',
+    maxSupply: '最大供应量',
+    totalRegistered: '已注册总数',
+    purchasePrice: '认领价格',
+    trailingMin: '尾部最小长度',
+    sandwichLead: '三明治前导最小',
+    sandwichTrail: '三明治尾部最小',
+    extraSame: '额外相同要求',
+    windowCount: '窗口计数',
+    tokenBalance: 'ADDRESS 余额',
+    nftBalance: 'NFT 数量',
+    bnbBalance: 'BNB 余额',
+    available: '可认领',
+    owned: '已拥有',
+    owner: '所有者',
+    trailing: '尾部',
+    total: '总计',
+    claimNow: '立即认领',
+    prev: '上一页',
+    next: '下一页',
+    valid: '有效',
+    invalid: '无效',
+    predictedAddr: '预测地址',
+    reward: '奖励',
+    processing: '处理中...',
+    txSuccess: '交易成功！',
+    txFailed: '交易失败',
+    walletRequired: '请先连接钱包',
+    wrongNetwork: '请切换到 BSC 主网',
+    page: '页',
+    noResults: '未找到结果',
+    pattern: '模式',
+    streak: '连续',
+    digit: '数字',
+    tier: '等级',
+    rarityScore: '稀有度'
   }
 };
-let lang = 'en';
 
-function setLang(l) {
-  lang = l;
-  document.getElementById('btn-en').classList.toggle('active', l==='en');
-  document.getElementById('btn-zh').classList.toggle('active', l==='zh');
+function t(key) { return i18n[currentLang][key] || key; }
+
+function toggleLang() {
+  currentLang = currentLang === 'en' ? 'zh' : 'en';
+  document.getElementById('langBtn').textContent = currentLang === 'en' ? 'CN / 中文' : 'EN / English';
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
-    if (I18N[l][key]) el.textContent = I18N[l][key];
+    if (i18n[currentLang][key]) {
+      if (key.includes('Notice') || key === 'mineNotice') el.innerHTML = i18n[currentLang][key];
+      else el.textContent = i18n[currentLang][key];
+    }
   });
-  // re-render dynamic subs
-  if (window._lastGlobal) renderGlobal(window._lastGlobal);
-  renderContracts();
+  if (globalInfo) renderGlobalStats(globalInfo);
+  if (document.getElementById('claimPriceNotice') && globalInfo) {
+    document.getElementById('claimPriceNotice').innerHTML = `<strong>${t('purchasePrice')}:</strong> ${ethers.formatEther(globalInfo.purchasePrice)} BNB`;
+  }
 }
 
-function t(key) { return I18N[lang][key] || key; }
+// ===== ETHERS & WALLET =====
+const ethersScript = document.createElement('script');
+ethersScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js';
+document.head.appendChild(ethersScript);
 
-// ── RPC helper ──
-async function rpcCall(to, data) {
-  const res = await fetch(RPC, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({jsonrpc:'2.0',method:'eth_call',params:[{to,data},'latest'],id:callId++})
+let provider = null;
+let signer = null;
+let userAddress = null;
+let readProvider = null;
+let globalInfo = null;
+
+ethersScript.onload = () => {
+  readProvider = new ethers.JsonRpcProvider(RPC_URL);
+  loadGlobalInfo();
+};
+
+async function connectWallet() {
+  if (!window.ethereum) { showToast(currentLang === 'zh' ? '请安装 MetaMask 钱包' : 'Please install MetaMask', 'error'); return; }
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    if (parseInt(chainId, 16) !== CHAIN_ID) {
+      try {
+        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_HEX }] });
+      } catch (e) {
+        if (e.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{ chainId: CHAIN_HEX, chainName: 'BNB Smart Chain', nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 }, rpcUrls: ['https://bsc-dataseed1.binance.org'], blockExplorerUrls: ['https://bscscan.com'] }]
+          });
+        } else { showToast(t('wrongNetwork'), 'error'); return; }
+      }
+    }
+    provider = new ethers.BrowserProvider(window.ethereum);
+    signer = await provider.getSigner();
+    userAddress = accounts[0];
+    updateWalletUI();
+    showToast(currentLang === 'zh' ? '钱包已连接' : 'Wallet connected', 'success');
+    loadMyAssets();
+  } catch (e) { showToast(e.message || 'Connection failed', 'error'); }
+}
+
+function disconnectWallet() {
+  provider = null; signer = null; userAddress = null;
+  updateWalletUI();
+}
+
+function updateWalletUI() {
+  const status = document.getElementById('walletStatus');
+  const btn = document.getElementById('connectBtn');
+  if (userAddress) {
+    const short = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+    status.innerHTML = `<div class="wallet-info"><div class="wallet-dot"></div><span class="wallet-addr">${short}</span></div>`;
+    btn.innerHTML = `<span>${t('disconnect')}</span>`;
+    btn.onclick = disconnectWallet;
+  } else {
+    status.innerHTML = '';
+    btn.innerHTML = `<span data-i18n="connectWallet">${t('connectWallet')}</span>`;
+    btn.onclick = connectWallet;
+  }
+}
+
+if (window.ethereum) {
+  window.ethereum.on('accountsChanged', (accounts) => {
+    if (accounts.length === 0) disconnectWallet();
+    else { userAddress = accounts[0]; updateWalletUI(); loadMyAssets(); }
   });
-  const json = await res.json();
-  if (json.error) throw new Error(json.error.message);
-  return json.result;
+  window.ethereum.on('chainChanged', () => location.reload());
 }
 
-function encodeCall(sig, ...args) {
-  // simple ABI encoder for no-arg and single uint/address calls
-  const hash = keccak256Selector(sig);
-  let data = '0x' + hash;
-  for (const a of args) {
-    if (typeof a === 'string' && a.startsWith('0x')) {
-      data += a.slice(2).toLowerCase().padStart(64,'0');
-    } else {
-      data += BigInt(a).toString(16).padStart(64,'0');
-    }
-  }
-  return data;
+// ===== CONTRACT HELPERS =====
+function getReadPN() { return new ethers.Contract(PREMIUM_NUMBER, PN_ABI, readProvider); }
+function getReadAM() { return new ethers.Contract(ADDRESS_MANAGER, AM_ABI, readProvider); }
+function getReadQuery() { return new ethers.Contract(QUERY_CONTRACT, QUERY_ABI, readProvider); }
+function getWritePN() { return new ethers.Contract(PREMIUM_NUMBER, PN_ABI, signer); }
+function getWriteAM() { return new ethers.Contract(ADDRESS_MANAGER, AM_ABI, signer); }
+
+function requireWallet() { if (!signer) { showToast(t('walletRequired'), 'error'); return false; } return true; }
+
+// ===== GLOBAL INFO =====
+async function loadGlobalInfo() {
+  try {
+    const q = getReadQuery();
+    globalInfo = await q.getGlobalInfo();
+    document.getElementById('statTotalMined').textContent = globalInfo.totalMined.toString();
+    document.getElementById('statTotalSupply').textContent = Number(ethers.formatEther(globalInfo.totalSupply)).toLocaleString(undefined, {maximumFractionDigits: 2});
+    document.getElementById('statReward').textContent = Number(ethers.formatEther(globalInfo.currentReward)).toLocaleString(undefined, {maximumFractionDigits: 2}) + ' ADDR';
+    document.getElementById('statEra').textContent = globalInfo.era.toString();
+    renderGlobalStats(globalInfo);
+    document.getElementById('claimPriceNotice').innerHTML = `<strong>${t('purchasePrice')}:</strong> ${ethers.formatEther(globalInfo.purchasePrice)} BNB`;
+  } catch (e) { console.error('Failed to load global info:', e); }
 }
 
-function keccak256Selector(sig) {
-  // minimal keccak for function selectors
-  const encoder = new TextEncoder();
-  const bytes = encoder.encode(sig);
-  return keccak256Bytes(bytes).slice(0,8);
-}
-
-// Keccak-256 (minimal implementation for function selectors)
-function keccak256Bytes(msgBytes) {
-  const RC = [
-    0x0000000000000001n,0x0000000000008082n,0x800000000000808An,0x8000000080008000n,
-    0x000000000000808Bn,0x0000000080000001n,0x8000000080008081n,0x8000000000008009n,
-    0x000000000000008An,0x0000000000000088n,0x0000000080008009n,0x000000008000000An,
-    0x000000008000808Bn,0x800000000000008Bn,0x8000000000008089n,0x8000000000008003n,
-    0x8000000000008002n,0x8000000000000080n,0x000000000000800An,0x800000008000000An,
-    0x8000000080008081n,0x8000000000008080n,0x0000000080000001n,0x8000000080008008n
+function renderGlobalStats(info) {
+  const container = document.getElementById('globalStats');
+  const stats = [
+    { label: t('totalSupplyLabel'), value: Number(ethers.formatEther(info.totalSupply)).toLocaleString(undefined,{maximumFractionDigits:2}), accent: true },
+    { label: t('totalMintedLabel'), value: Number(ethers.formatEther(info.totalMinted)).toLocaleString(undefined,{maximumFractionDigits:2}) },
+    { label: t('totalBurnedLabel'), value: Number(ethers.formatEther(info.totalBurned)).toLocaleString(undefined,{maximumFractionDigits:2}) },
+    { label: t('maxSupply'), value: '21,000,000' },
+    { label: t('totalMined'), value: info.totalMined.toString(), accent: true },
+    { label: t('totalRegistered'), value: info.totalRegistered.toString() },
+    { label: t('currentReward'), value: Number(ethers.formatEther(info.currentReward)).toLocaleString(undefined,{maximumFractionDigits:2}) + ' ADDR', accent: true },
+    { label: t('miningEra'), value: info.era.toString() },
+    { label: t('purchasePrice'), value: ethers.formatEther(info.purchasePrice) + ' BNB' },
+    { label: t('trailingMin'), value: info.trailingOnlyMin.toString() },
+    { label: t('sandwichLead'), value: info.sandwichLeadMin.toString() },
+    { label: t('sandwichTrail'), value: info.sandwichTrailMin.toString() },
+    { label: t('extraSame'), value: info.extraSameRequired.toString() },
+    { label: t('windowCount'), value: info.windowCount.toString() },
+    { label: 'PremiumNumber Owner', value: info.pnOwner.slice(0,6)+'...'+info.pnOwner.slice(-4) },
+    { label: 'AddressManager Owner', value: info.amOwner.slice(0,6)+'...'+info.amOwner.slice(-4) }
   ];
-  const ROTC = [
-    1,3,6,10,15,21,28,36,45,55,2,14,27,41,56,8,25,43,62,18,39,61,20,44
-  ];
-  const PI = [10,7,11,17,18,3,5,16,8,21,24,4,15,23,19,13,12,2,20,14,22,9,6,1];
-
-  const rate = 136;
-  const msg = new Uint8Array(msgBytes);
-
-  // padding
-  const q = rate - (msg.length % rate);
-  const padded = new Uint8Array(msg.length + q);
-  padded.set(msg);
-  padded[msg.length] = 0x01;
-  padded[padded.length - 1] |= 0x80;
-
-  const state = new Array(25).fill(0n);
-
-  for (let off = 0; off < padded.length; off += rate) {
-    for (let i = 0; i < rate/8; i++) {
-      let v = 0n;
-      for (let b = 0; b < 8; b++) v |= BigInt(padded[off + i*8 + b]) << BigInt(b*8);
-      state[i] ^= v;
-    }
-    // 24 rounds
-    for (let round = 0; round < 24; round++) {
-      // theta
-      const C = [];
-      for (let x = 0; x < 5; x++) C[x] = state[x] ^ state[x+5] ^ state[x+10] ^ state[x+15] ^ state[x+20];
-      const D = [];
-      for (let x = 0; x < 5; x++) D[x] = C[(x+4)%5] ^ rot64(C[(x+1)%5], 1);
-      for (let x = 0; x < 5; x++) for (let y = 0; y < 25; y += 5) state[x+y] ^= D[x];
-      // rho + pi
-      let t2 = state[1];
-      for (let i = 0; i < 24; i++) {
-        const j = PI[i]; const tmp = state[j]; state[j] = rot64(t2, ROTC[i]); t2 = tmp;
-      }
-      // chi
-      for (let y = 0; y < 25; y += 5) {
-        const t0 = [state[y],state[y+1],state[y+2],state[y+3],state[y+4]];
-        for (let x = 0; x < 5; x++) state[y+x] = t0[x] ^ ((~t0[(x+1)%5]) & t0[(x+2)%5]);
-      }
-      // iota
-      state[0] ^= RC[round];
-    }
-  }
-
-  // squeeze 32 bytes
-  let hex = '';
-  for (let i = 0; i < 4; i++) {
-    let v = state[i];
-    for (let b = 0; b < 8; b++) {
-      hex += (Number(v & 0xffn)).toString(16).padStart(2,'0');
-      v >>= 8n;
-    }
-  }
-  return hex;
-
-  function rot64(x, n) {
-    x = BigInt.asUintN(64, x);
-    return BigInt.asUintN(64, (x << BigInt(n)) | (x >> BigInt(64-n)));
-  }
-}
-
-function decodeUint(hex) {
-  if (!hex || hex === '0x') return 0n;
-  // strip 0x and take last 64 chars for single value
-  const clean = hex.replace('0x','');
-  return BigInt('0x' + (clean || '0'));
-}
-
-function decodeMultiUint(hex, count) {
-  const clean = hex.replace('0x','').padStart(count*64,'0');
-  const vals = [];
-  for (let i = 0; i < count; i++) {
-    vals.push(BigInt('0x' + clean.slice(i*64, (i+1)*64)));
-  }
-  return vals;
-}
-
-function decodeAddress(hex, wordIndex) {
-  const clean = hex.replace('0x','');
-  const word = clean.slice(wordIndex*64, (wordIndex+1)*64);
-  return '0x' + word.slice(24);
-}
-
-function formatToken(wei) {
-  const v = Number(wei) / 1e18;
-  if (v >= 1e6) return (v/1e6).toFixed(2) + 'M';
-  if (v >= 1e3) return (v/1e3).toFixed(2) + 'K';
-  return v.toFixed(2);
-}
-
-function formatTokenFull(wei) {
-  return (Number(wei) / 1e18).toLocaleString(undefined, {maximumFractionDigits:4});
-}
-
-function shortAddr(a) {
-  if (!a || a === '0x0000000000000000000000000000000000000000') return '---';
-  return a.slice(0,8) + '...' + a.slice(-6);
-}
-
-// ── Render contracts ──
-function renderContracts() {
-  const el = document.getElementById('contractCards');
-  el.innerHTML = Object.entries(CONTRACTS).map(([name, addr]) => `
-    <div class="addr-card">
-      <div class="addr-title">${name}</div>
-      <div class="addr-val">
-        <span>${addr}</span>
-        <span style="display:flex;gap:6px;align-items:center">
-          <button class="copy-btn" onclick="navigator.clipboard.writeText('${addr}')">Copy</button>
-          <a href="https://bscscan.com/address/${addr}#code" target="_blank">BscScan &rarr;</a>
-        </span>
-      </div>
-      <div class="verified">&#x2705; ${t('verified')}</div>
+  container.innerHTML = stats.map(s => `
+    <div class="stat">
+      <div class="label">${s.label}</div>
+      <div class="value ${s.accent ? 'accent' : ''}">${s.value}</div>
     </div>
   `).join('');
 }
 
-// ── Load global info ──
-async function loadGlobalInfo() {
-  const Q = CONTRACTS.PremiumNumberQuery;
-  const data = encodeCall('getGlobalInfo()');
-  const raw = await rpcCall(Q, data);
-  // Returns GlobalInfo struct: 18 fields
-  const clean = raw.replace('0x','');
-  const fields = [];
-  for (let i = 0; i < 18; i++) {
-    fields.push(clean.slice(i*64, (i+1)*64));
+// ===== TAB SWITCHING =====
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('content-' + tab).style.display = 'block';
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  if (tab === 'browse') loadBrowsePage(1);
+  if (tab === 'myassets') loadMyAssets();
+  if (tab === 'dashboard') loadGlobalInfo();
+}
+
+// ===== BROWSE =====
+const PAGE_SIZE = 6;
+let browsePage = 1;
+
+async function loadBrowsePage(page) {
+  const list = document.getElementById('browseList');
+  const pag = document.getElementById('browsePagination');
+  if (!globalInfo) { list.innerHTML = `<p style="color:var(--text3)">${t('noResults')}</p>`; return; }
+  const totalItems = Number(globalInfo.totalRegistered);
+  if (totalItems === 0) { list.innerHTML = `<p style="color:var(--text3)">${t('noResults')}</p>`; pag.innerHTML = ''; return; }
+
+  browsePage = page;
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+  const fromId = Math.max(1, totalItems - (page * PAGE_SIZE) + 1);
+  const toId = totalItems - ((page - 1) * PAGE_SIZE);
+
+  list.innerHTML = '<div style="text-align:center;padding:40px"><div class="spinner"></div></div>';
+  try {
+    const q = getReadQuery();
+    const details = await q.getByWalletIdRange(fromId, toId);
+    list.innerHTML = '';
+    const sorted = [...details].reverse();
+    for (const d of sorted) {
+      list.innerHTML += renderNftCard(d);
+    }
+  } catch (e) { list.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`; }
+
+  // Pagination
+  let pagHtml = '';
+  if (page > 1) pagHtml += `<button onclick="loadBrowsePage(${page-1})">${t('prev')}</button>`;
+  const start = Math.max(1, page - 2);
+  const end = Math.min(totalPages, page + 2);
+  for (let i = start; i <= end; i++) {
+    pagHtml += `<button class="${i===page?'active':''}" onclick="loadBrowsePage(${i})">${i}</button>`;
   }
-  return {
-    totalSupply:     BigInt('0x'+fields[0]),
-    totalMinted:     BigInt('0x'+fields[1]),
-    totalBurned:     BigInt('0x'+fields[2]),
-    maxSupply:       BigInt('0x'+fields[3]),
-    totalMined:      BigInt('0x'+fields[4]),
-    totalRegistered: BigInt('0x'+fields[5]),
-    nextWalletId:    BigInt('0x'+fields[6]),
-    minTotal8s:      BigInt('0x'+fields[7]),
-    trailingOnlyMin: BigInt('0x'+fields[8]),
-    sandwichLeadMin: BigInt('0x'+fields[9]),
-    sandwichTrailMin:BigInt('0x'+fields[10]),
-    currentReward:   BigInt('0x'+fields[11]),
-    era:             BigInt('0x'+fields[12]),
-    windowCount:     BigInt('0x'+fields[13]),
-    purchasePrice:   BigInt('0x'+fields[14]),
-    walletBytecodeHash: '0x'+fields[15],
-    addressManager:  '0x'+fields[16].slice(24),
-    amOwner:         '0x'+fields[17].slice(24),
-  };
+  if (page < totalPages) pagHtml += `<button onclick="loadBrowsePage(${page+1})">${t('next')}</button>`;
+  pag.innerHTML = pagHtml;
 }
 
-async function loadMarketInfo() {
-  const M = CONTRACTS.Marketplace;
-  const [feeRaw, treasuryRaw, ownerRaw] = await Promise.all([
-    rpcCall(M, encodeCall('feeBps()')),
-    rpcCall(M, encodeCall('treasury()')),
-    rpcCall(M, encodeCall('owner()')),
-  ]);
-  return {
-    feeBps: Number(decodeUint(feeRaw)),
-    treasury: '0x' + treasuryRaw.replace('0x','').slice(24),
-    owner: '0x' + ownerRaw.replace('0x','').slice(24),
-  };
-}
-
-function renderGlobal(g) {
-  window._lastGlobal = g;
-  const maxN = Number(g.maxSupply);
-  const mintedN = Number(g.totalMinted);
-  const burnedN = Number(g.totalBurned);
-  const supplyN = Number(g.totalSupply);
-
-  document.getElementById('totalSupply').textContent = formatToken(g.totalSupply);
-  document.getElementById('totalMinted').textContent = formatToken(g.totalMinted);
-  document.getElementById('totalBurned').textContent = formatToken(g.totalBurned);
-  document.getElementById('maxSupply').textContent = '21,000,000';
-
-  document.getElementById('supplyPct').textContent = ((supplyN/maxN)*100).toFixed(4) + '% ' + t('pct_of_max');
-  document.getElementById('mintedPct').textContent = ((mintedN/maxN)*100).toFixed(4) + '% ' + t('pct_of_max');
-  document.getElementById('burnedPct').textContent = burnedN > 0 ? ((burnedN/mintedN)*100).toFixed(2) + '% of minted' : '';
-
-  document.getElementById('currentReward').textContent = formatTokenFull(g.currentReward);
-  document.getElementById('era').textContent = g.era.toString();
-  document.getElementById('eraSub').textContent = t('era_sub_prefix') + g.era.toString() + t('era_sub_suffix');
-  document.getElementById('totalMined').textContent = g.totalMined.toString();
-  document.getElementById('windowCount').textContent = g.windowCount.toString();
-
-  document.getElementById('totalRegistered').textContent = g.totalRegistered.toString();
-  document.getElementById('purchasePrice').textContent = formatTokenFull(g.purchasePrice);
-  document.getElementById('nextWalletId').textContent = g.nextWalletId.toString();
-
-  document.getElementById('minTotal8s').textContent = g.minTotal8s.toString();
-  document.getElementById('trailingOnlyMin').textContent = g.trailingOnlyMin.toString();
-  document.getElementById('sandwichLeadMin').textContent = g.sandwichLeadMin.toString();
-  document.getElementById('sandwichTrailMin').textContent = g.sandwichTrailMin.toString();
-}
-
-function renderMarket(m) {
-  document.getElementById('feeBps').textContent = (m.feeBps / 100).toFixed(1) + '%';
-  document.getElementById('treasury').textContent = shortAddr(m.treasury);
-  document.getElementById('mktOwner').textContent = shortAddr(m.owner);
-}
-
-// ── Wallet lookup ──
-async function lookupWallet() {
-  const id = document.getElementById('lookupInput').value;
+async function searchById() {
+  const id = parseInt(document.getElementById('browseIdInput').value);
   if (!id || id < 1) return;
-  const el = document.getElementById('lookupResult');
-  el.className = 'lookup-result show';
-  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2)">Loading...</div>';
-
+  const list = document.getElementById('browseList');
+  const pag = document.getElementById('browsePagination');
+  list.innerHTML = '<div style="text-align:center;padding:40px"><div class="spinner"></div></div>';
+  pag.innerHTML = '';
   try {
-    const Q = CONTRACTS.PremiumNumberQuery;
-    const data = encodeCall('getByWalletId(uint256)', id);
-    const raw = await rpcCall(Q, data);
-    const clean = raw.replace('0x','');
-    const fields = [];
-    for (let i = 0; i < 11; i++) fields.push(clean.slice(i*64,(i+1)*64));
+    const q = getReadQuery();
+    const d = await q.getByWalletId(id);
+    list.innerHTML = renderNftCard(d);
+  } catch (e) { list.innerHTML = `<p style="color:var(--danger)">${t('noResults')}: ${e.message}</p>`; }
+}
 
-    const wid = BigInt('0x'+fields[0]);
-    const tid = BigInt('0x'+fields[1]);
-    const salt = '0x'+fields[2];
-    const miner = '0x'+fields[3].slice(24);
-    const owner = '0x'+fields[4].slice(24);
-    const trail = BigInt('0x'+fields[5]);
-    const total = BigInt('0x'+fields[6]);
-    const wallet = '0x'+fields[7].slice(24);
-    const reward = BigInt('0x'+fields[8]);
-    const approved = '0x'+fields[9].slice(24);
-    const purchasable = BigInt('0x'+fields[10]) !== 0n;
+function getTierClass(streak) {
+  const s = Number(streak);
+  if (s >= 13) return 'tier-legendary';
+  if (s >= 11) return 'tier-epic';
+  if (s >= 10) return 'tier-rare';
+  return 'tier-common';
+}
+function getTierName(streak) {
+  const s = Number(streak);
+  if (s >= 13) return 'Legendary';
+  if (s >= 11) return 'Epic';
+  if (s >= 10) return 'Rare';
+  return 'Common';
+}
 
-    const isZero = a => a === '0x0000000000000000000000000000000000000000';
-    const ownerDisplay = isZero(owner) ? t('lk_unclaimed') : owner;
+function renderNftCard(d) {
+  const addr = d.walletAddr;
+  const trailing = Number(d.trailing8s);
+  const total = Number(d.total8s);
+  const streak = trailing; // simplified
+  const isAvailable = d.purchasable;
+  const ownerShort = d.currentOwner === '0x0000000000000000000000000000000000000000' ? '' : d.currentOwner.slice(0,6)+'...'+d.currentOwner.slice(-4);
+  const tierClass = getTierClass(streak);
+  const tierName = getTierName(streak);
+  const price = d.price ? ethers.formatEther(d.price) : '0';
 
-    el.innerHTML = `
-      <div class="lr-row"><span class="lr-label">${t('lk_wid')}</span><span class="lr-value">${wid}</span></div>
-      <div class="lr-row"><span class="lr-label">${t('lk_tid')}</span><span class="lr-value">${tid}</span></div>
-      <div class="lr-row"><span class="lr-label">${t('lk_wallet')}</span><span class="lr-value"><a href="https://bscscan.com/address/${wallet}" target="_blank" style="color:var(--accent)">${wallet}</a></span></div>
-      <div class="lr-row"><span class="lr-label">${t('lk_trail')}</span><span class="lr-value">${trail}</span></div>
-      <div class="lr-row"><span class="lr-label">${t('lk_total')}</span><span class="lr-value">${total}</span></div>
-      <div class="lr-row"><span class="lr-label">${t('lk_miner')}</span><span class="lr-value">${shortAddr(miner)}</span></div>
-      <div class="lr-row"><span class="lr-label">${t('lk_owner')}</span><span class="lr-value">${isZero(owner) ? ownerDisplay : shortAddr(owner)}</span></div>
-      <div class="lr-row"><span class="lr-label">${t('lk_reward')}</span><span class="lr-value">${formatTokenFull(reward)} ADDRESS</span></div>
-      <div class="lr-row"><span class="lr-label">${t('lk_approved')}</span><span class="lr-value">${isZero(approved) ? t('lk_none') : shortAddr(approved)}</span></div>
-      <div class="lr-row"><span class="lr-label">${t('lk_purchasable')}</span><span class="lr-value">${purchasable ? '&#x2705; '+t('lk_yes') : '&#x274C; '+t('lk_no')}</span></div>
+  // Highlight trailing digits in address
+  const addrHex = addr.slice(2).toLowerCase();
+  let highlighted = '0x';
+  const hiStart = 40 - trailing;
+  for (let i = 0; i < 40; i++) {
+    if (i >= hiStart) highlighted += `<span class="hi">${addrHex[i]}</span>`;
+    else highlighted += addrHex[i];
+  }
+
+  return `
+    <div class="nft-card">
+      <div class="nft-header">
+        <span class="nft-id">#${d.walletId.toString()}</span>
+        <span class="nft-tier ${tierClass}">${tierName}</span>
+      </div>
+      <div class="nft-body">
+        <div class="nft-addr">${highlighted}</div>
+        <div class="nft-meta">
+          <span>${t('trailing')}: <strong>${trailing}</strong></span>
+          <span>${t('total')}: <strong>${total}</strong></span>
+        </div>
+      </div>
+      <div class="nft-footer">
+        ${isAvailable
+          ? `<span class="nft-price">${price} BNB</span><button class="btn btn-primary btn-sm" onclick="quickClaim(${d.walletId})">${t('claimNow')}</button>`
+          : `<span class="nft-owner">${t('owner')}: ${ownerShort}</span><span style="color:var(--text3);font-size:.85rem">${t('owned')}</span>`
+        }
+      </div>
+    </div>
+  `;
+}
+
+async function quickClaim(tokenId) {
+  if (!requireWallet()) return;
+  showLoading(t('processing'));
+  try {
+    const am = getWriteAM();
+    const price = globalInfo ? globalInfo.purchasePrice : await getReadAM().purchasePrice();
+    const tx = await am.claimById(tokenId, { value: price });
+    await tx.wait();
+    showToast(t('txSuccess'), 'success');
+    loadGlobalInfo();
+    loadBrowsePage(browsePage);
+  } catch (e) { showToast(e.reason || e.message || t('txFailed'), 'error'); }
+  hideLoading();
+}
+
+// ===== MINE =====
+async function doMine() {
+  if (!requireWallet()) return;
+  const salt = document.getElementById('mineSaltInput').value.trim();
+  if (!salt) return;
+  showLoading(t('processing'));
+  try {
+    const pn = getWritePN();
+    const tx = await pn.mine(salt);
+    await tx.wait();
+    showToast(t('txSuccess'), 'success');
+    loadGlobalInfo();
+  } catch (e) { showToast(e.reason || e.message || t('txFailed'), 'error'); }
+  hideLoading();
+}
+
+async function doBatchMine() {
+  if (!requireWallet()) return;
+  const raw = document.getElementById('batchSaltInput').value.trim();
+  if (!raw) return;
+  const salts = raw.split(',').map(s => s.trim()).filter(Boolean);
+  if (salts.length === 0) return;
+  showLoading(t('processing'));
+  try {
+    const pn = getWritePN();
+    const tx = await pn.mineBatch(salts);
+    await tx.wait();
+    showToast(t('txSuccess'), 'success');
+    loadGlobalInfo();
+  } catch (e) { showToast(e.reason || e.message || t('txFailed'), 'error'); }
+  hideLoading();
+}
+
+async function previewSalt() {
+  const salt = document.getElementById('previewSaltInput').value.trim();
+  if (!salt) return;
+  const result = document.getElementById('previewResult');
+  result.innerHTML = '<div class="spinner"></div>';
+  try {
+    const pn = getReadPN();
+    const minerAddr = userAddress || '0x0000000000000000000000000000000000000001';
+    const predicted = await pn.computeAddress(minerAddr, salt);
+    const [trailing8s, leading8s, total8s, valid] = await pn.checkAddress(predicted);
+    const reward = await pn.currentReward();
+    result.innerHTML = `
+      <div class="card" style="background:var(--bg2)">
+        <div style="margin-bottom:8px"><strong>${t('predictedAddr')}:</strong> <span style="font-family:var(--mono);word-break:break-all;color:var(--accent)">${predicted}</span></div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:8px">
+          <span>${t('trailing')}: <strong>${trailing8s.toString()}</strong></span>
+          <span>Leading: <strong>${leading8s.toString()}</strong></span>
+          <span>${t('total')}: <strong>${total8s.toString()}</strong></span>
+        </div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
+          <span>${t('valid')}: <strong style="color:${valid?'var(--accent)':'var(--danger)'}">${valid ? '✓ ' + t('valid') : '✗ ' + t('invalid')}</strong></span>
+          <span>${t('reward')}: <strong>${valid ? Number(ethers.formatEther(reward)).toLocaleString(undefined,{maximumFractionDigits:2}) + ' ADDR' : '--'}</strong></span>
+        </div>
+      </div>
     `;
-  } catch(e) {
-    el.innerHTML = `<div style="color:var(--red);padding:12px;font-weight:600">${e.message}</div>`;
-  }
+  } catch (e) { result.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`; }
 }
 
-// ── User balance check ──
-async function checkUserBalance() {
-  const addr = document.getElementById('userAddrInput').value.trim();
-  if (!addr || !addr.startsWith('0x')) return;
-  const el = document.getElementById('userResult');
-  el.className = 'lookup-result show';
-  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2)">Loading...</div>';
-
+// ===== CLAIM =====
+async function claimById() {
+  if (!requireWallet()) return;
+  const id = parseInt(document.getElementById('claimIdInput').value);
+  if (!id || id < 1) return;
+  showLoading(t('processing'));
   try {
-    const Q = CONTRACTS.PremiumNumberQuery;
-    const data = encodeCall('getUserDashboard(address)', addr);
-    const raw = await rpcCall(Q, data);
-    const vals = decodeMultiUint(raw, 2);
+    const am = getWriteAM();
+    const price = globalInfo ? globalInfo.purchasePrice : await getReadAM().purchasePrice();
+    const tx = await am.claimById(id, { value: price });
+    await tx.wait();
+    showToast(t('txSuccess'), 'success');
+    loadGlobalInfo();
+  } catch (e) { showToast(e.reason || e.message || t('txFailed'), 'error'); }
+  hideLoading();
+}
 
-    // Also get BNB balance directly
-    const bnbRes = await fetch(RPC, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({jsonrpc:'2.0',method:'eth_getBalance',params:[addr,'latest'],id:callId++})
-    });
-    const bnbJson = await bnbRes.json();
-    const bnbWei = BigInt(bnbJson.result || '0x0');
-
-    el.innerHTML = `
-      <div class="lr-row"><span class="lr-label">${t('u_token')}</span><span class="lr-value" style="font-size:20px;font-weight:800">${formatTokenFull(vals[0])} ADDRESS</span></div>
-      <div class="lr-row"><span class="lr-label">${t('u_bnb')}</span><span class="lr-value" style="font-size:20px;font-weight:800">${formatTokenFull(bnbWei)} BNB</span></div>
+// ===== MY ASSETS =====
+async function loadMyAssets() {
+  if (!userAddress) return;
+  const stats = document.getElementById('userStats');
+  const nftList = document.getElementById('myNftList');
+  const empty = document.getElementById('myNftEmpty');
+  try {
+    const q = getReadQuery();
+    const [tokenBal, bnbBal] = await q.getUserDashboard(userAddress);
+    const am = getReadAM();
+    const nftBal = await am.balanceOf(userAddress);
+    stats.innerHTML = `
+      <div class="stat"><div class="label">${t('tokenBalance')}</div><div class="value accent">${Number(ethers.formatEther(tokenBal)).toLocaleString(undefined,{maximumFractionDigits:4})}</div></div>
+      <div class="stat"><div class="label">${t('nftBalance')}</div><div class="value accent">${nftBal.toString()}</div></div>
+      <div class="stat"><div class="label">${t('bnbBalance')}</div><div class="value">${Number(ethers.formatEther(bnbBal)).toLocaleString(undefined,{maximumFractionDigits:4})}</div></div>
     `;
-  } catch(e) {
-    el.innerHTML = `<div style="color:var(--red);padding:12px;font-weight:600">${e.message}</div>`;
-  }
+
+    // Find user's NFTs by scanning
+    if (Number(nftBal) > 0 && globalInfo) {
+      nftList.innerHTML = '<div style="text-align:center;padding:20px"><div class="spinner"></div></div>';
+      empty.style.display = 'none';
+      const totalReg = Number(globalInfo.totalRegistered);
+      const userNfts = [];
+      const batchSize = 20;
+      for (let i = 1; i <= totalReg && userNfts.length < Number(nftBal); i += batchSize) {
+        const to = Math.min(i + batchSize - 1, totalReg);
+        try {
+          const batch = await q.getByWalletIdRange(i, to);
+          for (const d of batch) {
+            if (d.currentOwner.toLowerCase() === userAddress.toLowerCase()) {
+              userNfts.push(d);
+            }
+          }
+        } catch(e) { break; }
+      }
+      nftList.innerHTML = userNfts.map(d => renderNftCard(d)).join('');
+      if (userNfts.length === 0) { empty.style.display = 'block'; empty.textContent = t('noResults'); }
+    } else {
+      nftList.innerHTML = '';
+      empty.style.display = 'block';
+      empty.textContent = Number(nftBal) === 0 ? t('noResults') : t('noNfts');
+    }
+  } catch (e) { console.error(e); }
 }
 
-// ── Main load ──
-async function loadAll() {
-  const dot = document.getElementById('statusDot');
-  const txt = document.getElementById('statusText');
-  const err = document.getElementById('errorMsg');
-  const btn = document.getElementById('refreshBtn');
-
-  dot.className = 'status-dot loading';
-  txt.textContent = t('status_loading');
-  err.className = 'error-msg';
-  btn.classList.add('spinning');
-
+// ===== TOKEN TRANSFER & BURN =====
+async function transferToken() {
+  if (!requireWallet()) return;
+  const to = document.getElementById('transferToInput').value.trim();
+  const amount = document.getElementById('transferAmountInput').value.trim();
+  if (!to || !amount) return;
+  showLoading(t('processing'));
   try {
-    const [global, market] = await Promise.all([loadGlobalInfo(), loadMarketInfo()]);
-    renderGlobal(global);
-    renderMarket(market);
-    dot.className = 'status-dot ok';
-    txt.textContent = t('status_ok');
-    document.getElementById('lastUpdate').textContent = t('last_update') + new Date().toLocaleTimeString();
-  } catch(e) {
-    dot.className = 'status-dot err';
-    txt.textContent = t('status_err');
-    err.textContent = e.message;
-    err.className = 'error-msg show';
-  } finally {
-    btn.classList.remove('spinning');
-  }
+    const pn = getWritePN();
+    const tx = await pn.transfer(to, ethers.parseEther(amount));
+    await tx.wait();
+    showToast(t('txSuccess'), 'success');
+    loadMyAssets();
+  } catch (e) { showToast(e.reason || e.message || t('txFailed'), 'error'); }
+  hideLoading();
 }
 
-// ── Enter key support ──
-document.getElementById('lookupInput').addEventListener('keydown', e => { if(e.key==='Enter') lookupWallet(); });
-document.getElementById('userAddrInput').addEventListener('keydown', e => { if(e.key==='Enter') checkUserBalance(); });
+async function burnToken() {
+  if (!requireWallet()) return;
+  const amount = document.getElementById('transferAmountInput').value.trim();
+  if (!amount) return;
+  showLoading(t('processing'));
+  try {
+    const pn = getWritePN();
+    const tx = await pn.burn(ethers.parseEther(amount));
+    await tx.wait();
+    showToast(t('txSuccess'), 'success');
+    loadMyAssets(); loadGlobalInfo();
+  } catch (e) { showToast(e.reason || e.message || t('txFailed'), 'error'); }
+  hideLoading();
+}
 
-// ── Init ──
-renderContracts();
-loadAll();
-// Auto-refresh every 30s
-setInterval(loadAll, 30000);
+// ===== MANAGE NFT =====
+async function transferNFT() {
+  if (!requireWallet()) return;
+  const id = parseInt(document.getElementById('nftTransferIdInput').value);
+  const to = document.getElementById('nftTransferToInput').value.trim();
+  if (!id || !to) return;
+  showLoading(t('processing'));
+  try {
+    const am = getWriteAM();
+    const tx = await am.safeTransferFrom(userAddress, to, id);
+    await tx.wait();
+    showToast(t('txSuccess'), 'success');
+    loadMyAssets();
+  } catch (e) { showToast(e.reason || e.message || t('txFailed'), 'error'); }
+  hideLoading();
+}
+
+async function approveNFT() {
+  if (!requireWallet()) return;
+  const id = parseInt(document.getElementById('approveIdInput').value);
+  const to = document.getElementById('approveToInput').value.trim();
+  if (!id || !to) return;
+  showLoading(t('processing'));
+  try {
+    const am = getWriteAM();
+    const tx = await am.approve(to, id);
+    await tx.wait();
+    showToast(t('txSuccess'), 'success');
+  } catch (e) { showToast(e.reason || e.message || t('txFailed'), 'error'); }
+  hideLoading();
+}
+
+async function upgradeWallet() {
+  if (!requireWallet()) return;
+  const id = parseInt(document.getElementById('upgradeIdInput').value);
+  const impl = document.getElementById('upgradeImplInput').value.trim();
+  const data = document.getElementById('upgradeDataInput').value.trim() || '0x';
+  if (!id || !impl) return;
+  showLoading(t('processing'));
+  try {
+    const am = getWriteAM();
+    const tx = await am.upgradeWalletToToken(id, impl, data);
+    await tx.wait();
+    showToast(t('txSuccess'), 'success');
+  } catch (e) { showToast(e.reason || e.message || t('txFailed'), 'error'); }
+  hideLoading();
+}
+
+async function renounceUpgrade() {
+  if (!requireWallet()) return;
+  const id = parseInt(document.getElementById('upgradeIdInput').value);
+  if (!id) return;
+  showLoading(t('processing'));
+  try {
+    const am = getWriteAM();
+    const tx = await am.renounceWalletUpgrade(id);
+    await tx.wait();
+    showToast(t('txSuccess'), 'success');
+  } catch (e) { showToast(e.reason || e.message || t('txFailed'), 'error'); }
+  hideLoading();
+}
+
+// ===== UI HELPERS =====
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 5000);
+}
+
+function showLoading(text) {
+  document.getElementById('loadingText').textContent = text || t('processing');
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('show');
+}
 </script>
 </body>
 </html>
