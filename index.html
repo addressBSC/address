@@ -171,11 +171,6 @@ select option{background:var(--bg2);color:var(--text)}
             <option value="true" data-i18n="unclaimed">Unclaimed</option>
             <option value="false" data-i18n="claimed">Claimed</option>
           </select>
-          <select id="fSort" onchange="loadMarket()">
-            <option value="newest" data-i18n="newest">Newest</option>
-            <option value="streak" data-i18n="streak">Streak</option>
-            <option value="price" data-i18n="price">Price</option>
-          </select>
         </div>
         <!-- Search by ID / Buy by ID -->
         <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
@@ -362,6 +357,7 @@ const API_BASE='https://address.shibclaw.xyz';
 const PN_ABI=['function balanceOf(address) view returns (uint256)','function transfer(address,uint256) returns (bool)','function totalSupply() view returns (uint256)','function totalMinted() view returns (uint256)','function currentReward() view returns (uint256)','function era() view returns (uint256)','function requiredRun() view returns (uint256)','function windowCount() view returns (uint256)','function totalMined() view returns (uint256)','function MAX_SUPPLY() view returns (uint256)'];
 const AM_ABI=['function claim(uint256 salt) payable','function claimById(uint256 walletId) payable','function purchasePrice() view returns (uint256)','function currentPrice(uint256 salt) view returns (uint256)','function balanceOf(address) view returns (uint256)','function nextWalletId() view returns (uint256)','function getAddressInfo(uint256 salt) view returns (uint256 walletId, address wallet, address currentOwner, uint256 streak, uint256 occurrences)','function getAddressInfoById(uint256 walletId) view returns (uint256 salt, address wallet, address currentOwner, uint256 streak, uint256 occurrences)'];
 const PQ_ABI=['function getUserDashboard(address user) view returns (uint256 tokenBalance, uint256 bnbBalance)','function getByWalletIdRange(uint256 fromId, uint256 toId) view returns (tuple(uint256 walletId, uint256 tokenId, uint256 salt, address currentOwner, uint256 streak, uint256 occurrences, address walletAddr, address approved, bool purchasable, uint256 price)[])'];
+// 不再创建全局只读 RPC 实例 — 所有数据通过 API 获取，RPC 仅在钱包操作时使用用户的 provider
 
 let provider,signer,userAddr;
 let pnContract,amContract,pqContract;
@@ -409,19 +405,30 @@ async function copyAddr(text){
   try{await navigator.clipboard.writeText(text);showToast(t('toastCopied'),'success')}catch{showToast(t('toastTxFail'),'error')}
 }
 
-/* === DIGIT HIGHLIGHT === */
+/* === DIGIT HIGHLIGHT (与合约 _analyze 逻辑完全一致，大小写不敏感，仅0-9有效) === */
+function _analyzeAddr(addr){
+  const h=addr.slice(2).toLowerCase();
+  let tDigit=h[h.length-1],tCount=0;
+  for(let i=h.length-1;i>=0;i--){if(h[i]===tDigit)tCount++;else break}
+  let lDigit=h[0],lCount=0;
+  for(let i=0;i<h.length;i++){if(h[i]===lDigit)lCount++;else break}
+  const tOk=tDigit>='0'&&tDigit<='9'&&tCount>=9;
+  const lOk=lDigit>='0'&&lDigit<='9'&&lCount>=9;
+  let digit,streak,leadingWin;
+  if(tOk&&(!lOk||tCount>=lCount)){digit=tDigit;streak=tCount;leadingWin=false}
+  else if(lOk){digit=lDigit;streak=lCount;leadingWin=true}
+  else{digit=tCount>=lCount?tDigit:lDigit;streak=Math.max(tCount,lCount);leadingWin=lCount>tCount}
+  let occ=0;for(let i=0;i<h.length;i++)if(h[i]===digit)occ++;
+  return{digit,streak,leadingWin,tCount,lCount,occ,pattern:leadingWin?'Leading':'Trailing'}
+}
 function hlAddr(addr){
-  const hex=addr.slice(2);let bs=0,bl=1,cs=0,cl=1;
-  for(let i=1;i<hex.length;i++){if(hex[i]===hex[i-1]){cl++}else{if(cl>bl){bl=cl;bs=cs}cs=i;cl=1}}
-  if(cl>bl){bl=cl;bs=cs}
-  if(bl<2)return addr;
-  return '0x'+hex.slice(0,bs)+'<span class="hl-digit">'+hex.slice(bs,bs+bl)+'</span>'+hex.slice(bs+bl);
+  const a=_analyzeAddr(addr);const h=addr.slice(2);
+  if(a.streak<2)return addr;
+  if(a.leadingWin)return '0x<span class="hl-digit">'+h.slice(0,a.lCount)+'</span>'+h.slice(a.lCount);
+  return '0x'+h.slice(0,h.length-a.tCount)+'<span class="hl-digit">'+h.slice(h.length-a.tCount)+'</span>'
 }
-function digitOf(addr){
-  const hex=addr.slice(2);let bd='',bl=0,cd=hex[0]||'',cl=1;
-  for(let i=1;i<=hex.length;i++){if(hex[i]===cd){cl++}else{if(cl>bl){bl=cl;bd=cd}cd=hex[i];cl=1}}
-  return bd;
-}
+function digitOf(addr){return _analyzeAddr(addr).digit}
+function patternOf(addr){return _analyzeAddr(addr).pattern}
 
 /* === TIER HELPERS === */
 function tierName(s){if(s>=14)return t('legendary');if(s>=12)return t('epic');if(s>=10)return t('rare');return t('common')}
@@ -468,26 +475,22 @@ async function loadMarket(){
   const listEl=document.getElementById('marketList');const pagEl=document.getElementById('marketPagination');
   listEl.innerHTML=sk(3);
   try{
-    const t=document.getElementById('fTier').value,di=document.getElementById('fDigit').value,
-          p=document.getElementById('fPattern').value,s=document.getElementById('fStatus').value,
-          so=document.getElementById('fSort').value;
-    const params=new URLSearchParams({page:marketPage,limit:PER_PAGE,sort:so});
-    if(t){const m={Common:['1','9'],Rare:['10','11'],Epic:['12','13'],Legendary:['14','']}[t];if(m){if(m[0])params.set('minStreak',m[0]);if(m[1])params.set('maxStreak',m[1])}}
-    if(di)params.set('digit',di);if(p)params.set('pattern',p);if(s)params.set('purchasable',s);
+    const tierVal=document.getElementById('fTier').value,di=document.getElementById('fDigit').value,
+          p=document.getElementById('fPattern').value,s=document.getElementById('fStatus').value;
+    const params=new URLSearchParams({page:marketPage,limit:PER_PAGE,sort:'newest'});
+    // 使用服务端 tier 字段直接筛选（不再用 minStreak/maxStreak）
+    if(tierVal)params.set('tier',tierVal);
+    if(di)params.set('digit',di);
+    if(p)params.set('pattern',p);
+    if(s)params.set('purchasable',s);
     const resp=await fetch(API_BASE+'/api/addresses?'+params.toString());
     if(!resp.ok)throw new Error();
     const data=await resp.json();
     const items=extractItems(data);const total=extractTotal(data);
-    try{const ids=items.map(i=>Number(i.walletId||i.tokenId||i.id)).filter(id=>id>0);if(ids.length){const from=Math.min(...ids),to=Math.max(...ids);const chain=await pqContract.getByWalletIdRange(from,to);const cm={};for(const c of chain)cm[Number(c.walletId)]=c;for(const item of items){const cid=Number(item.walletId||item.tokenId||item.id);const ci=cm[cid];if(ci){item.currentOwner=ci.currentOwner;item.purchasable=ci.purchasable}}}}catch(_){}
+    // 不再调用链上 RPC 验证 — 直接信任 API 返回的 purchasable 字段
     renderMarketList(items,total);
   }catch(e){
-    try{
-      const total=await amContract.nextWalletId();
-      const fromId=Math.max(1,Number(total)-PER_PAGE*marketPage+1);
-      const toId=Math.min(Number(total)-1,fromId+PER_PAGE-1);
-      if(fromId<=toId){const details=await pqContract.getByWalletIdRange(fromId,toId);renderMarketList(details,Number(total)-1)}
-      else{listEl.innerHTML='<div class="empty-state"><p>'+t('noNfts')+'</p></div>';pagEl.innerHTML=''}
-    }catch(e2){listEl.innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>';pagEl.innerHTML=''}
+    listEl.innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>';pagEl.innerHTML='';
   }
 }
 
@@ -500,15 +503,20 @@ function renderMarketList(items,total){
     const wId=item.walletId||item.tokenId||item.id||'?';
     const s=Number(item.streak||0);
     const occ=Number(item.occurrences||item.occurrence||0);
-    const ownerAddr=item.currentOwner||item.owner||ethers.ZeroAddress;
-    const purchasable=ownerAddr===ethers.ZeroAddress||ownerAddr==='0x0000000000000000000000000000000000000000';
+    // 直接使用 API 返回的 purchasable 字段
+    const purchasable=item.purchasable===true||item.purchasable===1;
     const priceWei=item.price||item.purchasePrice||0;
     const priceBNB=purchasable&&priceWei?ethers.formatEther(priceWei):'--';
-    const pType=item.pattern||(item.leading>item.trailing?'Leading':'Trailing');
+    // 使用 API 返回的 pattern/digit/tier 字段，回退到本地计算
+    const pType=item.pattern||patternOf(wAddr);
     const dVal=item.digit!==undefined&&item.digit!==null?item.digit:digitOf(wAddr);
+    const itemTier=item.tier||'';
     const hl=hlAddr(wAddr);
-    html+='<div class="addr-card">'+
-      '<div class="addr-id">#'+wId+(purchasable?' <span class="badge badge-green">'+t('unclaimed')+'</span>':' <span class="badge badge-blue">'+t('claimed')+'</span>')+'</div>'+
+    // 检查是否为当前用户持有
+    const ownerAddr=(item.currentOwner||'').toLowerCase();
+    const isOwned=userAddr&&ownerAddr===userAddr.toLowerCase()&&ownerAddr!=='0x0000000000000000000000000000000000000000';
+    html+='<div class="addr-card"'+(isOwned?' style="border-color:var(--accent)"':'')+'>'+
+      '<div class="addr-id">#'+wId+(isOwned?' <span class="badge badge-yellow">MINE</span>':'')+(purchasable?'':' <span class="badge badge-blue">'+t('claimed')+'</span>')+'</div>'+
       '<div class="addr-display" onclick="copyAddr(\''+wAddr+'\')">'+hl+'<svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div>'+
       '<div class="addr-meta">'+tierBadge(s)+
       '<span>'+t('digit')+': '+dVal+'</span><span>'+t('streak')+': '+s+'</span><span>'+t(pType.toLowerCase())+'</span><span>'+t('occurrences')+': '+occ+'</span></div>'+
@@ -539,6 +547,7 @@ async function searchById(){
 async function buyByWid(wid){
   if(!signer){showToast(t('toastConnFirst'),'error');return}
   try{
+    await rpcThrottle();
     const price=await amContract.purchasePrice();
     showToast(t('toastClaiming'),'info');
     const tx=await amContract.claimById(wid,{value:price});await tx.wait();
@@ -551,6 +560,7 @@ async function buyById(){
   const id=document.getElementById('buyIdInput').value.trim();
   if(!id){showToast(t('toastEnterId'),'error');return}
   try{
+    await rpcThrottle();
     const price=await amContract.purchasePrice();
     showToast(t('toastClaiming'),'info');
     const tx=await amContract.claimById(id,{value:price});await tx.wait();
@@ -582,33 +592,42 @@ async function loadLeaderboard(){
   }catch(e){el.innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>'}
 }
 
+/* === RPC 限速（最少间隔 1 秒） === */
+let _lastRpcCall=0;
+async function rpcThrottle(){const now=Date.now(),wait=Math.max(0,1000-now+_lastRpcCall);if(wait>0)await new Promise(r=>setTimeout(r,wait));_lastRpcCall=Date.now()}
+
 /* === MY NFTS === */
 async function refreshMyNfts(){
   if(!userAddr){document.getElementById('walletAddr').textContent=t('notConnected');return}
   try{
     document.getElementById('walletAddr').textContent=userAddr.slice(0,8)+'...'+userAddr.slice(-6);
+    // 先用 API 获取用户数据
+    const resp=await fetch(API_BASE+'/api/user/'+userAddr);
+    let apiItems=[];
+    if(resp.ok){const raw=await resp.json();const ud=unwrap(raw);apiItems=ud.ownedAddresses||extractItems(raw)}
+    // RPC 获取余额（限速）
+    await rpcThrottle();
     const[tokenBal,bnbBal]=await pqContract.getUserDashboard(userAddr);
     document.getElementById('addBalance').textContent=parseFloat(ethers.formatEther(tokenBal)).toLocaleString(undefined,{maximumFractionDigits:4})+' ADD';
     document.getElementById('bnbBalance').textContent=parseFloat(ethers.formatEther(bnbBal)).toLocaleString(undefined,{maximumFractionDigits:6})+' BNB';
+    await rpcThrottle();
     const nftCount=await amContract.balanceOf(userAddr);
     document.getElementById('nftCount').textContent=nftCount.toString();
     const myList=document.getElementById('myAddressesList');
-    if(Number(nftCount)===0){myList.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><p>'+t('noNfts')+'</p></div>';return}
-    try{
-      const resp=await fetch(API_BASE+'/api/user/'+userAddr);
-      if(resp.ok){const raw=await resp.json();const items=extractItems(raw);
-        if(!items.length){myList.innerHTML='<div class="empty-state"><p>'+t('noNfts')+'</p></div>';return}
-        let h='';
-        for(const item of items){
-          const wa=item.walletAddr||item.wallet||item.address||'';const s=Number(item.streak||0);
-          const hl=hlAddr(wa);
-          h+='<div class="addr-card"><div class="addr-id">#'+(item.walletId||item.tokenId||'?')+' <span class="badge badge-blue">'+t('claimed')+'</span></div>'+
-            '<div class="addr-display" onclick="copyAddr(\''+wa+'\')">'+hl+'<svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div>'+
-            '<div class="addr-meta">'+tierBadge(s)+'<span>'+t('streak')+': '+s+'</span></div>'+
-            '<div class="addr-actions"><button class="btn-secondary" style="font-size:.78rem;padding:9px" onclick="window.open(\'https://bscscan.com/address/'+wa+'\',\'_blank\')">BscScan</button></div></div>'}
-        myList.innerHTML=h
-      }else{myList.innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>'}
-    }catch{myList.innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>'}
+    if(Number(nftCount)===0&&apiItems.length===0){myList.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><p>'+t('noNfts')+'</p></div>';return}
+    if(apiItems.length>0){
+      let h='';
+      for(const item of apiItems){
+        const wa=item.walletAddr||item.wallet||item.address||'';const s=Number(item.streak||0);
+        const pType=item.pattern||patternOf(wa);
+        const dVal=item.digit!==undefined&&item.digit!==null?item.digit:digitOf(wa);
+        const hl=hlAddr(wa);
+        h+='<div class="addr-card" style="border-color:var(--accent)"><div class="addr-id">#'+(item.walletId||item.tokenId||'?')+' <span class="badge badge-yellow">MINE</span></div>'+
+          '<div class="addr-display" onclick="copyAddr(\''+wa+'\')">'+hl+'<svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div>'+
+          '<div class="addr-meta">'+tierBadge(s)+'<span>'+t('digit')+': '+dVal+'</span><span>'+t('streak')+': '+s+'</span><span>'+t(pType.toLowerCase())+'</span></div>'+
+          '<div class="addr-actions"><button class="btn-secondary" style="font-size:.78rem;padding:9px" onclick="window.open(\'https://bscscan.com/address/'+wa+'\',\'_blank\')">BscScan</button></div></div>'}
+      myList.innerHTML=h
+    }else{myList.innerHTML='<div class="empty-state"><p>'+t('noNfts')+'</p></div>'}
   }catch(e){console.error('MyNFTs error:',e)}
 }
 
@@ -628,52 +647,36 @@ async function transferADD(){
 
 /* === INFO === */
 async function loadInfo(){
-  // Global Stats
+  // Global Stats — 仅从 API 获取，不再回退到 RPC
   try{
     const resp=await fetch(API_BASE+'/api/global');
     if(resp.ok){
       const g=await resp.json();const info=extractObj(g);
       const fmt=v=>parseFloat(ethers.formatEther(v||0)).toLocaleString(undefined,{maximumFractionDigits:2});
       document.getElementById('globalStatsContent').innerHTML='<div class="stat-grid-4 fade-in">'+
-        '<div class="stat-card"><div class="sc-val">'+fmt(info.maxSupply||info.MAX_SUPPLY||0)+'</div><div class="sc-label">'+t('maxSupply')+'</div></div>'+
-        '<div class="stat-card"><div class="sc-val">'+(info.totalMined||info.totalMined_||0)+'</div><div class="sc-label">'+t('totalMined')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+fmt(info.maxSupply||0)+'</div><div class="sc-label">'+t('maxSupply')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+(info.totalMined||0)+'</div><div class="sc-label">'+t('totalMined')+'</div></div>'+
         '<div class="stat-card"><div class="sc-val">'+fmt(info.totalMinted||0)+'</div><div class="sc-label">'+t('totalMinted')+'</div></div>'+
-        '<div class="stat-card"><div class="sc-val">'+fmt(info.totalSupply||info.totalSupply_||0)+'</div><div class="sc-label">'+t('totalSupply')+'</div></div>'+
-        '<div class="stat-card"><div class="sc-val">'+fmt(info.currentReward||info.currentReward_||0)+' ADD</div><div class="sc-label">'+t('currentReward')+'</div></div>'+
-        '<div class="stat-card"><div class="sc-val">'+(info.era||info.era_||0)+'</div><div class="sc-label">'+t('era')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+fmt(info.totalSupply||0)+'</div><div class="sc-label">'+t('totalSupply')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+fmt(info.currentReward||0)+' ADD</div><div class="sc-label">'+t('currentReward')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+(info.era||0)+'</div><div class="sc-label">'+t('era')+'</div></div>'+
         '</div>'
     }else{throw new Error()}
   }catch{
-    try{
-      const [supply,minted,reward,era,mined,maxSup]=await Promise.all([
-        (pnContract?pnContract.totalSupply():Promise.resolve(0n)).catch(()=>0n),
-        (pnContract?pnContract.totalMinted():Promise.resolve(0n)).catch(()=>0n),
-        (pnContract?pnContract.currentReward():Promise.resolve(0n)).catch(()=>0n),
-        (pnContract?pnContract.era():Promise.resolve(0n)).catch(()=>0n),
-        (pnContract?pnContract.totalMined():Promise.resolve(0n)).catch(()=>0n),
-        (pnContract?pnContract.MAX_SUPPLY():Promise.resolve(0n)).catch(()=>0n)
-      ]);
-      const fmt=v=>parseFloat(ethers.formatEther(v||0)).toLocaleString(undefined,{maximumFractionDigits:2});
-      document.getElementById('globalStatsContent').innerHTML='<div class="stat-grid-4 fade-in">'+
-        '<div class="stat-card"><div class="sc-val">'+fmt(maxSup)+'</div><div class="sc-label">'+t('maxSupply')+'</div></div>'+
-        '<div class="stat-card"><div class="sc-val">'+(mined||0)+'</div><div class="sc-label">'+t('totalMined')+'</div></div>'+
-        '<div class="stat-card"><div class="sc-val">'+fmt(minted)+'</div><div class="sc-label">'+t('totalMinted')+'</div></div>'+
-        '<div class="stat-card"><div class="sc-val">'+fmt(supply)+'</div><div class="sc-label">'+t('totalSupply')+'</div></div>'+
-        '<div class="stat-card"><div class="sc-val">'+fmt(reward)+' ADD</div><div class="sc-label">'+t('currentReward')+'</div></div>'+
-        '<div class="stat-card"><div class="sc-val">'+(era||0)+'</div><div class="sc-label">'+t('era')+'</div></div>'+
-        '</div>'
-    }catch{document.getElementById('globalStatsContent').innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>'}
+    document.getElementById('globalStatsContent').innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>'
   }
   // Stats
   try{
     const resp=await fetch(API_BASE+'/api/stats');
     if(resp.ok){const d=await resp.json();const info=extractObj(d);
-      const items=[{label:t('total'),val:info.totalAddresses||info.total||info.registered||0},
-        {label:t('available'),val:info.available||info.availableAddresses||info.unclaimed||0,cl:'green'},
-        {label:t('totalMined'),val:info.totalMined||info.mined||0,cl:'accent'},
-        {label:t('purchasePrice'),val:info.purchasePrice||info.price?ethers.formatEther(info.purchasePrice||info.price||0)+' BNB':'--',cl:'accent'}];
+      const items=[{label:t('total'),val:info.total||0},
+        {label:t('available'),val:info.purchasable||0,cl:'green'},
+        {label:t('claimed'),val:info.owned||0,cl:'accent'}];
+      // tier 分布
+      const td=info.tierDistribution||{};
       let h='<div class="stat-grid-4 fade-in">';
       for(const it of items)h+='<div class="stat-card"><div class="sc-val'+(it.cl?' '+it.cl:'')+'">'+it.val+'</div><div class="sc-label">'+it.label+'</div></div>';
+      h+='<div class="stat-card"><div class="sc-val">'+(td.Common||0)+' / '+(td.Rare||0)+' / '+(td.Epic||0)+' / '+(td.Legendary||0)+'</div><div class="sc-label">C / R / E / L</div></div>';
       h+='</div>';document.getElementById('statsContent').innerHTML=h
     }else{throw new Error()}
   }catch{document.getElementById('statsContent').innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>'}
@@ -697,5 +700,6 @@ if(window.ethereum){window.ethereum.on('accountsChanged',()=>location.reload());
 /* === AUTO LOAD === */
 setTimeout(()=>{loadMarket();loadMarketOverview();loadLeaderboard();loadInfo()},300);
 </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
