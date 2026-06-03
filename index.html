@@ -1,1487 +1,729 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Premium Address - BSC 靓号挖矿 DApp</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PADD - Premium Address</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0e17'/%3E%3Ctext x='16' y='22' font-size='16' font-weight='800' fill='%23f59e0b' text-anchor='middle' font-family='monospace'%3EP%3C/text%3E%3C/svg%3E">
 <style>
-:root {
-  --bg-deep: #020a06;
-  --bg-panel: #061410;
-  --bg-card: #0a1f18;
-  --bg-card-hover: #0f2a22;
-  --neon-green: #00ff9d;
-  --neon-cyan: #00e5ff;
-  --neon-gold: #ffb000;
-  --neon-pink: #ff2bd1;
-  --neon-red: #ff3c3c;
-  --text-primary: #c8f0e0;
-  --text-dim: #5a8a78;
-  --text-muted: #2e5548;
-  --border-glow: #00ff9d22;
-  --border-solid: #1a3d30;
-  --font-display: 'Orbitron', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-body: 'Noto Sans SC', sans-serif;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg-deep);
-  color: var(--text-primary);
-  font-family: var(--font-body);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* Scanline overlay */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 255, 157, 0.015) 2px,
-    rgba(0, 255, 157, 0.015) 4px
-  );
-  pointer-events: none;
-  z-index: 9999;
-}
-
-/* Grid background */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 20% 0%, rgba(0, 255, 157, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 100%, rgba(0, 229, 255, 0.04) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: -1;
-}
-
-::selection {
-  background: var(--neon-green);
-  color: var(--bg-deep);
-}
-
-/* ─── SCROLLBAR ─── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-deep); }
-::-webkit-scrollbar-thumb { background: var(--border-solid); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--neon-green); }
-
-/* ─── NAVBAR ─── */
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 clamp(16px, 3vw, 48px);
-  height: 64px;
-  background: rgba(2, 10, 6, 0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-solid);
-}
-
-.nav-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-}
-
-.nav-logo-icon {
-  width: 32px;
-  height: 32px;
-  border: 2px solid var(--neon-green);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--neon-green);
-  text-shadow: 0 0 8px var(--neon-green);
-  box-shadow: 0 0 12px rgba(0, 255, 157, 0.2), inset 0 0 8px rgba(0, 255, 157, 0.1);
-}
-
-.nav-logo-text {
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.nav-links {
-  display: flex;
-  gap: 28px;
-  list-style: none;
-}
-
-.nav-links a {
-  color: var(--text-dim);
-  text-decoration: none;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  transition: color 0.3s, text-shadow 0.3s;
-}
-
-.nav-links a:hover {
-  color: var(--neon-green);
-  text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
-}
-
-.btn-connect {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  padding: 10px 24px;
-  background: transparent;
-  color: var(--neon-green);
-  border: 1px solid var(--neon-green);
-  cursor: pointer;
-  transition: all 0.3s;
-  text-transform: uppercase;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-connect::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--neon-green);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.btn-connect:hover::before { opacity: 0.1; }
-.btn-connect:hover {
-  box-shadow: 0 0 20px rgba(0, 255, 157, 0.3), inset 0 0 20px rgba(0, 255, 157, 0.05);
-}
-
-.btn-connect.connected {
-  border-color: var(--neon-cyan);
-  color: var(--neon-cyan);
-}
-
-.btn-connect.connected:hover {
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
-}
-
-/* ─── HERO ─── */
-.hero {
-  padding: 140px clamp(16px, 5vw, 80px) 80px;
-  position: relative;
-  overflow: hidden;
-  min-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.hero-grid-bg {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, rgba(0, 255, 157, 0.03) 1px, transparent 1px),
-    linear-gradient(rgba(0, 255, 157, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse at 30% 40%, black 20%, transparent 70%);
-}
-
-.hero-glow {
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 255, 157, 0.08) 0%, transparent 70%);
-  top: -100px;
-  left: -100px;
-  animation: pulseGlow 6s ease-in-out infinite;
-}
-
-@keyframes pulseGlow {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.1); }
-}
-
-.hero-tag {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--neon-green);
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  margin-bottom: 24px;
-  opacity: 0;
-  animation: fadeUp 0.8s 0.2s forwards;
-}
-
-.hero-tag::before {
-  content: '>';
-  margin-right: 8px;
-  opacity: 0.5;
-}
-
-.hero-title {
-  font-family: var(--font-display);
-  font-size: clamp(36px, 6vw, 72px);
-  font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -1px;
-  margin-bottom: 24px;
-  opacity: 0;
-  animation: fadeUp 0.8s 0.4s forwards;
-}
-
-.hero-title .accent {
-  color: var(--neon-green);
-  text-shadow: 0 0 30px rgba(0, 255, 157, 0.4), 0 0 60px rgba(0, 255, 157, 0.1);
-}
-
-.hero-title .cyan {
-  color: var(--neon-cyan);
-  text-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
-}
-
-.hero-desc {
-  max-width: 600px;
-  font-size: 16px;
-  line-height: 1.8;
-  color: var(--text-dim);
-  margin-bottom: 40px;
-  opacity: 0;
-  animation: fadeUp 0.8s 0.6s forwards;
-}
-
-.hero-stats {
-  display: flex;
-  gap: 40px;
-  flex-wrap: wrap;
-  opacity: 0;
-  animation: fadeUp 0.8s 0.8s forwards;
-}
-
-.hero-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.hero-stat-val {
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--neon-green);
-  text-shadow: 0 0 12px rgba(0, 255, 157, 0.3);
-}
-
-.hero-stat-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-muted);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-/* Address demo */
-.hero-addr-demo {
-  margin-top: 48px;
-  padding: 20px 28px;
-  background: rgba(0, 255, 157, 0.03);
-  border: 1px solid var(--border-solid);
-  border-left: 3px solid var(--neon-green);
-  font-family: var(--font-mono);
-  font-size: clamp(14px, 2vw, 20px);
-  letter-spacing: 2px;
-  opacity: 0;
-  animation: fadeUp 0.8s 1s forwards;
-  overflow-x: auto;
-}
-
-.hero-addr-demo .dim { color: var(--text-muted); }
-.hero-addr-demo .glow {
-  color: var(--neon-green);
-  text-shadow: 0 0 10px rgba(0, 255, 157, 0.6);
-  font-weight: 700;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ─── SECTIONS ─── */
-.section {
-  padding: 80px clamp(16px, 5vw, 80px);
-  position: relative;
-}
-
-.section-header {
-  margin-bottom: 48px;
-}
-
-.section-tag {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--neon-cyan);
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-
-.section-title {
-  font-family: var(--font-display);
-  font-size: clamp(22px, 3vw, 32px);
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-.section-line {
-  width: 60px;
-  height: 2px;
-  background: var(--neon-green);
-  margin-top: 16px;
-  box-shadow: 0 0 10px rgba(0, 255, 157, 0.4);
-}
-
-/* ─── DASHBOARD GRID ─── */
-.dash-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-}
-
-.dash-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-solid);
-  padding: 24px;
-  position: relative;
-  transition: all 0.3s;
-  overflow: hidden;
-}
-
-.dash-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan));
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.dash-card:hover::before { opacity: 1; }
-.dash-card:hover {
-  background: var(--bg-card-hover);
-  border-color: rgba(0, 255, 157, 0.2);
-}
-
-.dash-card-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-muted);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-
-.dash-card-value {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.dash-card-value.green { color: var(--neon-green); text-shadow: 0 0 8px rgba(0, 255, 157, 0.3); }
-.dash-card-value.cyan { color: var(--neon-cyan); text-shadow: 0 0 8px rgba(0, 229, 255, 0.3); }
-.dash-card-value.gold { color: var(--neon-gold); text-shadow: 0 0 8px rgba(255, 176, 0, 0.3); }
-.dash-card-value.pink { color: var(--neon-pink); text-shadow: 0 0 8px rgba(255, 43, 209, 0.3); }
-
-.dash-card-sub {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 6px;
-}
-
-/* ─── WALLET PANEL ─── */
-.wallet-panel {
-  display: none;
-  background: var(--bg-card);
-  border: 1px solid var(--border-solid);
-  padding: 32px;
-  margin-bottom: 48px;
-}
-
-.wallet-panel.visible { display: block; }
-
-.wallet-panel-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 24px;
-}
-
-.wallet-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.wallet-item-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-muted);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.wallet-item-value {
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--neon-green);
-  text-shadow: 0 0 12px rgba(0, 255, 157, 0.3);
-}
-
-.wallet-item-unit {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--text-dim);
-}
-
-/* ─── EXPLORER TABLE ─── */
-.explorer-wrap {
-  overflow-x: auto;
-}
-
-.explorer-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: var(--font-mono);
-  font-size: 13px;
-}
-
-.explorer-table thead th {
-  text-align: left;
-  padding: 14px 16px;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border-solid);
-  white-space: nowrap;
-}
-
-.explorer-table tbody tr {
-  border-bottom: 1px solid rgba(26, 61, 48, 0.4);
-  transition: background 0.2s;
-}
-
-.explorer-table tbody tr:hover {
-  background: rgba(0, 255, 157, 0.03);
-}
-
-.explorer-table td {
-  padding: 14px 16px;
-  white-space: nowrap;
-  vertical-align: middle;
-}
-
-.addr-cell {
-  font-size: 13px;
-  letter-spacing: 1px;
-}
-
-.addr-cell .dim { color: var(--text-muted); }
-.addr-cell .hi {
-  color: var(--neon-green);
-  font-weight: 700;
-  text-shadow: 0 0 6px rgba(0, 255, 157, 0.4);
-}
-
-.tier-badge {
-  display: inline-block;
-  padding: 3px 10px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  border: 1px solid;
-}
-
-.tier-common { color: var(--neon-green); border-color: var(--neon-green); background: rgba(0, 255, 157, 0.05); }
-.tier-rare { color: var(--neon-cyan); border-color: var(--neon-cyan); background: rgba(0, 229, 255, 0.05); }
-.tier-epic { color: var(--neon-pink); border-color: var(--neon-pink); background: rgba(255, 43, 209, 0.05); }
-.tier-legendary { color: var(--neon-gold); border-color: var(--neon-gold); background: rgba(255, 176, 0, 0.05); }
-
-.btn-claim {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  padding: 7px 16px;
-  background: rgba(0, 255, 157, 0.1);
-  color: var(--neon-green);
-  border: 1px solid var(--neon-green);
-  cursor: pointer;
-  transition: all 0.3s;
-  letter-spacing: 1px;
-}
-
-.btn-claim:hover {
-  background: rgba(0, 255, 157, 0.2);
-  box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
-}
-
-.btn-claim:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.btn-claim.sold {
-  color: var(--text-muted);
-  border-color: var(--text-muted);
-  background: transparent;
-  cursor: default;
-}
-
-.owner-addr {
-  color: var(--text-dim);
-  font-size: 11px;
-}
-
-/* Pagination */
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 24px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-}
-
-.pagination button {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  padding: 8px 20px;
-  background: transparent;
-  color: var(--neon-green);
-  border: 1px solid var(--border-solid);
-  cursor: pointer;
-  transition: all 0.3s;
-  letter-spacing: 1px;
-}
-
-.pagination button:hover:not(:disabled) {
-  border-color: var(--neon-green);
-  box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
-}
-
-.pagination button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.pagination .page-info {
-  color: var(--text-dim);
-}
-
-/* ─── CONTRACT INFO ─── */
-.contract-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 12px;
-}
-
-.contract-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-solid);
-  transition: all 0.3s;
-  gap: 12px;
-}
-
-.contract-row:hover {
-  border-color: rgba(0, 255, 157, 0.2);
-  background: var(--bg-card-hover);
-}
-
-.contract-name {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--neon-cyan);
-  letter-spacing: 1px;
-  white-space: nowrap;
-}
-
-.contract-addr {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-dim);
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.contract-link {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--neon-green);
-  text-decoration: none;
-  letter-spacing: 1px;
-  white-space: nowrap;
-  border: 1px solid var(--border-solid);
-  padding: 4px 10px;
-  transition: all 0.3s;
-}
-
-.contract-link:hover {
-  border-color: var(--neon-green);
-  box-shadow: 0 0 8px rgba(0, 255, 157, 0.2);
-}
-
-/* ─── TIER LEGEND ─── */
-.tier-legend {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-  margin-bottom: 32px;
-  padding: 16px 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-solid);
-}
-
-.tier-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-dim);
-}
-
-.tier-legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-/* ─── FOOTER ─── */
-.footer {
-  padding: 40px clamp(16px, 5vw, 80px);
-  border-top: 1px solid var(--border-solid);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.footer-text {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-  letter-spacing: 1px;
-}
-
-.footer-links {
-  display: flex;
-  gap: 20px;
-}
-
-.footer-links a {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-dim);
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-.footer-links a:hover { color: var(--neon-green); }
-
-/* ─── LOADING ─── */
-.loading-dots::after {
-  content: '';
-  animation: dots 1.5s infinite;
-}
-
-@keyframes dots {
-  0% { content: '.'; }
-  33% { content: '..'; }
-  66% { content: '...'; }
-}
-
-.skeleton {
-  background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  color: transparent !important;
-}
-
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* ─── STATUS BAR ─── */
-.status-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 28px;
-  background: rgba(6, 20, 16, 0.95);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid var(--border-solid);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-muted);
-  z-index: 1000;
-}
-
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--neon-green);
-  box-shadow: 0 0 6px var(--neon-green);
-  display: inline-block;
-  margin-right: 6px;
-}
-
-.status-dot.off {
-  background: var(--neon-red);
-  box-shadow: 0 0 6px var(--neon-red);
-}
-
-/* ─── TOAST ─── */
-.toast {
-  position: fixed;
-  top: 80px;
-  right: 20px;
-  padding: 14px 24px;
-  background: var(--bg-card);
-  border: 1px solid var(--neon-green);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--neon-green);
-  z-index: 10000;
-  transform: translateX(120%);
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
-}
-
-.toast.show { transform: translateX(0); }
-.toast.error {
-  border-color: var(--neon-red);
-  color: var(--neon-red);
-  box-shadow: 0 0 20px rgba(255, 60, 60, 0.2);
-}
-
-/* ─── MOBILE ─── */
-.mobile-menu-btn {
-  display: none;
-  background: none;
-  border: 1px solid var(--border-solid);
-  color: var(--text-dim);
-  padding: 6px 10px;
-  cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: 16px;
-}
-
-@media (max-width: 768px) {
-  .nav-links { display: none; }
-  .mobile-menu-btn { display: block; }
-  .hero { padding-top: 100px; min-height: auto; }
-  .hero-stats { gap: 24px; }
-  .hero-stat-val { font-size: 18px; }
-  .dash-grid { grid-template-columns: repeat(2, 1fr); }
-  .contract-grid { grid-template-columns: 1fr; }
-  .tier-legend { flex-direction: column; gap: 12px; }
-  .footer { flex-direction: column; text-align: center; }
-}
-
-@media (max-width: 480px) {
-  .dash-grid { grid-template-columns: 1fr; }
-  .hero-title { font-size: 28px; }
-}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0e17;--bg2:#111827;--bg3:#1a2235;--bg4:#232d42;--accent:#f59e0b;--accent2:#d97706;--accent-glow:rgba(245,158,11,.15);--green:#10b981;--red:#ef4444;--blue:#3b82f6;--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;--border:#1e293b;--radius:16px;--radius-sm:10px}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}
+button{cursor:pointer;border:none;font-family:inherit}
+.app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative}
+.tab-content{flex:1;overflow-y:auto;padding:16px 16px 100px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg2);gap:8px}
+.header-logo{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.header-logo .logo-box{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;color:#000}
+.header-logo span{font-size:1.1rem;font-weight:800;letter-spacing:.5px}
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.lang-btn{background:var(--bg3);color:var(--text2);font-weight:700;padding:6px 12px;border-radius:8px;font-size:.75rem;border:1px solid var(--border);transition:all .15s}
+.lang-btn:hover{color:var(--accent);border-color:var(--accent)}
+.wallet-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;padding:9px 14px;border-radius:var(--radius-sm);font-size:.8rem;transition:transform .15s;white-space:nowrap}
+.wallet-btn:active{transform:scale(.96)}
+.tab-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:var(--bg2);border-top:1px solid var(--border);z-index:100;padding:6px 0 env(safe-area-inset-bottom,8px)}
+.tab-bar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;background:none;color:var(--text3);font-size:.7rem;font-weight:600;transition:color .2s}
+.tab-bar button.active{color:var(--accent)}
+.tab-bar button svg{width:22px;height:22px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.card-title{font-size:1.05rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-box{background:var(--bg3);border-radius:var(--radius-sm);padding:12px}
+.stat-label{font-size:.7rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.stat-value{font-size:1.15rem;font-weight:800;color:var(--text)}
+.stat-value.accent{color:var(--accent)}
+.stat-value.green{color:var(--green)}
+.btn-primary{width:100%;padding:14px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-size:.95rem;font-weight:800;letter-spacing:.5px;transition:opacity .15s,transform .15s}
+.btn-primary:active{transform:scale(.98);opacity:.9}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-secondary{width:100%;padding:12px;border-radius:var(--radius-sm);background:var(--bg3);color:var(--text);font-size:.85rem;font-weight:700;border:1px solid var(--border);transition:all .15s}
+.btn-secondary:active{background:var(--bg4)}
+.input-group{margin-bottom:12px}
+.input-group label{display:block;font-size:.78rem;font-weight:700;color:var(--text2);margin-bottom:5px}
+.input-group input,.input-group select{width:100%;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.9rem;font-weight:600;outline:none;transition:border-color .2s}
+.input-group input:focus,.input-group select:focus{border-color:var(--accent)}
+.input-group input::placeholder{color:var(--text3)}
+select option{background:var(--bg2);color:var(--text)}
+.info-list{list-style:none}
+.info-list li{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.info-list li:last-child{border-bottom:none}
+.info-list .label{color:var(--text2);font-weight:600}
+.info-list .value{font-weight:700;text-align:right;word-break:break-all;max-width:55%}
+.info-list .value.mono{font-family:'SF Mono',Monaco,'Cascadia Code',monospace;font-size:.75rem}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.badge-green{background:rgba(16,185,129,.12);color:var(--green)}
+.badge-yellow{background:var(--accent-glow);color:var(--accent)}
+.badge-red{background:rgba(239,68,68,.12);color:var(--red)}
+.badge-blue{background:rgba(59,130,246,.12);color:var(--blue)}
+.badge-tier-c{background:rgba(57,255,20,.08);color:#39ff14}
+.badge-tier-r{background:rgba(0,229,255,.08);color:#00e5ff}
+.badge-tier-e{background:rgba(255,43,209,.08);color:#ff2bd1}
+.badge-tier-l{background:rgba(255,176,0,.08);color:#ffb000}
+.addr-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px}
+.addr-card .addr-id{font-size:.7rem;color:var(--text3);font-weight:600;margin-bottom:4px}
+.addr-card .addr-text{font-family:'SF Mono',Monaco,'Cascadia Code',monospace;font-size:.82rem;font-weight:700;word-break:break-all;margin-bottom:6px;color:var(--accent)}
+.addr-card .addr-meta{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:.72rem;color:var(--text2);margin-bottom:8px}
+.addr-card .addr-meta span{background:var(--bg4);padding:2px 7px;border-radius:4px}
+.addr-card .addr-actions{display:flex;gap:8px}
+.addr-card .addr-actions button{flex:1;padding:10px;border-radius:var(--radius-sm);font-size:.78rem;font-weight:700}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:12px 24px;border-radius:var(--radius-sm);font-weight:700;font-size:.85rem;z-index:1000;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-state svg{width:44px;height:44px;margin-bottom:10px;opacity:.4}
+.empty-state p{font-size:.85rem;font-weight:600}
+.flex-row{display:flex;gap:8px;margin-bottom:12px}
+.flex-row>*{flex:1}
+.filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.filter-bar select,.filter-bar input{flex:1;min-width:80px;padding:9px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.75rem;font-weight:600;outline:none}
+.filter-bar select:focus,.filter-bar input:focus{border-color:var(--accent)}
+.pagination{display:flex;gap:8px;justify-content:center;align-items:center;padding:10px 0}
+.pagination button{background:var(--bg3);color:var(--text2);padding:7px 12px;border-radius:8px;font-size:.75rem;font-weight:700;border:1px solid var(--border);transition:all .15s}
+.pagination button:disabled{opacity:.3;cursor:default}
+.pagination button:hover:not(:disabled){color:var(--accent);border-color:var(--accent)}
+.pagination .page-info{font-size:.75rem;color:var(--text3);font-weight:600}
+.leaderboard-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.leaderboard-item:last-child{border-bottom:none}
+.leaderboard-item .rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:900;background:var(--bg4);color:var(--text3);flex-shrink:0}
+.leaderboard-item .rank.gold{background:rgba(245,158,11,.2);color:var(--accent)}
+.leaderboard-item .rank.silver{background:rgba(148,163,184,.2);color:var(--text2)}
+.leaderboard-item .rank.bronze{background:rgba(180,83,9,.2);color:#b45309}
+.leaderboard-item .lb-info{flex:1}
+.leaderboard-item .lb-info .lb-name{font-size:.85rem;font-weight:700}
+.leaderboard-item .lb-info .lb-detail{font-size:.72rem;color:var(--text3);margin-top:2px}
+.leaderboard-item .lb-value{font-size:.9rem;font-weight:800;color:var(--accent)}
+.stat-grid-4{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{background:var(--bg3);border-radius:var(--radius-sm);padding:14px;text-align:center}
+.stat-card .sc-value{font-size:1.3rem;font-weight:800;color:var(--accent)}
+.stat-card .sc-label{font-size:.68rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.divider{height:1px;background:var(--border);margin:16px 0}
+.panel{display:none}.panel.active{display:block}
+@media(min-width:600px){.app{border-left:1px solid var(--border);border-right:1px solid var(--border)}html{background:#05080f}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .35s ease}
 </style>
 </head>
 <body>
+<div class="app">
+  <div class="header">
+    <div class="header-logo">
+      <div class="logo-box">P</div>
+      <span>PADD</span>
+    </div>
+    <div class="header-right">
+      <button class="lang-btn" id="langBtn" onclick="toggleLang()">CN</button>
+      <button class="wallet-btn" id="connectBtn" onclick="connectWallet()" data-i18n="connect">Connect</button>
+    </div>
+  </div>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
+  <div class="tab-content">
+    <!-- ====== MARKET ====== -->
+    <div class="panel active" id="panel-market">
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="marketplace">Marketplace</span></div>
+        <p style="font-size:.8rem;color:var(--text2);margin-bottom:14px;line-height:1.5" data-i18n="marketDesc">Browse premium addresses. Unclaimed ones can be purchased with BNB.</p>
 
-<!-- Navbar -->
-<nav class="navbar">
-  <a href="#" class="nav-logo">
-    <div class="nav-logo-icon">PA</div>
-    <span class="nav-logo-text">Premium Address</span>
-  </a>
-  <ul class="nav-links">
-    <li><a href="#dashboard">数据面板</a></li>
-    <li><a href="#explorer">靓号探索</a></li>
-    <li><a href="#contracts">合约信息</a></li>
-  </ul>
-  <div style="display:flex;align-items:center;gap:12px;">
-    <button class="mobile-menu-btn" onclick="document.querySelector('.nav-links').style.display=document.querySelector('.nav-links').style.display==='flex'?'none':'flex'">///</button>
-    <button class="btn-connect" id="btnConnect" onclick="connectWallet()">
-      连接钱包
+        <div class="filter-bar">
+          <select id="fTier" onchange="loadMarket()">
+            <option value="" data-i18n="allTiers">All Tiers</option>
+            <option value="Common">Common</option>
+            <option value="Rare">Rare</option>
+            <option value="Epic">Epic</option>
+            <option value="Legendary">Legendary</option>
+          </select>
+          <select id="fDigit" onchange="loadMarket()">
+            <option value="" data-i18n="allDigits">All Digits</option>
+            <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+            <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+            <option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option>
+          </select>
+          <select id="fPattern" onchange="loadMarket()">
+            <option value="" data-i18n="allPatterns">All Patterns</option>
+            <option value="trailing" data-i18n="trailing">Trailing</option>
+            <option value="leading" data-i18n="leading">Leading</option>
+          </select>
+          <select id="fStatus" onchange="loadMarket()">
+            <option value="" data-i18n="allStatus">All</option>
+            <option value="available" data-i18n="unclaimed">Unclaimed</option>
+            <option value="claimed" data-i18n="claimed">Claimed</option>
+          </select>
+          <select id="fSort" onchange="loadMarket()">
+            <option value="newest" data-i18n="newest">Newest</option>
+            <option value="streak" data-i18n="streak">Streak</option>
+            <option value="price" data-i18n="price">Price</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:12px;display:flex;gap:8px">
+          <input type="number" id="searchId" placeholder="# ID" style="flex:1;padding:9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.78rem;font-weight:600;outline:none" onkeydown="if(event.key==='Enter')searchById()">
+          <button class="btn-secondary" onclick="searchById()" style="flex:none;padding:9px 16px;width:auto;font-size:.78rem" data-i18n="search">Search</button>
+        </div>
+
+        <div id="marketList"></div>
+        <div class="pagination" id="marketPagination"></div>
+      </div>
+    </div>
+
+    <!-- ====== LEADERBOARD ====== -->
+    <div class="panel" id="panel-leaderboard">
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="leaderboard">Leaderboard</span></div>
+        <div id="leaderboardContent">
+          <div class="empty-state"><p data-i18n="loading">Loading...</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== MY NFTs ====== -->
+    <div class="panel" id="panel-mynfts">
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="wallet">Wallet</span></div>
+        <ul class="info-list">
+          <li><span class="label" data-i18n="address">Address</span><span class="value mono" id="walletAddr" data-i18n="notConnected">Not Connected</span></li>
+          <li><span class="label">ADD <span data-i18n="balance">Balance</span></span><span class="value" id="addBalance">--</span></li>
+          <li><span class="label">BNB <span data-i18n="balance">Balance</span></span><span class="value" id="bnbBalance">--</span></li>
+          <li><span class="label" data-i18n="nftCount">NFT Count</span><span class="value" id="nftCount">0</span></li>
+        </ul>
+      </div>
+
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="myAddresses">My Addresses</span></div>
+        <div id="myAddressesList">
+          <div class="empty-state"><p data-i18n="noNfts">No premium addresses owned yet</p></div>
+        </div>
+      </div>
+
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="transferADD">Transfer ADD</span></div>
+        <div class="input-group">
+          <label data-i18n="recipient">Recipient</label>
+          <input type="text" id="transferToInput" placeholder="0x...">
+        </div>
+        <div class="input-group">
+          <label data-i18n="amount">Amount</label>
+          <input type="number" id="transferAmtInput" placeholder="0.00">
+        </div>
+        <button class="btn-primary" onclick="transferADD()" data-i18n="transferBtn">Transfer</button>
+      </div>
+    </div>
+
+    <!-- ====== INFO ====== -->
+    <div class="panel" id="panel-info">
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="globalStats">Global Stats</span></div>
+        <div id="globalStatsContent">
+          <div class="empty-state"><p data-i18n="loading">Loading...</p></div>
+        </div>
+      </div>
+
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="networkStatus">Network Status</span></div>
+        <div id="networkStatus">
+          <div class="empty-state"><p data-i18n="loading">Loading...</p></div>
+        </div>
+      </div>
+
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="contractInfo">Contract Info</span></div>
+        <ul class="info-list">
+          <li><span class="label">ADD Token</span><span class="value mono"><a href="https://bscscan.com/address/0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8" target="_blank">0x1805...E6d8</a></span></li>
+          <li><span class="label">AddressManager</span><span class="value mono"><a href="https://bscscan.com/address/0x78B11198268619728E4b53c642E8d68941004c11" target="_blank">0x78B1...4c11</a></span></li>
+          <li><span class="label">PremiumNumberQuery</span><span class="value mono"><a href="https://bscscan.com/address/0x86719c4337b8BF7d54aa73df7e3d460efD076405" target="_blank">0x8671...6405</a></span></li>
+          <li><span class="label" data-i18n="network">Network</span><span class="value">BSC Mainnet</span></li>
+          <li><span class="label">API</span><span class="value mono"><a href="https://address.shibclaw.xyz" target="_blank">address.shibclaw.xyz</a></span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="active" onclick="switchTab('market',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+      <span data-i18n="tabMarket">Market</span>
+    </button>
+    <button onclick="switchTab('leaderboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 6 9 6 9z"/><path d="M18 9h1.5a2.5 2.5 0 000-5C17 4 18 9 18 9z"/><path d="M4 22h16"/><path d="M10 22V8h4v14"/></svg>
+      <span data-i18n="tabLeaderboard">Rank</span>
+    </button>
+    <button onclick="switchTab('mynfts',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span data-i18n="tabMyNfts">My NFTs</span>
+    </button>
+    <button onclick="switchTab('info',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      <span data-i18n="tabInfo">Info</span>
     </button>
   </div>
-</nav>
-
-<!-- Hero -->
-<section class="hero">
-  <div class="hero-grid-bg"></div>
-  <div class="hero-glow"></div>
-  <div class="hero-tag">BSC Mainnet // Chain ID 56</div>
-  <h1 class="hero-title">
-    挖掘<span class="accent">靓号地址</span><br>
-    赚取<span class="cyan">ADD</span>代币
-  </h1>
-  <p class="hero-desc">
-    Premium Address 是一个基于 BSC 链的 PoW 靓号地址挖矿协议。通过计算找到包含连续重复数字的钱包地址，获得 ADD 代币奖励。每个靓号地址同时铸造为 ERC-721 NFT，可交易、可升级。
-  </p>
-  <div class="hero-stats">
-    <div class="hero-stat">
-      <div class="hero-stat-val">21,000,000</div>
-      <div class="hero-stat-label">最大供应量 ADD</div>
-    </div>
-    <div class="hero-stat">
-      <div class="hero-stat-val">9+</div>
-      <div class="hero-stat-label">最低连续位数</div>
-    </div>
-    <div class="hero-stat">
-      <div class="hero-stat-val">ERC-721</div>
-      <div class="hero-stat-label">靓号 NFT</div>
-    </div>
-    <div class="hero-stat">
-      <div class="hero-stat-val">PoW</div>
-      <div class="hero-stat-label">挖矿机制</div>
-    </div>
-  </div>
-  <div class="hero-addr-demo">
-    <span class="dim">0x</span><span class="dim">7a3b1f</span><span class="dim">...</span><span class="dim">c2e</span><span class="glow">999999999</span>
-    <span style="color:var(--text-muted); margin-left:16px;">// 9 位连续 "9" - OMEGA 级</span>
-  </div>
-</section>
-
-<!-- Dashboard -->
-<section class="section" id="dashboard">
-  <div class="section-header">
-    <div class="section-tag">// 全局数据</div>
-    <h2 class="section-title">数据面板</h2>
-    <div class="section-line"></div>
-  </div>
-
-  <!-- Wallet Panel -->
-  <div class="wallet-panel" id="walletPanel">
-    <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;">// 我的钱包</div>
-    <div class="wallet-panel-grid">
-      <div class="wallet-item">
-        <div class="wallet-item-label">ADD 余额</div>
-        <div class="wallet-item-value" id="myAddBalance">--</div>
-        <div class="wallet-item-unit">Address Token</div>
-      </div>
-      <div class="wallet-item">
-        <div class="wallet-item-label">BNB 余额</div>
-        <div class="wallet-item-value" id="myBnbBalance">--</div>
-        <div class="wallet-item-unit">BNB</div>
-      </div>
-      <div class="wallet-item">
-        <div class="wallet-item-label">持有 NFT</div>
-        <div class="wallet-item-value" id="myNftCount">--</div>
-        <div class="wallet-item-unit">Premium Address</div>
-      </div>
-      <div class="wallet-item">
-        <div class="wallet-item-label">钱包地址</div>
-        <div style="font-family:var(--font-mono);font-size:13px;color:var(--neon-cyan);word-break:break-all;" id="myAddress">--</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="dash-grid" id="dashGrid">
-    <div class="dash-card">
-      <div class="dash-card-label">总供应量</div>
-      <div class="dash-card-value green" id="dTotalSupply">--</div>
-      <div class="dash-card-sub">ADD (流通)</div>
-    </div>
-    <div class="dash-card">
-      <div class="dash-card-label">已铸造</div>
-      <div class="dash-card-value cyan" id="dTotalMinted">--</div>
-      <div class="dash-card-sub">ADD</div>
-    </div>
-    <div class="dash-card">
-      <div class="dash-card-label">已销毁</div>
-      <div class="dash-card-value pink" id="dTotalBurned">--</div>
-      <div class="dash-card-sub">ADD</div>
-    </div>
-    <div class="dash-card">
-      <div class="dash-card-label">最大供应</div>
-      <div class="dash-card-value" id="dMaxSupply">--</div>
-      <div class="dash-card-sub">ADD</div>
-    </div>
-    <div class="dash-card">
-      <div class="dash-card-label">已挖掘靓号</div>
-      <div class="dash-card-value gold" id="dTotalMined">--</div>
-      <div class="dash-card-sub">个地址</div>
-    </div>
-    <div class="dash-card">
-      <div class="dash-card-label">当前奖励</div>
-      <div class="dash-card-value green" id="dCurrentReward">--</div>
-      <div class="dash-card-sub">ADD / 次</div>
-    </div>
-    <div class="dash-card">
-      <div class="dash-card-label">减半纪元</div>
-      <div class="dash-card-value cyan" id="dEra">--</div>
-      <div class="dash-card-sub">ERA</div>
-    </div>
-    <div class="dash-card">
-      <div class="dash-card-label">难度要求</div>
-      <div class="dash-card-value gold" id="dRequiredRun">--</div>
-      <div class="dash-card-sub">连续位数</div>
-    </div>
-    <div class="dash-card">
-      <div class="dash-card-label">购买价格</div>
-      <div class="dash-card-value pink" id="dPurchasePrice">--</div>
-      <div class="dash-card-sub">BNB</div>
-    </div>
-  </div>
-</section>
-
-<!-- Explorer -->
-<section class="section" id="explorer">
-  <div class="section-header">
-    <div class="section-tag">// 靓号探索</div>
-    <h2 class="section-title">已挖掘地址</h2>
-    <div class="section-line"></div>
-  </div>
-
-  <div class="tier-legend">
-    <div class="tier-legend-item">
-      <div class="tier-legend-dot" style="background:var(--neon-green);"></div>
-      Common (9-9连)
-    </div>
-    <div class="tier-legend-item">
-      <div class="tier-legend-dot" style="background:var(--neon-cyan);"></div>
-      Rare (10-11连)
-    </div>
-    <div class="tier-legend-item">
-      <div class="tier-legend-dot" style="background:var(--neon-pink);"></div>
-      Epic (12-13连)
-    </div>
-    <div class="tier-legend-item">
-      <div class="tier-legend-dot" style="background:var(--neon-gold);"></div>
-      Legendary (14+连)
-    </div>
-  </div>
-
-  <div class="explorer-wrap">
-    <table class="explorer-table">
-      <thead>
-        <tr>
-          <th>#ID</th>
-          <th>靓号地址</th>
-          <th>等级</th>
-          <th>连续</th>
-          <th>出现</th>
-          <th>状态</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody id="explorerBody">
-        <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">连接钱包后加载数据<span class="loading-dots"></span></td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="pagination" id="pagination" style="display:none;">
-    <button id="btnPrev" onclick="prevPage()">上一页</button>
-    <span class="page-info" id="pageInfo">1 / 1</span>
-    <button id="btnNext" onclick="nextPage()">下一页</button>
-  </div>
-</section>
-
-<!-- Contracts -->
-<section class="section" id="contracts">
-  <div class="section-header">
-    <div class="section-tag">// 合约信息</div>
-    <h2 class="section-title">智能合约</h2>
-    <div class="section-line"></div>
-  </div>
-
-  <div class="contract-grid">
-    <div class="contract-row">
-      <div>
-        <div class="contract-name">PremiumNumber (ADD)</div>
-        <div class="contract-addr">0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8</div>
-      </div>
-      <a class="contract-link" href="https://bscscan.com/address/0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8" target="_blank" rel="noopener">BscScan</a>
-    </div>
-    <div class="contract-row">
-      <div>
-        <div class="contract-name">AddressManager (NFT)</div>
-        <div class="contract-addr">0x78B11198268619728E4b53c642E8d68941004c11</div>
-      </div>
-      <a class="contract-link" href="https://bscscan.com/address/0x78B11198268619728E4b53c642E8d68941004c11" target="_blank" rel="noopener">BscScan</a>
-    </div>
-    <div class="contract-row">
-      <div>
-        <div class="contract-name">PremiumNumberQuery</div>
-        <div class="contract-addr">0x86719c4337b8BF7d54aa73df7e3d460efD076405</div>
-      </div>
-      <a class="contract-link" href="https://bscscan.com/address/0x86719c4337b8BF7d54aa73df7e3d460efD076405" target="_blank" rel="noopener">BscScan</a>
-    </div>
-    <div class="contract-row">
-      <div>
-        <div class="contract-name">PremiumRenderer</div>
-        <div class="contract-addr">0xa3cCd778AE6a168c12538dea746d0e6931aF8940</div>
-      </div>
-      <a class="contract-link" href="https://bscscan.com/address/0xa3cCd778AE6a168c12538dea746d0e6931aF8940" target="_blank" rel="noopener">BscScan</a>
-    </div>
-  </div>
-</section>
-
-<!-- Footer -->
-<footer class="footer">
-  <div class="footer-text">Premium Address // BSC Mainnet // 2024</div>
-  <div class="footer-links">
-    <a href="https://bscscan.com/address/0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8" target="_blank" rel="noopener">BscScan</a>
-  </div>
-</footer>
-
-<!-- Status Bar -->
-<div class="status-bar">
-  <div>
-    <span class="status-dot off" id="statusDot"></span>
-    <span id="statusText">未连接</span>
-  </div>
-  <div>BSC Mainnet // Chain ID 56</div>
 </div>
 
-<div style="height:28px;"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-// ─── CONTRACT CONFIG ───
-const CONTRACTS = {
-  premiumNumber: '0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8',
-  addressManager: '0x78B11198268619728E4b53c642E8d68941004c11',
-  query: '0x86719c4337b8BF7d54aa73df7e3d460efD076405',
-  renderer: '0xa3cCd778AE6a168c12538dea746d0e6931aF8940'
+/* === I18N === */
+const LANG = {
+  en: {
+    connect:'Connect', notConnected:'Not Connected', connected:'Connected',
+    marketplace:'Marketplace', marketDesc:'Browse premium addresses. Unclaimed ones can be purchased with BNB.',
+    allTiers:'All Tiers', allDigits:'All Digits', allPatterns:'All Patterns', allStatus:'All',
+    unclaimed:'Unclaimed', claimed:'Claimed', newest:'Newest', streak:'Streak', price:'Price', search:'Search',
+    leaderboard:'Leaderboard', wallet:'Wallet', address:'Address', balance:'Balance', nftCount:'NFT Count',
+    myAddresses:'My Addresses', noNfts:'No premium addresses owned yet',
+    transferADD:'Transfer ADD', recipient:'Recipient', amount:'Amount', transferBtn:'Transfer',
+    globalStats:'Global Stats', networkStatus:'Network Status', contractInfo:'Contract Info',
+    network:'Network', tabMarket:'Market', tabLeaderboard:'Rank', tabMyNfts:'My NFTs', tabInfo:'Info',
+    claim:'Claim', view:'View', owner:'Owner', digit:'Digit', pattern:'Pattern',
+    occurrences:'Occurrences', tier:'Tier', trailing:'Trailing', leading:'Leading',
+    toastConnect:'Wallet Connected', toastNoMM:'Please install MetaMask',
+    toastSwitchBSC:'Please switch to BSC Mainnet', toastConnFail:'Connection failed',
+    toastSending:'Sending transaction...', toastTxFail:'Transaction failed',
+    toastClaiming:'Buying...', toastClaimOk:'Purchased successfully!',
+    toastTransferring:'Transferring...', toastTransferOk:'Transferred!',
+    toastConnFirst:'Connect wallet first', toastEnterAmt:'Enter an amount',
+    toastEnterAddr:'Enter a valid address', toastFetchFail:'Failed to load data',
+    loading:'Loading...', totalSupply:'Total Supply', totalMinted:'Total Minted',
+    totalBurned:'Total Burned', totalMined:'Total Mined', currentReward:'Current Reward',
+    era:'Era', requiredRun:'Required Run', windowCount:'Window (10b)',
+    purchasePrice:'Purchase Price', maxSupply:'Max Supply', rank:'Rank',
+    id:'ID', walletId:'Wallet ID', synced:'Synced', blockNumber:'Block Number',
+    stats:'Statistics', all:'All', priceBNB:'Price (BNB)',
+    noLeaderboard:'No leaderboard data available',
+    searchByID:'Search by ID'
+  },
+  zh: {
+    connect:'连接钱包', notConnected:'未连接', connected:'已连接',
+    marketplace:'市场', marketDesc:'浏览靓号地址。未认领的可以用 BNB 购买。',
+    allTiers:'所有等级', allDigits:'所有数字', allPatterns:'所有模式', allStatus:'全部',
+    unclaimed:'未认领', claimed:'已认领', newest:'最新', streak:'连数', price:'价格', search:'搜索',
+    leaderboard:'排行榜', wallet:'钱包', address:'地址', balance:'余额', nftCount:'NFT 数量',
+    myAddresses:'我的地址', noNfts:'还没有拥有靓号地址',
+    transferADD:'转账 ADD', recipient:'接收地址', amount:'数量', transferBtn:'转账',
+    globalStats:'全局统计', networkStatus:'网络状态', contractInfo:'合约信息',
+    network:'网络', tabMarket:'市场', tabLeaderboard:'排行', tabMyNfts:'我的NFT', tabInfo:'信息',
+    claim:'购买', view:'查看', owner:'拥有者', digit:'数字', pattern:'模式',
+    occurrences:'出现次数', tier:'等级', trailing:'后缀', leading:'前缀',
+    toastConnect:'钱包已连接', toastNoMM:'请安装 MetaMask',
+    toastSwitchBSC:'请切换到 BSC 主网', toastConnFail:'连接失败',
+    toastSending:'发送交易中...', toastTxFail:'交易失败',
+    toastClaiming:'购买中...', toastClaimOk:'购买成功！',
+    toastTransferring:'转账中...', toastTransferOk:'转账成功！',
+    toastConnFirst:'请先连接钱包', toastEnterAmt:'请输入数量',
+    toastEnterAddr:'请输入有效地址', toastFetchFail:'加载数据失败',
+    loading:'加载中...', totalSupply:'总供应量', totalMinted:'总铸造量',
+    totalBurned:'总销毁量', totalMined:'总挖掘量', currentReward:'当前奖励',
+    era:'纪元', requiredRun:'最低连数', windowCount:'窗口(10块)',
+    purchasePrice:'购买价格', maxSupply:'最大供应量', rank:'排名',
+    id:'编号', walletId:'钱包ID', synced:'已同步', blockNumber:'区块高度',
+    stats:'统计', all:'全部', priceBNB:'价格 (BNB)',
+    noLeaderboard:'暂无排行榜数据',
+    searchByID:'按ID搜索'
+  }
 };
+let curLang = 'en';
+function t(key) { return LANG[curLang][key] || LANG.en[key] || key; }
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (LANG[curLang][k]) {
+      if (k === 'marketDesc') el.innerHTML = LANG[curLang][k];
+      else el.textContent = LANG[curLang][k];
+    }
+  });
+  document.getElementById('langBtn').textContent = curLang === 'en' ? 'CN' : 'EN';
+  if (userAddr) {
+    document.getElementById('connectBtn').textContent = userAddr.slice(0,6)+'...'+userAddr.slice(-4);
+  }
+}
+function toggleLang() {
+  curLang = curLang === 'en' ? 'zh' : 'en';
+  applyLang();
+  const active = document.querySelector('.panel.active');
+  if (active) {
+    const id = active.id;
+    if (id === 'panel-market') loadMarket();
+    else if (id === 'panel-leaderboard') loadLeaderboard();
+    else if (id === 'panel-mynfts') refreshMyNfts();
+    else if (id === 'panel-info') loadInfo();
+  }
+}
 
-const BSC_CHAIN_ID = '0x38'; // 56
-const BSC_RPC = 'https://bsc-dataseed.binance.org/';
-
-// ─── ABI ───
-const QUERY_ABI = [
-  'function getGlobalInfo() view returns (tuple(uint256 totalSupply, uint256 totalMinted, uint256 totalBurned, uint256 maxSupply, uint256 totalMined, uint256 totalRegistered, uint256 nextWalletId, uint256 runMin, uint256 runMax, uint256 currentReward, uint256 era, uint256 windowCount, uint256 requiredRun, address pnOwner, uint256 purchasePrice, uint256 priceMin, uint256 priceMax, uint256 priceTick, address amOwner, bytes32 walletBytecodeHash, address addressManager))',
-  'function getUserDashboard(address user) view returns (uint256 tokenBalance, uint256 bnbBalance)',
-  'function getByWalletIdRange(uint256 fromId, uint256 toId) view returns (tuple(uint256 walletId, uint256 tokenId, uint256 salt, address currentOwner, uint256 streak, uint256 occurrences, address walletAddr, address approved, bool purchasable, uint256 price)[])',
-  'function traitsRange(uint256 fromId, uint256 toId) view returns (tuple(uint256 tokenId, address wallet, address currentOwner, string pattern, uint8 digit, uint256 streak, uint256 leading, uint256 trailing, uint256 occurrences, string tier, uint256 rarityScore)[])'
-];
-
-const AM_ABI = [
-  'function claimById(uint256 walletId) payable',
-  'function purchasePrice() view returns (uint256)',
-  'function balanceOf(address) view returns (uint256)'
-];
+/* === CONTRACTS === */
+const PN_ADDR = '0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8';
+const AM_ADDR = '0x78B11198268619728E4b53c642E8d68941004c11';
+const PQ_ADDR = '0x86719c4337b8BF7d54aa73df7e3d460efD076405';
+const BSC_CHAIN = '0x38';
+const API_BASE = 'https://address.shibclaw.xyz';
 
 const PN_ABI = [
-  'function balanceOf(address) view returns (uint256)'
+  'function balanceOf(address) view returns (uint256)',
+  'function transfer(address,uint256) returns (bool)',
+  'function totalSupply() view returns (uint256)',
+  'function totalMinted() view returns (uint256)',
+  'function currentReward() view returns (uint256)',
+  'function era() view returns (uint256)',
+  'function requiredRun() view returns (uint256)',
+  'function windowCount() view returns (uint256)',
+  'function totalMined() view returns (uint256)',
+  'function MAX_SUPPLY() view returns (uint256)'
+];
+const AM_ABI = [
+  'function claim(uint256 salt) payable',
+  'function claimById(uint256 walletId) payable',
+  'function purchasePrice() view returns (uint256)',
+  'function currentPrice(uint256 salt) view returns (uint256)',
+  'function balanceOf(address) view returns (uint256)',
+  'function nextWalletId() view returns (uint256)',
+  'function getAddressInfo(uint256 salt) view returns (uint256 walletId, address wallet, address currentOwner, uint256 streak, uint256 occurrences)',
+  'function getAddressInfoById(uint256 walletId) view returns (uint256 salt, address wallet, address currentOwner, uint256 streak, uint256 occurrences)'
+];
+const PQ_ABI = [
+  'function getUserDashboard(address user) view returns (uint256 tokenBalance, uint256 bnbBalance)',
+  'function getByWalletIdRange(uint256 fromId, uint256 toId) view returns (tuple(uint256 walletId, uint256 tokenId, uint256 salt, address currentOwner, uint256 streak, uint256 occurrences, address walletAddr, address approved, bool purchasable, uint256 price)[])'
 ];
 
-// ─── STATE ───
-let provider = null;
-let signer = null;
-let userAddress = null;
-let queryContract = null;
-let amContract = null;
-let pnContract = null;
-let globalInfo = null;
+let provider, signer, userAddr;
+let pnContract, amContract, pqContract;
 
-// Pagination
-let currentPage = 1;
-const PAGE_SIZE = 10;
-let totalItems = 0;
-
-// ─── UTILS ───
-function formatTokenAmount(wei, decimals = 18) {
-  const val = Number(ethers.formatUnits(wei, decimals));
-  if (val >= 1e6) return (val / 1e6).toFixed(2) + 'M';
-  if (val >= 1e3) return (val / 1e3).toFixed(2) + 'K';
-  return val.toFixed(2);
+/* === TABS === */
+function switchTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'market') loadMarket();
+  else if (name === 'leaderboard') loadLeaderboard();
+  else if (name === 'mynfts') refreshMyNfts();
+  else if (name === 'info') loadInfo();
 }
 
-function formatBNB(wei) {
-  return Number(ethers.formatEther(wei)).toFixed(4);
+/* === TOAST === */
+function showToast(msg, dur) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), dur || 3000); }
+
+/* === WALLET === */
+async function connectWallet() {
+  if (!window.ethereum) { showToast(t('toastNoMM')); return; }
+  try {
+    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const cid = await window.ethereum.request({ method: 'eth_chainId' });
+    if (cid !== BSC_CHAIN) {
+      try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: BSC_CHAIN }] }); }
+      catch (e) { showToast(t('toastSwitchBSC')); return; }
+    }
+    provider = new ethers.BrowserProvider(window.ethereum);
+    signer = await provider.getSigner();
+    userAddr = await signer.getAddress();
+    pnContract = new ethers.Contract(PN_ADDR, PN_ABI, signer);
+    amContract = new ethers.Contract(AM_ADDR, AM_ABI, signer);
+    pqContract = new ethers.Contract(PQ_ADDR, PQ_ABI, signer);
+    document.getElementById('connectBtn').textContent = userAddr.slice(0, 6) + '...' + userAddr.slice(-4);
+    showToast(t('toastConnect'));
+    const active = document.querySelector('.panel.active');
+    if (active) {
+      if (active.id === 'panel-mynfts') refreshMyNfts();
+    }
+  } catch (e) { showToast(t('toastConnFail')); console.error(e); }
 }
 
-function shortAddr(addr) {
-  return addr.slice(0, 6) + '...' + addr.slice(-4);
+/* === TIER HELPERS === */
+function tierName(s) { if (s >= 14) return 'Legendary'; if (s >= 12) return 'Epic'; if (s >= 10) return 'Rare'; return 'Common'; }
+function tierBadge(s) { const tn = tierName(s); const cls = tn === 'Common' ? 'badge-tier-c' : tn === 'Rare' ? 'badge-tier-r' : tn === 'Epic' ? 'badge-tier-e' : 'badge-tier-l'; return '<span class="badge ' + cls + '">' + tn + '</span>'; }
+
+/* === DATA EXTRACTOR === */
+function extractItems(d) {
+  if (Array.isArray(d)) return d;
+  if (d && Array.isArray(d.items)) return d.items;
+  if (d && Array.isArray(d.data)) return d.data;
+  if (d && Array.isArray(d.list)) return d.list;
+  if (d && Array.isArray(d.records)) return d.records;
+  if (d && Array.isArray(d.result)) return d.result;
+  return [];
+}
+function extractTotal(d) {
+  if (!d || typeof d !== 'object') return 0;
+  return Number(d.total || d.totalCount || d.count || d.recordsTotal || d.totalRecords || 0);
+}
+function extractObj(d) {
+  if (!d || typeof d !== 'object') return {};
+  return d.data || d.info || d;
 }
 
-function showToast(msg, isError = false) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.className = 'toast show' + (isError ? ' error' : '');
-  setTimeout(() => toast.className = 'toast', 3000);
-}
+/* === MARKET === */
+let marketPage = 1;
+const PER_PAGE = 20;
 
-function getTierClass(streak) {
-  const s = Number(streak);
-  if (s >= 14) return 'legendary';
-  if (s >= 12) return 'epic';
-  if (s >= 10) return 'rare';
-  return 'common';
-}
-
-function getTierName(streak) {
-  const s = Number(streak);
-  if (s >= 14) return 'Legendary';
-  if (s >= 12) return 'Epic';
-  if (s >= 10) return 'Rare';
-  return 'Common';
-}
-
-// Highlight repeated digits in address
-function highlightAddress(addr, streak, trailing, leading) {
-  const hex = addr.slice(2).toLowerCase();
-  const s = Number(streak);
-  const tr = Number(trailing);
-  const ld = Number(leading);
-
-  let spans = '';
-  for (let i = 0; i < 40; i++) {
-    const isLeadingHi = ld >= s && i < ld;
-    const isTrailingHi = tr >= s && i >= 40 - tr;
-    const hi = isLeadingHi || isTrailingHi;
-    if (hi) {
-      spans += `<span class="hi">${hex[i]}</span>`;
-    } else {
-      spans += `<span class="dim">${hex[i]}</span>`;
+async function loadMarket() {
+  const listEl = document.getElementById('marketList');
+  const pagEl = document.getElementById('marketPagination');
+  try {
+    const tier = document.getElementById('fTier').value;
+    const digit = document.getElementById('fDigit').value;
+    const pattern = document.getElementById('fPattern').value;
+    const status = document.getElementById('fStatus').value;
+    const sort = document.getElementById('fSort').value;
+    const params = new URLSearchParams({ page: marketPage, limit: PER_PAGE, sort: sort });
+    if (tier) params.set('tier', tier);
+    if (digit) params.set('digit', digit);
+    if (pattern) params.set('pattern', pattern);
+    if (status) params.set('status', status);
+    const resp = await fetch(API_BASE + '/api/addresses?' + params.toString());
+    if (!resp.ok) throw new Error('fetch fail');
+    const data = await resp.json();
+    renderMarketList(extractItems(data), extractTotal(data));
+  } catch (e) {
+    try {
+      const total = await amContract.nextWalletId();
+      const fromId = Math.max(1, Number(total) - PER_PAGE * marketPage + 1);
+      const toId = Math.min(Number(total) - 1, fromId + PER_PAGE - 1);
+      if (fromId <= toId) {
+        const details = await pqContract.getByWalletIdRange(fromId, toId);
+        renderMarketList(details, Number(total) - 1);
+      } else {
+        listEl.innerHTML = '<div class="empty-state"><p>' + t('noNfts') + '</p></div>';
+      }
+    } catch (e2) {
+      listEl.innerHTML = '<div class="empty-state"><p>' + t('toastFetchFail') + '</p></div>';
     }
   }
-  return `<span class="dim">0x</span>${spans}`;
 }
 
-// ─── WALLET CONNECTION ───
-async function connectWallet() {
-  if (userAddress) {
-    // Disconnect
-    userAddress = null;
-    signer = null;
-    document.getElementById('btnConnect').textContent = '连接钱包';
-    document.getElementById('btnConnect').classList.remove('connected');
-    document.getElementById('walletPanel').classList.remove('visible');
-    document.getElementById('statusDot').classList.add('off');
-    document.getElementById('statusText').textContent = '未连接';
+function renderMarketList(items, total) {
+  const listEl = document.getElementById('marketList');
+  const pagEl = document.getElementById('marketPagination');
+  if (!items || items.length === 0) {
+    listEl.innerHTML = '<div class="empty-state"><p>' + t('noNfts') + '</p></div>';
+    pagEl.innerHTML = '';
     return;
   }
+  let html = '';
+  for (const item of items) {
+    const walletAddr = item.walletAddr || item.wallet || item.address || item.walletAddress || '';
+    const walletId = item.walletId || item.tokenId || item.id || '?';
+    const streak = Number(item.streak || 0);
+    const occ = Number(item.occurrences || item.occurrence || 0);
+    const ownerAddr = item.currentOwner || item.owner || ethers.ZeroAddress;
+    const purchasable = item.purchasable !== undefined ? item.purchasable : (item.currentOwner === null || item.currentOwner === undefined || item.owner === null || ownerAddr === ethers.ZeroAddress);
+    const priceWei = item.price || item.purchasePrice || 0;
+    const priceBNB = ethers.formatEther(priceWei);
+    const addrShort = walletAddr ? walletAddr.slice(0, 10) + '...' + walletAddr.slice(-6) : '--';
+    const patternType = item.pattern || (item.leading > item.trailing ? 'Leading' : 'Trailing');
+    const digitVal = item.digit !== undefined && item.digit !== null ? item.digit : '?';
+    html += '<div class="addr-card">' +
+      '<div class="addr-id">#' + walletId + (purchasable ? ' <span class="badge badge-green">' + t('unclaimed') + '</span>' : ' <span class="badge badge-blue">' + t('claimed') + '</span>') + '</div>' +
+      '<div class="addr-text">' + addrShort + '</div>' +
+      '<div class="addr-meta">' +
+      tierBadge(streak) +
+      '<span>' + t('digit') + ': ' + digitVal + '</span>' +
+      '<span>' + t('streak') + ': ' + streak + '</span>' +
+      '<span>' + t('pattern') + ': ' + patternType + '</span>' +
+      '<span>' + t('occurrences') + ': ' + occ + '</span>' +
+      '</div>' +
+      '<div class="addr-actions">' +
+      (purchasable
+        ? '<button class="btn-primary" style="font-size:.82rem;padding:10px" onclick="buyAddress(' + (item.salt || 0) + ')">' + t('claim') + ' ' + priceBNB + ' BNB</button>'
+        : '<button class="btn-secondary" style="font-size:.82rem;padding:10px" disabled>' + t('claimed') + '</button>'
+      ) +
+      '<button class="btn-secondary" style="font-size:.82rem;padding:10px;flex:none;width:auto;padding:10px 12px" onclick="window.open(\'https://bscscan.com/address/' + walletAddr + '\',\'_blank\')">BscScan</button>' +
+      '</div></div>';
+  }
+  listEl.innerHTML = html;
+  const pages = Math.ceil(total / PER_PAGE) || 1;
+  pagEl.innerHTML = '<button onclick="marketPage=Math.max(1,marketPage-1);loadMarket()" ' + (marketPage <= 1 ? 'disabled' : '') + '>‹</button>' +
+    '<span class="page-info">' + marketPage + ' / ' + pages + '</span>' +
+    '<button onclick="marketPage=Math.min(' + pages + ',marketPage+1);loadMarket()" ' + (marketPage >= pages ? 'disabled' : '') + '>›</button>';
+}
 
-  if (!window.ethereum) {
-    showToast('请安装 MetaMask 钱包', true);
-    return;
+async function searchById() {
+  const id = document.getElementById('searchId').value.trim();
+  if (!id) { loadMarket(); return; }
+  try {
+    const resp = await fetch(API_BASE + '/api/addresses/' + id);
+    if (resp.ok) {
+      const raw = await resp.json();
+      const item = extractItems(raw).length ? extractItems(raw)[0] : (raw.data ? raw.data : raw);
+      document.getElementById('marketList').innerHTML = '';
+      renderMarketList([item], 1);
+      document.getElementById('marketPagination').innerHTML = '';
+    } else {
+      showToast(t('toastFetchFail'));
+    }
+  } catch (e) {
+    showToast(t('toastFetchFail'));
+  }
+}
+
+async function buyAddress(salt) {
+  if (!signer) { showToast(t('toastConnFirst')); return; }
+  try {
+    const price = await amContract.currentPrice(salt);
+    showToast(t('toastClaiming'));
+    const tx = await amContract.claim(salt, { value: price });
+    await tx.wait();
+    showToast(t('toastClaimOk'));
+    loadMarket();
+  } catch (e) { showToast(e.reason || t('toastTxFail')); }
+}
+
+/* === LEADERBOARD === */
+async function loadLeaderboard() {
+  const el = document.getElementById('leaderboardContent');
+  try {
+    const resp = await fetch(API_BASE + '/api/leaderboard');
+    if (!resp.ok) throw new Error('fetch fail');
+    const data = await resp.json();
+    const items = extractItems(data);
+    if (!items || items.length === 0) {
+      el.innerHTML = '<div class="empty-state"><p>' + t('noLeaderboard') + '</p></div>';
+      return;
+    }
+    let html = '';
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const rank = i + 1;
+      const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+      const addr = item.address || item.miner || item.wallet || item.walletAddr || item.user || '';
+      const count = item.count || item.total || item.score || item.nftCount || 0;
+      const detail = item.detail || item.label || (item.streak ? t('streak') + ': ' + item.streak : '') || (item.occurrences ? t('occurrences') + ': ' + item.occurrences : '');
+      const value = item.value || item.reward || item.score || item.points || count;
+      html += '<div class="leaderboard-item">' +
+        '<div class="rank ' + rankClass + '">' + rank + '</div>' +
+        '<div class="lb-info">' +
+        '<div class="lb-name">' + (addr ? addr.slice(0, 8) + '...' + addr.slice(-6) : '#' + (item.walletId || item.id || i)) + '</div>' +
+        (detail ? '<div class="lb-detail">' + detail + '</div>' : '') +
+        '</div>' +
+        '<div class="lb-value">' + value + '</div>' +
+        '</div>';
+    }
+    el.innerHTML = '<div class="fade-in">' + html + '</div>';
+  } catch (e) {
+    el.innerHTML = '<div class="empty-state"><p>' + t('toastFetchFail') + '</p></div>';
+  }
+}
+
+/* === MY NFTS === */
+async function refreshMyNfts() {
+  if (!userAddr) { document.getElementById('walletAddr').textContent = t('notConnected'); return; }
+  try {
+    document.getElementById('walletAddr').textContent = userAddr.slice(0, 8) + '...' + userAddr.slice(-6);
+    const [tokenBal, bnbBal] = await pqContract.getUserDashboard(userAddr);
+    document.getElementById('addBalance').textContent = parseFloat(ethers.formatEther(tokenBal)).toLocaleString(undefined, { maximumFractionDigits: 4 }) + ' ADD';
+    document.getElementById('bnbBalance').textContent = parseFloat(ethers.formatEther(bnbBal)).toLocaleString(undefined, { maximumFractionDigits: 6 }) + ' BNB';
+    const nftCount = await amContract.balanceOf(userAddr);
+    document.getElementById('nftCount').textContent = nftCount.toString();
+    const myList = document.getElementById('myAddressesList');
+    if (Number(nftCount) === 0) {
+      myList.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><p>' + t('noNfts') + '</p></div>';
+    } else {
+      try {
+        const resp = await fetch(API_BASE + '/api/user/' + userAddr);
+        if (resp.ok) {
+          const data = await resp.json();
+          const items = extractItems(data);
+          if (items.length === 0) { myList.innerHTML = '<div class="empty-state"><p>' + t('noNfts') + '</p></div>'; return; }
+          let html = '';
+          for (const item of items) {
+            const walletAddr = item.walletAddr || item.wallet || '';
+            const streak2 = Number(item.streak || 0);
+            const addrShort2 = walletAddr ? walletAddr.slice(0, 10) + '...' + walletAddr.slice(-6) : '--';
+            html += '<div class="addr-card">' +
+              '<div class="addr-id">#' + (item.walletId || item.tokenId || '?') + ' <span class="badge badge-blue">' + t('claimed') + '</span></div>' +
+              '<div class="addr-text">' + addrShort2 + '</div>' +
+              '<div class="addr-meta">' + tierBadge(streak2) + '<span>' + t('streak') + ': ' + streak2 + '</span></div>' +
+              '<div class="addr-actions">' +
+              '<button class="btn-secondary" style="font-size:.82rem;padding:10px" onclick="window.open(\'https://bscscan.com/address/' + walletAddr + '\',\'_blank\')">BscScan</button>' +
+              '</div></div>';
+          }
+          myList.innerHTML = html;
+        } else { myList.innerHTML = '<div class="empty-state"><p>' + t('toastFetchFail') + '</p></div>'; }
+      } catch { myList.innerHTML = '<div class="empty-state"><p>' + t('toastFetchFail') + '</p></div>'; }
+    }
+  } catch (e) { console.error('MyNFTs error:', e); }
+}
+
+async function transferADD() {
+  if (!signer) { showToast(t('toastConnFirst')); return; }
+  const to = document.getElementById('transferToInput').value.trim();
+  const amt = document.getElementById('transferAmtInput').value.trim();
+  if (!ethers.isAddress(to)) { showToast(t('toastEnterAddr')); return; }
+  if (!amt || Number(amt) <= 0) { showToast(t('toastEnterAmt')); return; }
+  try {
+    showToast(t('toastTransferring'));
+    const tx = await pnContract.transfer(to, ethers.parseEther(amt));
+    await tx.wait();
+    showToast(t('toastTransferOk'));
+    document.getElementById('transferToInput').value = '';
+    document.getElementById('transferAmtInput').value = '';
+    refreshMyNfts();
+  } catch (e) { showToast(e.reason || t('toastTxFail')); }
+}
+
+/* === INFO === */
+async function loadInfo() {
+  try {
+    const resp = await fetch(API_BASE + '/api/global');
+    if (resp.ok) {
+      const g = await resp.json();
+      const info = extractObj(g);
+      const fmt = v => parseFloat(ethers.formatEther(v || 0)).toLocaleString(undefined, { maximumFractionDigits: 2 });
+      document.getElementById('globalStatsContent').innerHTML = '<div class="stat-grid-4 fade-in">' +
+        '<div class="stat-card"><div class="sc-value">' + fmt(info.maxSupply || info.MAX_SUPPLY || 0) + '</div><div class="sc-label">' + t('maxSupply') + '</div></div>' +
+        '<div class="stat-card"><div class="sc-value">' + (info.totalMined || info.totalMined_ || 0) + '</div><div class="sc-label">' + t('totalMined') + '</div></div>' +
+        '<div class="stat-card"><div class="sc-value">' + fmt(info.totalMinted || 0) + '</div><div class="sc-label">' + t('totalMinted') + '</div></div>' +
+        '<div class="stat-card"><div class="sc-value">' + fmt(info.totalSupply || info.totalSupply_ || 0) + '</div><div class="sc-label">' + t('totalSupply') + '</div></div>' +
+        '<div class="stat-card"><div class="sc-value">' + fmt(info.currentReward || info.currentReward_ || 0) + ' ADD</div><div class="sc-label">' + t('currentReward') + '</div></div>' +
+        '<div class="stat-card"><div class="sc-value">' + (info.era || info.era_ || 0) + '</div><div class="sc-label">' + t('era') + '</div></div>' +
+        '</div>';
+    } else { throw new Error(); }
+  } catch {
+    try {
+      const [supply, minted, reward, era, mined, maxSup] = await Promise.all([
+        pnContract.totalSupply().catch(() => 0n),
+        pnContract.totalMinted().catch(() => 0n),
+        pnContract.currentReward().catch(() => 0n),
+        pnContract.era().catch(() => 0n),
+        pnContract.totalMined().catch(() => 0n),
+        pnContract.MAX_SUPPLY().catch(() => 0n)
+      ]);
+      const fmt = v => parseFloat(ethers.formatEther(v || 0)).toLocaleString(undefined, { maximumFractionDigits: 2 });
+      document.getElementById('globalStatsContent').innerHTML = '<div class="stat-grid-4 fade-in">' +
+        '<div class="stat-card"><div class="sc-value">' + fmt(maxSup) + '</div><div class="sc-label">' + t('maxSupply') + '</div></div>' +
+        '<div class="stat-card"><div class="sc-value">' + (mined || 0) + '</div><div class="sc-label">' + t('totalMined') + '</div></div>' +
+        '<div class="stat-card"><div class="sc-value">' + fmt(minted) + '</div><div class="sc-label">' + t('totalMinted') + '</div></div>' +
+        '<div class="stat-card"><div class="sc-value">' + fmt(supply) + '</div><div class="sc-label">' + t('totalSupply') + '</div></div>' +
+        '<div class="stat-card"><div class="sc-value">' + fmt(reward) + ' ADD</div><div class="sc-label">' + t('currentReward') + '</div></div>' +
+        '<div class="stat-card"><div class="sc-value">' + (era || 0) + '</div><div class="sc-label">' + t('era') + '</div></div>' +
+        '</div>';
+    } catch {
+      document.getElementById('globalStatsContent').innerHTML = '<div class="empty-state"><p>' + t('toastFetchFail') + '</p></div>';
+    }
   }
 
   try {
-    // Request accounts
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-    // Check chain
-    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-    if (chainId !== BSC_CHAIN_ID) {
-      try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: BSC_CHAIN_ID }]
-        });
-      } catch (switchError) {
-        if (switchError.code === 4902) {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: BSC_CHAIN_ID,
-              chainName: 'BNB Smart Chain',
-              nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-              rpcUrls: [BSC_RPC],
-              blockExplorerUrls: ['https://bscscan.com']
-            }]
-          });
-        } else {
-          throw switchError;
-        }
-      }
-    }
-
-    provider = new ethers.BrowserProvider(window.ethereum);
-    signer = await provider.getSigner();
-    userAddress = await signer.getAddress();
-
-    // Setup contracts
-    queryContract = new ethers.Contract(CONTRACTS.query, QUERY_ABI, provider);
-    amContract = new ethers.Contract(CONTRACTS.addressManager, AM_ABI, signer);
-    pnContract = new ethers.Contract(CONTRACTS.premiumNumber, PN_ABI, provider);
-
-    // Update UI
-    document.getElementById('btnConnect').textContent = shortAddr(userAddress);
-    document.getElementById('btnConnect').classList.add('connected');
-    document.getElementById('statusDot').classList.remove('off');
-    document.getElementById('statusText').textContent = '已连接 ' + shortAddr(userAddress);
-    document.getElementById('myAddress').textContent = userAddress;
-
-    showToast('钱包已连接');
-
-    // Load data
-    await Promise.all([loadGlobalInfo(), loadUserInfo(), loadExplorer()]);
-
-  } catch (err) {
-    console.error(err);
-    showToast('连接失败: ' + (err.message || err), true);
+    const resp2 = await fetch(API_BASE + '/api/status');
+    if (resp2.ok) {
+      const s = await resp2.json();
+      const st = extractObj(s);
+      document.getElementById('networkStatus').innerHTML = '<ul class="info-list fade-in">' +
+        '<li><span class="label">' + t('status') + '</span><span class="value"><span class="badge badge-green">' + (st.synced !== false ? t('synced') : st.message || 'OK') + '</span></span></li>' +
+        '<li><span class="label">' + t('blockNumber') + '</span><span class="value mono">' + (st.blockNumber || st.block || st.latestBlock || '--') + '</span></li>' +
+        (st.chainId ? '<li><span class="label">Chain ID</span><span class="value">' + st.chainId + '</span></li>' : '') +
+        (st.updatedAt || st.lastUpdate || st.timestamp ? '<li><span class="label">Updated</span><span class="value">' + (st.updatedAt || st.lastUpdate || st.timestamp) + '</span></li>' : '') +
+        '</ul>';
+    } else { throw new Error(); }
+  } catch {
+    document.getElementById('networkStatus').innerHTML = '<ul class="info-list fade-in"><li><span class="label">' + t('network') + '</span><span class="value">BSC Mainnet</span></li><li><span class="label">Chain ID</span><span class="value">56</span></li></ul>';
   }
 }
 
-// Listen for account/chain changes
+/* === EVENTS === */
 if (window.ethereum) {
-  window.ethereum.on('accountsChanged', (accounts) => {
-    if (accounts.length === 0) {
-      location.reload();
-    } else {
-      userAddress = null;
-      connectWallet();
-    }
-  });
+  window.ethereum.on('accountsChanged', () => location.reload());
   window.ethereum.on('chainChanged', () => location.reload());
 }
 
-// ─── LOAD GLOBAL INFO ───
-async function loadGlobalInfo() {
-  try {
-    globalInfo = await queryContract.getGlobalInfo();
-
-    document.getElementById('dTotalSupply').textContent = formatTokenAmount(globalInfo.totalSupply);
-    document.getElementById('dTotalMinted').textContent = formatTokenAmount(globalInfo.totalMinted);
-    document.getElementById('dTotalBurned').textContent = formatTokenAmount(globalInfo.totalBurned);
-    document.getElementById('dMaxSupply').textContent = formatTokenAmount(globalInfo.maxSupply);
-    document.getElementById('dTotalMined').textContent = Number(globalInfo.totalMined).toLocaleString();
-    document.getElementById('dCurrentReward').textContent = formatTokenAmount(globalInfo.currentReward);
-    document.getElementById('dEra').textContent = Number(globalInfo.era).toString();
-    document.getElementById('dRequiredRun').textContent = Number(globalInfo.requiredRun).toString();
-    document.getElementById('dPurchasePrice').textContent = formatBNB(globalInfo.purchasePrice);
-
-    totalItems = Number(globalInfo.totalRegistered);
-
-  } catch (err) {
-    console.error('Failed to load global info:', err);
-    showToast('加载全局数据失败', true);
-  }
-}
-
-// ─── LOAD USER INFO ───
-async function loadUserInfo() {
-  if (!userAddress) return;
-  try {
-    const [dashboard, nftBalance] = await Promise.all([
-      queryContract.getUserDashboard(userAddress),
-      amContract.balanceOf(userAddress)
-    ]);
-
-    document.getElementById('myAddBalance').textContent = formatTokenAmount(dashboard.tokenBalance);
-    document.getElementById('myBnbBalance').textContent = formatBNB(dashboard.bnbBalance);
-    document.getElementById('myNftCount').textContent = Number(nftBalance).toString();
-
-    document.getElementById('walletPanel').classList.add('visible');
-  } catch (err) {
-    console.error('Failed to load user info:', err);
-  }
-}
-
-// ─── LOAD EXPLORER ───
-async function loadExplorer() {
-  if (!queryContract || totalItems === 0) {
-    document.getElementById('explorerBody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">暂无数据</td></tr>';
-    return;
-  }
-
-  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
-  if (currentPage > totalPages) currentPage = totalPages;
-  if (currentPage < 1) currentPage = 1;
-
-  // Load from newest to oldest
-  const endId = totalItems - (currentPage - 1) * PAGE_SIZE;
-  const startId = Math.max(1, endId - PAGE_SIZE + 1);
-
-  try {
-    document.getElementById('explorerBody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">加载中<span class="loading-dots"></span></td></tr>';
-
-    const [details, traits] = await Promise.all([
-      queryContract.getByWalletIdRange(startId, endId),
-      queryContract.traitsRange(startId, endId)
-    ]);
-
-    let html = '';
-    // Reverse to show newest first
-    for (let i = details.length - 1; i >= 0; i--) {
-      const d = details[i];
-      const t = traits[i];
-      const tier = getTierClass(t.streak);
-      const tierName = t.tier || getTierName(t.streak);
-      const purchasable = d.purchasable;
-      const walletId = Number(d.walletId);
-
-      const addrHtml = highlightAddress(
-        d.walletAddr,
-        t.streak,
-        t.trailing,
-        t.leading
-      );
-
-      let statusHtml, actionHtml;
-      if (purchasable) {
-        statusHtml = `<span style="color:var(--neon-green);">可购买</span>`;
-        actionHtml = `<button class="btn-claim" onclick="claimNFT(${walletId})">购买 ${formatBNB(d.price)} BNB</button>`;
-      } else {
-        const ownerStr = d.currentOwner === userAddress ? '我的' : shortAddr(d.currentOwner);
-        statusHtml = `<span class="owner-addr">已拥有: ${ownerStr}</span>`;
-        actionHtml = `<button class="btn-claim sold" disabled>已售出</button>`;
-      }
-
-      html += `<tr>
-        <td style="color:var(--text-dim);">#${walletId}</td>
-        <td class="addr-cell">${addrHtml}</td>
-        <td><span class="tier-badge tier-${tier}">${tierName}</span></td>
-        <td style="color:var(--neon-cyan);">${Number(t.streak)}</td>
-        <td style="color:var(--text-dim);">x${Number(t.occurrences)}</td>
-        <td>${statusHtml}</td>
-        <td>${actionHtml}</td>
-      </tr>`;
-    }
-
-    document.getElementById('explorerBody').innerHTML = html || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">暂无数据</td></tr>';
-
-    // Pagination
-    const pagination = document.getElementById('pagination');
-    if (totalItems > PAGE_SIZE) {
-      pagination.style.display = 'flex';
-      document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
-      document.getElementById('btnPrev').disabled = currentPage <= 1;
-      document.getElementById('btnNext').disabled = currentPage >= totalPages;
-    }
-
-  } catch (err) {
-    console.error('Failed to load explorer:', err);
-    document.getElementById('explorerBody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--neon-red);padding:40px;">加载失败，请重试</td></tr>';
-  }
-}
-
-function prevPage() {
-  if (currentPage > 1) {
-    currentPage--;
-    loadExplorer();
-  }
-}
-
-function nextPage() {
-  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
-  if (currentPage < totalPages) {
-    currentPage++;
-    loadExplorer();
-  }
-}
-
-// ─── CLAIM NFT ───
-async function claimNFT(walletId) {
-  if (!signer) {
-    showToast('请先连接钱包', true);
-    return;
-  }
-
-  try {
-    const price = await amContract.purchasePrice();
-    showToast('确认交易中...');
-
-    const tx = await amContract.claimById(walletId, { value: price });
-    showToast('交易已提交，等待确认...');
-
-    await tx.wait();
-    showToast('购买成功!');
-
-    // Reload data
-    await Promise.all([loadGlobalInfo(), loadUserInfo(), loadExplorer()]);
-
-  } catch (err) {
-    console.error('Claim failed:', err);
-    if (err.code === 'ACTION_REJECTED' || err.code === 4001) {
-      showToast('交易已取消', true);
-    } else {
-      showToast('购买失败: ' + (err.reason || err.message || '未知错误'), true);
-    }
-  }
-}
-
-// ─── AUTO-CONNECT on load if already authorized ───
-window.addEventListener('DOMContentLoaded', async () => {
-  if (window.ethereum) {
-    try {
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-      if (accounts.length > 0) {
-        connectWallet();
-      } else {
-        // Still init read-only provider for public data
-        initReadOnly();
-      }
-    } catch (e) {
-      initReadOnly();
-    }
-  } else {
-    initReadOnly();
-  }
-});
-
-async function initReadOnly() {
-  try {
-    provider = new ethers.JsonRpcProvider(BSC_RPC);
-    queryContract = new ethers.Contract(CONTRACTS.query, QUERY_ABI, provider);
-    amContract = new ethers.Contract(CONTRACTS.addressManager, AM_ABI, provider);
-    pnContract = new ethers.Contract(CONTRACTS.premiumNumber, PN_ABI, provider);
-    await loadGlobalInfo();
-    await loadExplorer();
-  } catch (e) {
-    console.error('Read-only init failed:', e);
-  }
-}
+// Auto-load initial tab
+setTimeout(() => { loadMarket(); loadLeaderboard(); loadInfo(); }, 500);
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
 </body>
 </html>
