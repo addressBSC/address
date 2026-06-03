@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>PADD - Premium Address</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0e17'/%3E%3Ctext x='16' y='22' font-size='16' font-weight='800' fill='%23f59e0b' text-anchor='middle' font-family='monospace'%3EP%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/addressBSC/address/refs/heads/main/owner/padd.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0a0e17;--bg2:#111827;--bg3:#1a2235;--bg4:#232d42;--accent:#f59e0b;--accent2:#d97706;--accent-glow:rgba(245,158,11,.15);--green:#10b981;--red:#ef4444;--blue:#3b82f6;--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;--border:#1e293b;--radius:16px;--radius-sm:10px}
@@ -16,7 +17,7 @@ button{cursor:pointer;border:none;font-family:inherit}
 .tab-content{flex:1;overflow-y:auto;padding:16px 16px 100px}
 .header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg2);gap:8px}
 .header-logo{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.header-logo .logo-box{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;color:#000}
+.header-logo .logo-box{width:34px;height:34px;border-radius:8px;object-fit:cover}
 .header-logo span{font-size:1.1rem;font-weight:800;letter-spacing:.5px}
 .header-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .lang-btn{background:var(--bg3);color:var(--text2);font-weight:700;padding:6px 12px;border-radius:8px;font-size:.75rem;border:1px solid var(--border);transition:all .15s}
@@ -53,7 +54,7 @@ select option{background:var(--bg2);color:var(--text)}
 .info-list .label{color:var(--text2);font-weight:600}
 .info-list .value{font-weight:700;text-align:right;word-break:break-all;max-width:55%}
 .info-list .value.mono{font-family:'SF Mono',Monaco,'Cascadia Code',monospace;font-size:.75rem}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
 .badge-green{background:rgba(16,185,129,.12);color:var(--green)}
 .badge-yellow{background:var(--accent-glow);color:var(--accent)}
 .badge-red{background:rgba(239,68,68,.12);color:var(--red)}
@@ -62,42 +63,61 @@ select option{background:var(--bg2);color:var(--text)}
 .badge-tier-r{background:rgba(0,229,255,.08);color:#00e5ff}
 .badge-tier-e{background:rgba(255,43,209,.08);color:#ff2bd1}
 .badge-tier-l{background:rgba(255,176,0,.08);color:#ffb000}
-.addr-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px}
-.addr-card .addr-id{font-size:.7rem;color:var(--text3);font-weight:600;margin-bottom:4px}
-.addr-card .addr-text{font-family:'SF Mono',Monaco,'Cascadia Code',monospace;font-size:.82rem;font-weight:700;word-break:break-all;margin-bottom:6px;color:var(--accent)}
+/* ADDRESS CARD */
+.addr-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;transition:border-color .2s}
+.addr-card .addr-id{font-size:.7rem;color:var(--text3);font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.addr-card .addr-display{font-family:'SF Mono',Monaco,'Cascadia Code',monospace;font-size:.82rem;font-weight:600;word-break:break-all;margin-bottom:6px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.addr-card .addr-display:hover{opacity:.8}
+.addr-card .addr-display .copy-icon{width:14px;height:14px;flex-shrink:0;opacity:.4;transition:opacity .2s}
+.addr-card .addr-display:hover .copy-icon{opacity:1}
+.hl-digit{color:var(--accent);font-weight:800}
 .addr-card .addr-meta{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:.72rem;color:var(--text2);margin-bottom:8px}
 .addr-card .addr-meta span{background:var(--bg4);padding:2px 7px;border-radius:4px}
 .addr-card .addr-actions{display:flex;gap:8px}
 .addr-card .addr-actions button{flex:1;padding:10px;border-radius:var(--radius-sm);font-size:.78rem;font-weight:700}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:12px 24px;border-radius:var(--radius-sm);font-weight:700;font-size:.85rem;z-index:1000;opacity:0;transition:opacity .3s;pointer-events:none}
-.toast.show{opacity:1}
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:12px 24px;border-radius:var(--radius-sm);font-weight:700;font-size:.85rem;z-index:1000;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;display:flex;align-items:center;gap:8px;min-width:200px;justify-content:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:var(--green);background:rgba(16,185,129,.08)}
+.toast.error{border-color:var(--red);background:rgba(239,68,68,.08)}
+.toast.info{border-color:var(--blue);background:rgba(59,130,246,.08)}
+.toast .toast-icon{width:18px;height:18px;flex-shrink:0}
+/* SKELETON */
+.skeleton{padding:14px;background:var(--bg3);border-radius:var(--radius-sm);margin-bottom:10px;border:1px solid var(--border)}
+.skeleton .sk-line{height:14px;border-radius:4px;background:linear-gradient(90deg,var(--bg4) 25%,var(--bg3) 50%,var(--bg4) 75%);background-size:200% 100%;animation:skAnim 1.5s infinite;margin-bottom:8px}
+.skeleton .sk-line:last-child{margin-bottom:0}
+.skeleton .sk-line.w50{width:50%}.skeleton .sk-line.w30{width:30%}.skeleton .sk-line.w70{width:70%}
+@keyframes skAnim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* EMPTY STATE */
 .empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
 .empty-state svg{width:44px;height:44px;margin-bottom:10px;opacity:.4}
 .empty-state p{font-size:.85rem;font-weight:600}
-.flex-row{display:flex;gap:8px;margin-bottom:12px}
-.flex-row>*{flex:1}
-.filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-.filter-bar select,.filter-bar input{flex:1;min-width:80px;padding:9px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.75rem;font-weight:600;outline:none}
+/* FILTERS */
+.filter-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.filter-bar select,.filter-bar input{flex:1 1 80px;padding:9px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.72rem;font-weight:600;outline:none;min-width:0;width:0}
 .filter-bar select:focus,.filter-bar input:focus{border-color:var(--accent)}
+/* PAGINATION */
 .pagination{display:flex;gap:8px;justify-content:center;align-items:center;padding:10px 0}
 .pagination button{background:var(--bg3);color:var(--text2);padding:7px 12px;border-radius:8px;font-size:.75rem;font-weight:700;border:1px solid var(--border);transition:all .15s}
 .pagination button:disabled{opacity:.3;cursor:default}
 .pagination button:hover:not(:disabled){color:var(--accent);border-color:var(--accent)}
-.pagination .page-info{font-size:.75rem;color:var(--text3);font-weight:600}
-.leaderboard-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
-.leaderboard-item:last-child{border-bottom:none}
-.leaderboard-item .rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:900;background:var(--bg4);color:var(--text3);flex-shrink:0}
-.leaderboard-item .rank.gold{background:rgba(245,158,11,.2);color:var(--accent)}
-.leaderboard-item .rank.silver{background:rgba(148,163,184,.2);color:var(--text2)}
-.leaderboard-item .rank.bronze{background:rgba(180,83,9,.2);color:#b45309}
-.leaderboard-item .lb-info{flex:1}
-.leaderboard-item .lb-info .lb-name{font-size:.85rem;font-weight:700}
-.leaderboard-item .lb-info .lb-detail{font-size:.72rem;color:var(--text3);margin-top:2px}
-.leaderboard-item .lb-value{font-size:.9rem;font-weight:800;color:var(--accent)}
+.pagination .page-info{font-size:.72rem;color:var(--text3);font-weight:600}
+/* LEADERBOARD */
+.lb-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.lb-item:last-child{border-bottom:none}
+.lb-item .rank-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:900;background:var(--bg4);color:var(--text3);flex-shrink:0}
+.lb-item .rank-num.gold{background:rgba(245,158,11,.2);color:var(--accent)}
+.lb-item .rank-num.silver{background:rgba(148,163,184,.2);color:var(--text2)}
+.lb-item .rank-num.bronze{background:rgba(180,83,9,.2);color:#b45309}
+.lb-item .lb-info{flex:1;min-width:0}
+.lb-item .lb-info .lb-name{font-size:.82rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-item .lb-info .lb-detail{font-size:.7rem;color:var(--text3);margin-top:2px}
+.lb-item .lb-val{font-size:.85rem;font-weight:800;color:var(--accent);white-space:nowrap}
+/* OVERVIEW */
 .stat-grid-4{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .stat-card{background:var(--bg3);border-radius:var(--radius-sm);padding:14px;text-align:center}
-.stat-card .sc-value{font-size:1.3rem;font-weight:800;color:var(--accent)}
-.stat-card .sc-label{font-size:.68rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.stat-card .sc-val{font-size:1.2rem;font-weight:800;color:var(--accent)}
+.stat-card .sc-label{font-size:.65rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
 .divider{height:1px;background:var(--border);margin:16px 0}
 .panel{display:none}.panel.active{display:block}
 @media(min-width:600px){.app{border-left:1px solid var(--border);border-right:1px solid var(--border)}html{background:#05080f}}
@@ -109,7 +129,7 @@ select option{background:var(--bg2);color:var(--text)}
 <div class="app">
   <div class="header">
     <div class="header-logo">
-      <div class="logo-box">P</div>
+      <img class="logo-box" src="https://raw.githubusercontent.com/addressBSC/address/refs/heads/main/owner/padd.png" alt="PADD">
       <span>PADD</span>
     </div>
     <div class="header-right">
@@ -123,31 +143,33 @@ select option{background:var(--bg2);color:var(--text)}
     <div class="panel active" id="panel-market">
       <div class="card fade-in">
         <div class="card-title"><span class="dot"></span><span data-i18n="marketplace">Marketplace</span></div>
-        <p style="font-size:.8rem;color:var(--text2);margin-bottom:14px;line-height:1.5" data-i18n="marketDesc">Browse premium addresses. Unclaimed ones can be purchased with BNB.</p>
-
+        <p style="font-size:.78rem;color:var(--text2);margin-bottom:12px;line-height:1.5" data-i18n="marketDesc">Browse premium addresses. Unclaimed ones can be purchased with BNB.</p>
+        <!-- Overview Stats -->
+        <div id="marketOverview" class="stat-grid-4" style="margin-bottom:14px"></div>
+        <!-- Filters -->
         <div class="filter-bar">
           <select id="fTier" onchange="loadMarket()">
-            <option value="" data-i18n="allTiers">All Tiers</option>
-            <option value="Common">Common</option>
-            <option value="Rare">Rare</option>
-            <option value="Epic">Epic</option>
-            <option value="Legendary">Legendary</option>
+            <option value="" data-i18n="allTiers">All</option>
+            <option value="Common" data-i18n="common">Common</option>
+            <option value="Rare" data-i18n="rare">Rare</option>
+            <option value="Epic" data-i18n="epic">Epic</option>
+            <option value="Legendary" data-i18n="legendary">Legendary</option>
           </select>
           <select id="fDigit" onchange="loadMarket()">
-            <option value="" data-i18n="allDigits">All Digits</option>
+            <option value="" data-i18n="allDigits">Digit</option>
             <option value="0">0</option><option value="1">1</option><option value="2">2</option>
             <option value="3">3</option><option value="4">4</option><option value="5">5</option>
             <option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option>
           </select>
           <select id="fPattern" onchange="loadMarket()">
-            <option value="" data-i18n="allPatterns">All Patterns</option>
-            <option value="trailing" data-i18n="trailing">Trailing</option>
-            <option value="leading" data-i18n="leading">Leading</option>
+            <option value="" data-i18n="allPatterns">Pattern</option>
+            <option value="Trailing" data-i18n="trailing">Trailing</option>
+            <option value="Leading" data-i18n="leading">Leading</option>
           </select>
           <select id="fStatus" onchange="loadMarket()">
             <option value="" data-i18n="allStatus">All</option>
-            <option value="available" data-i18n="unclaimed">Unclaimed</option>
-            <option value="claimed" data-i18n="claimed">Claimed</option>
+            <option value="true" data-i18n="unclaimed">Unclaimed</option>
+            <option value="false" data-i18n="claimed">Claimed</option>
           </select>
           <select id="fSort" onchange="loadMarket()">
             <option value="newest" data-i18n="newest">Newest</option>
@@ -155,12 +177,14 @@ select option{background:var(--bg2);color:var(--text)}
             <option value="price" data-i18n="price">Price</option>
           </select>
         </div>
-
-        <div style="margin-bottom:12px;display:flex;gap:8px">
-          <input type="number" id="searchId" placeholder="# ID" style="flex:1;padding:9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.78rem;font-weight:600;outline:none" onkeydown="if(event.key==='Enter')searchById()">
-          <button class="btn-secondary" onclick="searchById()" style="flex:none;padding:9px 16px;width:auto;font-size:.78rem" data-i18n="search">Search</button>
+        <!-- Search by ID / Buy by ID -->
+        <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+          <input type="number" id="searchId" placeholder="# ID search" style="flex:1;min-width:80px;padding:9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.75rem;font-weight:600;outline:none" onkeydown="if(event.key==='Enter')searchById()">
+          <button class="btn-secondary" onclick="searchById()" style="flex:none;padding:9px 14px;width:auto;font-size:.75rem" data-i18n="search">Search</button>
+          <input type="number" id="buyIdInput" placeholder="# ID buy" style="flex:1;min-width:80px;padding:9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.75rem;font-weight:600;outline:none" onkeydown="if(event.key==='Enter')buyById()">
+          <button class="btn-primary" onclick="buyById()" style="flex:none;padding:9px 14px;width:auto;font-size:.75rem" data-i18n="buy">Buy</button>
         </div>
-
+        <!-- List -->
         <div id="marketList"></div>
         <div class="pagination" id="marketPagination"></div>
       </div>
@@ -170,13 +194,11 @@ select option{background:var(--bg2);color:var(--text)}
     <div class="panel" id="panel-leaderboard">
       <div class="card fade-in">
         <div class="card-title"><span class="dot"></span><span data-i18n="leaderboard">Leaderboard</span></div>
-        <div id="leaderboardContent">
-          <div class="empty-state"><p data-i18n="loading">Loading...</p></div>
-        </div>
+        <div id="leaderboardContent"><div class="skeleton"><div class="sk-line w70"></div><div class="sk-line w50"></div><div class="sk-line w70"></div><div class="sk-line w50"></div></div></div>
       </div>
     </div>
 
-    <!-- ====== MY NFTs ====== -->
+    <!-- ====== MY NFTS ====== -->
     <div class="panel" id="panel-mynfts">
       <div class="card fade-in">
         <div class="card-title"><span class="dot"></span><span data-i18n="wallet">Wallet</span></div>
@@ -187,24 +209,14 @@ select option{background:var(--bg2);color:var(--text)}
           <li><span class="label" data-i18n="nftCount">NFT Count</span><span class="value" id="nftCount">0</span></li>
         </ul>
       </div>
-
       <div class="card fade-in">
         <div class="card-title"><span class="dot"></span><span data-i18n="myAddresses">My Addresses</span></div>
-        <div id="myAddressesList">
-          <div class="empty-state"><p data-i18n="noNfts">No premium addresses owned yet</p></div>
-        </div>
+        <div id="myAddressesList"><div class="empty-state"><p data-i18n="noNfts">No premium addresses owned yet</p></div></div>
       </div>
-
       <div class="card fade-in">
         <div class="card-title"><span class="dot"></span><span data-i18n="transferADD">Transfer ADD</span></div>
-        <div class="input-group">
-          <label data-i18n="recipient">Recipient</label>
-          <input type="text" id="transferToInput" placeholder="0x...">
-        </div>
-        <div class="input-group">
-          <label data-i18n="amount">Amount</label>
-          <input type="number" id="transferAmtInput" placeholder="0.00">
-        </div>
+        <div class="input-group"><label data-i18n="recipient">Recipient</label><input type="text" id="transferToInput" placeholder="0x..."></div>
+        <div class="input-group"><label data-i18n="amount">Amount</label><input type="number" id="transferAmtInput" placeholder="0.00"></div>
         <button class="btn-primary" onclick="transferADD()" data-i18n="transferBtn">Transfer</button>
       </div>
     </div>
@@ -213,24 +225,22 @@ select option{background:var(--bg2);color:var(--text)}
     <div class="panel" id="panel-info">
       <div class="card fade-in">
         <div class="card-title"><span class="dot"></span><span data-i18n="globalStats">Global Stats</span></div>
-        <div id="globalStatsContent">
-          <div class="empty-state"><p data-i18n="loading">Loading...</p></div>
-        </div>
+        <div id="globalStatsContent"><div class="skeleton"><div class="sk-line w70"></div><div class="sk-line w50"></div></div></div>
       </div>
-
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="stats">Statistics</span></div>
+        <div id="statsContent"><div class="skeleton"><div class="sk-line w70"></div><div class="sk-line w50"></div></div></div>
+      </div>
       <div class="card fade-in">
         <div class="card-title"><span class="dot"></span><span data-i18n="networkStatus">Network Status</span></div>
-        <div id="networkStatus">
-          <div class="empty-state"><p data-i18n="loading">Loading...</p></div>
-        </div>
+        <div id="networkStatus"><div class="skeleton"><div class="sk-line w70"></div></div></div>
       </div>
-
       <div class="card fade-in">
         <div class="card-title"><span class="dot"></span><span data-i18n="contractInfo">Contract Info</span></div>
         <ul class="info-list">
           <li><span class="label">ADD Token</span><span class="value mono"><a href="https://bscscan.com/address/0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8" target="_blank">0x1805...E6d8</a></span></li>
           <li><span class="label">AddressManager</span><span class="value mono"><a href="https://bscscan.com/address/0x78B11198268619728E4b53c642E8d68941004c11" target="_blank">0x78B1...4c11</a></span></li>
-          <li><span class="label">PremiumNumberQuery</span><span class="value mono"><a href="https://bscscan.com/address/0x86719c4337b8BF7d54aa73df7e3d460efD076405" target="_blank">0x8671...6405</a></span></li>
+          <li><span class="label">Query</span><span class="value mono"><a href="https://bscscan.com/address/0x86719c4337b8BF7d54aa73df7e3d460efD076405" target="_blank">0x8671...6405</a></span></li>
           <li><span class="label" data-i18n="network">Network</span><span class="value">BSC Mainnet</span></li>
           <li><span class="label">API</span><span class="value mono"><a href="https://address.shibclaw.xyz" target="_blank">address.shibclaw.xyz</a></span></li>
         </ul>
@@ -240,7 +250,7 @@ select option{background:var(--bg2);color:var(--text)}
 
   <div class="tab-bar">
     <button class="active" onclick="switchTab('market',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg>
       <span data-i18n="tabMarket">Market</span>
     </button>
     <button onclick="switchTab('leaderboard',this)">
@@ -266,476 +276,425 @@ const LANG = {
   en: {
     connect:'Connect', notConnected:'Not Connected', connected:'Connected',
     marketplace:'Marketplace', marketDesc:'Browse premium addresses. Unclaimed ones can be purchased with BNB.',
-    allTiers:'All Tiers', allDigits:'All Digits', allPatterns:'All Patterns', allStatus:'All',
-    unclaimed:'Unclaimed', claimed:'Claimed', newest:'Newest', streak:'Streak', price:'Price', search:'Search',
+    allTiers:'All Tiers', allDigits:'Digit', allPatterns:'Pattern', allStatus:'All',
+    unclaimed:'Unclaimed', claimed:'Claimed', newest:'Newest', streak:'Streak', price:'Price', search:'Search', buy:'Buy',
     leaderboard:'Leaderboard', wallet:'Wallet', address:'Address', balance:'Balance', nftCount:'NFT Count',
     myAddresses:'My Addresses', noNfts:'No premium addresses owned yet',
     transferADD:'Transfer ADD', recipient:'Recipient', amount:'Amount', transferBtn:'Transfer',
     globalStats:'Global Stats', networkStatus:'Network Status', contractInfo:'Contract Info',
     network:'Network', tabMarket:'Market', tabLeaderboard:'Rank', tabMyNfts:'My NFTs', tabInfo:'Info',
-    claim:'Claim', view:'View', owner:'Owner', digit:'Digit', pattern:'Pattern',
+    claim:'Buy', view:'View', owner:'Owner', digit:'Digit', pattern:'Pattern',
     occurrences:'Occurrences', tier:'Tier', trailing:'Trailing', leading:'Leading',
-    toastConnect:'Wallet Connected', toastNoMM:'Please install MetaMask',
+    toastConnected:'Wallet Connected', toastNoMM:'Please install MetaMask',
     toastSwitchBSC:'Please switch to BSC Mainnet', toastConnFail:'Connection failed',
     toastSending:'Sending transaction...', toastTxFail:'Transaction failed',
     toastClaiming:'Buying...', toastClaimOk:'Purchased successfully!',
     toastTransferring:'Transferring...', toastTransferOk:'Transferred!',
     toastConnFirst:'Connect wallet first', toastEnterAmt:'Enter an amount',
     toastEnterAddr:'Enter a valid address', toastFetchFail:'Failed to load data',
+    toastCopied:'Copied!', toastEnterId:'Enter a valid ID',
     loading:'Loading...', totalSupply:'Total Supply', totalMinted:'Total Minted',
     totalBurned:'Total Burned', totalMined:'Total Mined', currentReward:'Current Reward',
-    era:'Era', requiredRun:'Required Run', windowCount:'Window (10b)',
-    purchasePrice:'Purchase Price', maxSupply:'Max Supply', rank:'Rank',
-    id:'ID', walletId:'Wallet ID', synced:'Synced', blockNumber:'Block Number',
-    stats:'Statistics', all:'All', priceBNB:'Price (BNB)',
-    noLeaderboard:'No leaderboard data available',
-    searchByID:'Search by ID'
+    era:'Era', requiredRun:'Required Run', windowCount:'Window', purchasePrice:'Purchase Price',
+    maxSupply:'Max Supply', rank:'Rank', id:'ID', synced:'Synced', blockNumber:'Block Number',
+    stats:'Statistics', priceBNB:'Price', all:'All',
+    noLeaderboard:'No leaderboard data available', searchByID:'Search by ID',
+    common:'Common', rare:'Rare', epic:'Epic', legendary:'Legendary',
+    overview:'Overview', total:'Total', available:'Available', priceLabel:'Price',
+    myNFTs:'My NFTs', info:'Info', rankTab:'Rank'
   },
   zh: {
     connect:'连接钱包', notConnected:'未连接', connected:'已连接',
-    marketplace:'市场', marketDesc:'浏览靓号地址。未认领的可以用 BNB 购买。',
-    allTiers:'所有等级', allDigits:'所有数字', allPatterns:'所有模式', allStatus:'全部',
-    unclaimed:'未认领', claimed:'已认领', newest:'最新', streak:'连数', price:'价格', search:'搜索',
+    marketplace:'靓号市场', marketDesc:'浏览靓号地址。未认领的可以用 BNB 购买。',
+    allTiers:'全部等级', allDigits:'数字', allPatterns:'模式', allStatus:'全部',
+    unclaimed:'未认领', claimed:'已认领', newest:'最新', streak:'连数', price:'价格', search:'搜索', buy:'购买',
     leaderboard:'排行榜', wallet:'钱包', address:'地址', balance:'余额', nftCount:'NFT 数量',
-    myAddresses:'我的地址', noNfts:'还没有拥有靓号地址',
+    myAddresses:'我的靓号', noNfts:'还没有拥有靓号地址',
     transferADD:'转账 ADD', recipient:'接收地址', amount:'数量', transferBtn:'转账',
     globalStats:'全局统计', networkStatus:'网络状态', contractInfo:'合约信息',
     network:'网络', tabMarket:'市场', tabLeaderboard:'排行', tabMyNfts:'我的NFT', tabInfo:'信息',
     claim:'购买', view:'查看', owner:'拥有者', digit:'数字', pattern:'模式',
     occurrences:'出现次数', tier:'等级', trailing:'后缀', leading:'前缀',
-    toastConnect:'钱包已连接', toastNoMM:'请安装 MetaMask',
+    toastConnected:'钱包已连接', toastNoMM:'请安装 MetaMask',
     toastSwitchBSC:'请切换到 BSC 主网', toastConnFail:'连接失败',
     toastSending:'发送交易中...', toastTxFail:'交易失败',
     toastClaiming:'购买中...', toastClaimOk:'购买成功！',
     toastTransferring:'转账中...', toastTransferOk:'转账成功！',
     toastConnFirst:'请先连接钱包', toastEnterAmt:'请输入数量',
     toastEnterAddr:'请输入有效地址', toastFetchFail:'加载数据失败',
+    toastCopied:'已复制！', toastEnterId:'请输入有效ID',
     loading:'加载中...', totalSupply:'总供应量', totalMinted:'总铸造量',
     totalBurned:'总销毁量', totalMined:'总挖掘量', currentReward:'当前奖励',
     era:'纪元', requiredRun:'最低连数', windowCount:'窗口(10块)',
     purchasePrice:'购买价格', maxSupply:'最大供应量', rank:'排名',
-    id:'编号', walletId:'钱包ID', synced:'已同步', blockNumber:'区块高度',
-    stats:'统计', all:'全部', priceBNB:'价格 (BNB)',
-    noLeaderboard:'暂无排行榜数据',
-    searchByID:'按ID搜索'
+    id:'编号', synced:'已同步', blockNumber:'同步高度',
+    stats:'统计数据', priceBNB:'价格', all:'全部',
+    noLeaderboard:'暂无排行榜数据', searchByID:'按ID搜索',
+    common:'普通', rare:'稀有', epic:'史诗', legendary:'传说',
+    overview:'概览', total:'总计', available:'可购买', priceLabel:'当前价格',
+    myNFTs:'我的NFT', info:'信息', rankTab:'排行'
   }
 };
 let curLang = 'en';
-function t(key) { return LANG[curLang][key] || LANG.en[key] || key; }
-function applyLang() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const k = el.getAttribute('data-i18n');
-    if (LANG[curLang][k]) {
-      if (k === 'marketDesc') el.innerHTML = LANG[curLang][k];
-      else el.textContent = LANG[curLang][k];
-    }
+
+function t(k){return LANG[curLang][k]||LANG.en[k]||k}
+
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(k==='marketDesc'){el.innerHTML=LANG[curLang][k]||LANG.en[k];return}
+    const v=LANG[curLang][k]||LANG.en[k];
+    if(v)el.textContent=v;
   });
-  document.getElementById('langBtn').textContent = curLang === 'en' ? 'CN' : 'EN';
-  if (userAddr) {
-    document.getElementById('connectBtn').textContent = userAddr.slice(0,6)+'...'+userAddr.slice(-4);
-  }
+  document.getElementById('langBtn').textContent=curLang==='en'?'CN':'EN';
+  if(userAddr)document.getElementById('connectBtn').textContent=userAddr.slice(0,6)+'...'+userAddr.slice(-4);
 }
-function toggleLang() {
-  curLang = curLang === 'en' ? 'zh' : 'en';
-  applyLang();
-  const active = document.querySelector('.panel.active');
-  if (active) {
-    const id = active.id;
-    if (id === 'panel-market') loadMarket();
-    else if (id === 'panel-leaderboard') loadLeaderboard();
-    else if (id === 'panel-mynfts') refreshMyNfts();
-    else if (id === 'panel-info') loadInfo();
-  }
-}
+
+function toggleLang(){curLang=curLang==='en'?'zh':'en';applyLang();const a=document.querySelector('.panel.active');if(a){const id=a.id;if(id==='panel-market')loadMarket();else if(id==='panel-leaderboard')loadLeaderboard();else if(id==='panel-mynfts')refreshMyNfts();else if(id==='panel-info')loadInfo()}}
 
 /* === CONTRACTS === */
-const PN_ADDR = '0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8';
-const AM_ADDR = '0x78B11198268619728E4b53c642E8d68941004c11';
-const PQ_ADDR = '0x86719c4337b8BF7d54aa73df7e3d460efD076405';
-const BSC_CHAIN = '0x38';
-const API_BASE = 'https://address.shibclaw.xyz';
+const PN_ADDR='0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8';
+const AM_ADDR='0x78B11198268619728E4b53c642E8d68941004c11';
+const PQ_ADDR='0x86719c4337b8BF7d54aa73df7e3d460efD076405';
+const BSC_CHAIN='0x38';
+const API_BASE='https://address.shibclaw.xyz';
 
-const PN_ABI = [
-  'function balanceOf(address) view returns (uint256)',
-  'function transfer(address,uint256) returns (bool)',
-  'function totalSupply() view returns (uint256)',
-  'function totalMinted() view returns (uint256)',
-  'function currentReward() view returns (uint256)',
-  'function era() view returns (uint256)',
-  'function requiredRun() view returns (uint256)',
-  'function windowCount() view returns (uint256)',
-  'function totalMined() view returns (uint256)',
-  'function MAX_SUPPLY() view returns (uint256)'
-];
-const AM_ABI = [
-  'function claim(uint256 salt) payable',
-  'function claimById(uint256 walletId) payable',
-  'function purchasePrice() view returns (uint256)',
-  'function currentPrice(uint256 salt) view returns (uint256)',
-  'function balanceOf(address) view returns (uint256)',
-  'function nextWalletId() view returns (uint256)',
-  'function getAddressInfo(uint256 salt) view returns (uint256 walletId, address wallet, address currentOwner, uint256 streak, uint256 occurrences)',
-  'function getAddressInfoById(uint256 walletId) view returns (uint256 salt, address wallet, address currentOwner, uint256 streak, uint256 occurrences)'
-];
-const PQ_ABI = [
-  'function getUserDashboard(address user) view returns (uint256 tokenBalance, uint256 bnbBalance)',
-  'function getByWalletIdRange(uint256 fromId, uint256 toId) view returns (tuple(uint256 walletId, uint256 tokenId, uint256 salt, address currentOwner, uint256 streak, uint256 occurrences, address walletAddr, address approved, bool purchasable, uint256 price)[])'
-];
+const PN_ABI=['function balanceOf(address) view returns (uint256)','function transfer(address,uint256) returns (bool)','function totalSupply() view returns (uint256)','function totalMinted() view returns (uint256)','function currentReward() view returns (uint256)','function era() view returns (uint256)','function requiredRun() view returns (uint256)','function windowCount() view returns (uint256)','function totalMined() view returns (uint256)','function MAX_SUPPLY() view returns (uint256)'];
+const AM_ABI=['function claim(uint256 salt) payable','function claimById(uint256 walletId) payable','function purchasePrice() view returns (uint256)','function currentPrice(uint256 salt) view returns (uint256)','function balanceOf(address) view returns (uint256)','function nextWalletId() view returns (uint256)','function getAddressInfo(uint256 salt) view returns (uint256 walletId, address wallet, address currentOwner, uint256 streak, uint256 occurrences)','function getAddressInfoById(uint256 walletId) view returns (uint256 salt, address wallet, address currentOwner, uint256 streak, uint256 occurrences)'];
+const PQ_ABI=['function getUserDashboard(address user) view returns (uint256 tokenBalance, uint256 bnbBalance)','function getByWalletIdRange(uint256 fromId, uint256 toId) view returns (tuple(uint256 walletId, uint256 tokenId, uint256 salt, address currentOwner, uint256 streak, uint256 occurrences, address walletAddr, address approved, bool purchasable, uint256 price)[])'];
 
-let provider, signer, userAddr;
-let pnContract, amContract, pqContract;
+let provider,signer,userAddr;
+let pnContract,amContract,pqContract;
 
 /* === TABS === */
-function switchTab(name, btn) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  btn.classList.add('active');
-  if (name === 'market') loadMarket();
-  else if (name === 'leaderboard') loadLeaderboard();
-  else if (name === 'mynfts') refreshMyNfts();
-  else if (name === 'info') loadInfo();
+function switchTab(name,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');btn.classList.add('active');
+  if(name==='market')loadMarket();else if(name==='leaderboard')loadLeaderboard();else if(name==='mynfts')refreshMyNfts();else if(name==='info')loadInfo()
 }
 
 /* === TOAST === */
-function showToast(msg, dur) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), dur || 3000); }
+function showToast(msg,type){
+  const el=document.getElementById('toast');
+  el.className='toast';el.innerHTML='';
+  const icon=document.createElement('span');icon.className='toast-icon';
+  if(type==='success'){el.classList.add('success');icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'}
+  else if(type==='error'){el.classList.add('error');icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg>'}
+  else{el.classList.add('info');icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'}
+  el.appendChild(icon);const span=document.createElement('span');span.textContent=msg;el.appendChild(span);
+  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);
+}
 
 /* === WALLET === */
-async function connectWallet() {
-  if (!window.ethereum) { showToast(t('toastNoMM')); return; }
-  try {
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const cid = await window.ethereum.request({ method: 'eth_chainId' });
-    if (cid !== BSC_CHAIN) {
-      try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: BSC_CHAIN }] }); }
-      catch (e) { showToast(t('toastSwitchBSC')); return; }
-    }
-    provider = new ethers.BrowserProvider(window.ethereum);
-    signer = await provider.getSigner();
-    userAddr = await signer.getAddress();
-    pnContract = new ethers.Contract(PN_ADDR, PN_ABI, signer);
-    amContract = new ethers.Contract(AM_ADDR, AM_ABI, signer);
-    pqContract = new ethers.Contract(PQ_ADDR, PQ_ABI, signer);
-    document.getElementById('connectBtn').textContent = userAddr.slice(0, 6) + '...' + userAddr.slice(-4);
-    showToast(t('toastConnect'));
-    const active = document.querySelector('.panel.active');
-    if (active) {
-      if (active.id === 'panel-mynfts') refreshMyNfts();
-    }
-  } catch (e) { showToast(t('toastConnFail')); console.error(e); }
+async function connectWallet(){
+  if(!window.ethereum){showToast(t('toastNoMM'),'error');return}
+  try{
+    await window.ethereum.request({method:'eth_requestAccounts'});
+    const cid=await window.ethereum.request({method:'eth_chainId'});
+    if(cid!==BSC_CHAIN){try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_CHAIN}]})}catch(e){showToast(t('toastSwitchBSC'),'error');return}}
+    provider=new ethers.BrowserProvider(window.ethereum);
+    signer=await provider.getSigner();userAddr=await signer.getAddress();
+    pnContract=new ethers.Contract(PN_ADDR,PN_ABI,signer);
+    amContract=new ethers.Contract(AM_ADDR,AM_ABI,signer);
+    pqContract=new ethers.Contract(PQ_ADDR,PQ_ABI,signer);
+    document.getElementById('connectBtn').textContent=userAddr.slice(0,6)+'...'+userAddr.slice(-4);
+    showToast(t('toastConnected'),'success');
+    if(document.getElementById('panel-mynfts').classList.contains('active'))refreshMyNfts();
+  }catch(e){showToast(t('toastConnFail'),'error');console.error(e)}
+}
+
+/* === COPY === */
+async function copyAddr(text){
+  try{await navigator.clipboard.writeText(text);showToast(t('toastCopied'),'success')}catch{showToast(t('toastTxFail'),'error')}
+}
+
+/* === DIGIT HIGHLIGHT === */
+function hlAddr(addr){
+  const hex=addr.slice(2);let bs=0,bl=1,cs=0,cl=1;
+  for(let i=1;i<hex.length;i++){if(hex[i]===hex[i-1]){cl++}else{if(cl>bl){bl=cl;bs=cs}cs=i;cl=1}}
+  if(cl>bl){bl=cl;bs=cs}
+  if(bl<2)return addr;
+  return '0x'+hex.slice(0,bs)+'<span class="hl-digit">'+hex.slice(bs,bs+bl)+'</span>'+hex.slice(bs+bl);
+}
+function digitOf(addr){
+  const hex=addr.slice(2);let bd='',bl=0,cd=hex[0]||'',cl=1;
+  for(let i=1;i<=hex.length;i++){if(hex[i]===cd){cl++}else{if(cl>bl){bl=cl;bd=cd}cd=hex[i];cl=1}}
+  return bd;
 }
 
 /* === TIER HELPERS === */
-function tierName(s) { if (s >= 14) return 'Legendary'; if (s >= 12) return 'Epic'; if (s >= 10) return 'Rare'; return 'Common'; }
-function tierBadge(s) { const tn = tierName(s); const cls = tn === 'Common' ? 'badge-tier-c' : tn === 'Rare' ? 'badge-tier-r' : tn === 'Epic' ? 'badge-tier-e' : 'badge-tier-l'; return '<span class="badge ' + cls + '">' + tn + '</span>'; }
+function tierName(s){if(s>=14)return t('legendary');if(s>=12)return t('epic');if(s>=10)return t('rare');return t('common')}
+function tierBadge(s){const tn=tierName(s);const n=tierName(Number(s));const cls=s>=14?'badge-tier-l':s>=12?'badge-tier-e':s>=10?'badge-tier-r':'badge-tier-c';return'<span class="badge '+cls+'">'+tn+'</span>'}
 
-/* === DATA EXTRACTOR === */
-function unwrap(d) {
-  if (!d || typeof d !== 'object') return d;
-  if (d.success === true && d.data !== undefined) return d.data;
-  return d;
-}
-function extractItems(d) {
-  if (!d || typeof d !== 'object') return [];
-  let r = unwrap(d);
-  if (Array.isArray(r)) return r;
-  if (Array.isArray(r.items)) return r.items;
-  if (Array.isArray(r.data)) return r.data;
-  if (Array.isArray(r.list)) return r.list;
-  if (Array.isArray(r.records)) return r.records;
-  if (Array.isArray(r.result)) return r.result;
-  return [];
-}
-function extractTotal(d) {
-  if (!d || typeof d !== 'object') return 0;
-  let r = unwrap(d);
-  if (r.pagination && r.pagination.total) return Number(r.pagination.total);
-  return Number(r.total || r.totalCount || r.count || r.recordsTotal || r.totalRecords || 0);
-}
-function extractObj(d) {
-  if (!d || typeof d !== 'object') return {};
-  let r = unwrap(d);
-  if (r.info) return r.info;
-  return r;
+/* === DATA EXTRACTORS === */
+function unwrap(d){if(!d||typeof d!=='object')return d;if(d.success===true&&d.data!==undefined)return d.data;return d}
+function extractItems(d){if(!d||typeof d!=='object')return [];const r=unwrap(d);if(Array.isArray(r))return r;if(Array.isArray(r.items))return r.items;if(Array.isArray(r.data))return r.data;if(Array.isArray(r.list))return r.list;if(Array.isArray(r.records))return r.records;if(Array.isArray(r.result))return r.result;return []}
+function extractTotal(d){if(!d||typeof d!=='object')return 0;const r=unwrap(d);if(r.pagination&&r.pagination.total)return Number(r.pagination.total);return Number(r.total||r.totalCount||r.count||r.recordsTotal||r.totalRecords||0)}
+function extractObj(d){if(!d||typeof d!=='object')return{};const r=unwrap(d);if(r.info)return r.info;return r}
+
+/* === SKELETON === */
+function sk(n){let h='';for(let i=0;i<n;i++)h+='<div class="skeleton"><div class="sk-line w70"></div><div class="sk-line w50"></div><div class="sk-line w70"></div></div>';return h}
+
+/* === MARKET OVERVIEW === */
+async function loadMarketOverview(){
+  const el=document.getElementById('marketOverview');
+  try{
+    const resp=await fetch(API_BASE+'/api/stats');
+    if(resp.ok){
+      const d=await resp.json();const info=extractObj(d);
+      const total=info.totalAddresses||info.total||info.totalMined||info.registered||0;
+      const avail=info.available||info.availableAddresses||info.unclaimed||0;
+      const price=info.purchasePrice||info.price||'';
+      const priceStr=price?ethers.formatEther(price)+' BNB':'--';
+      const pn=info.pending||info.pendingCount||0;
+      el.innerHTML='<div class="stat-card"><div class="sc-val">'+total+'</div><div class="sc-label">'+t('total')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val green">'+avail+'</div><div class="sc-label">'+t('available')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val"><span class="badge badge-green">'+priceStr+'</span></div><div class="sc-label">'+t('priceLabel')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val accent">'+pn+'</div><div class="sc-label">'+t('totalMined')+'</div></div>';
+    }else{throw new Error()}
+  }catch{
+    el.innerHTML='<div class="stat-card"><div class="sc-val">--</div><div class="sc-label">'+t('total')+'</div></div>'+
+      '<div class="stat-card"><div class="sc-val">--</div><div class="sc-label">'+t('available')+'</div></div>'+
+      '<div class="stat-card"><div class="sc-val">--</div><div class="sc-label">'+t('priceLabel')+'</div></div>'+
+      '<div class="stat-card"><div class="sc-val">--</div><div class="sc-label">'+t('totalMined')+'</div></div>';
+  }
 }
 
 /* === MARKET === */
-let marketPage = 1;
-const PER_PAGE = 20;
+let marketPage=1;const PER_PAGE=20;
 
-async function loadMarket() {
-  const listEl = document.getElementById('marketList');
-  const pagEl = document.getElementById('marketPagination');
-  try {
-    const tier = document.getElementById('fTier').value;
-    const digit = document.getElementById('fDigit').value;
-    const pattern = document.getElementById('fPattern').value;
-    const status = document.getElementById('fStatus').value;
-    const sort = document.getElementById('fSort').value;
-    const params = new URLSearchParams({ page: marketPage, limit: PER_PAGE, sort: sort });
-    if (tier) params.set('tier', tier);
-    if (digit) params.set('digit', digit);
-    if (pattern) params.set('pattern', pattern);
-    if (status) params.set('status', status);
-    const resp = await fetch(API_BASE + '/api/addresses?' + params.toString());
-    if (!resp.ok) throw new Error('fetch fail');
-    const data = await resp.json();
-    renderMarketList(extractItems(data), extractTotal(data));
-  } catch (e) {
-    try {
-      const total = await amContract.nextWalletId();
-      const fromId = Math.max(1, Number(total) - PER_PAGE * marketPage + 1);
-      const toId = Math.min(Number(total) - 1, fromId + PER_PAGE - 1);
-      if (fromId <= toId) {
-        const details = await pqContract.getByWalletIdRange(fromId, toId);
-        renderMarketList(details, Number(total) - 1);
-      } else {
-        listEl.innerHTML = '<div class="empty-state"><p>' + t('noNfts') + '</p></div>';
-      }
-    } catch (e2) {
-      listEl.innerHTML = '<div class="empty-state"><p>' + t('toastFetchFail') + '</p></div>';
-    }
+async function loadMarket(){
+  const listEl=document.getElementById('marketList');const pagEl=document.getElementById('marketPagination');
+  listEl.innerHTML=sk(3);
+  try{
+    const t=document.getElementById('fTier').value,di=document.getElementById('fDigit').value,
+          p=document.getElementById('fPattern').value,s=document.getElementById('fStatus').value,
+          so=document.getElementById('fSort').value;
+    const params=new URLSearchParams({page:marketPage,limit:PER_PAGE,sort:so});
+    if(t){const m={Common:['1','9'],Rare:['10','11'],Epic:['12','13'],Legendary:['14','']}[t];if(m){if(m[0])params.set('minStreak',m[0]);if(m[1])params.set('maxStreak',m[1])}}
+    if(di)params.set('digit',di);if(p)params.set('pattern',p);if(s)params.set('purchasable',s);
+    const resp=await fetch(API_BASE+'/api/addresses?'+params.toString());
+    if(!resp.ok)throw new Error();
+    const data=await resp.json();
+    renderMarketList(extractItems(data),extractTotal(data));
+  }catch(e){
+    try{
+      const total=await amContract.nextWalletId();
+      const fromId=Math.max(1,Number(total)-PER_PAGE*marketPage+1);
+      const toId=Math.min(Number(total)-1,fromId+PER_PAGE-1);
+      if(fromId<=toId){const details=await pqContract.getByWalletIdRange(fromId,toId);renderMarketList(details,Number(total)-1)}
+      else{listEl.innerHTML='<div class="empty-state"><p>'+t('noNfts')+'</p></div>';pagEl.innerHTML=''}
+    }catch(e2){listEl.innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>';pagEl.innerHTML=''}
   }
 }
 
-function renderMarketList(items, total) {
-  const listEl = document.getElementById('marketList');
-  const pagEl = document.getElementById('marketPagination');
-  if (!items || items.length === 0) {
-    listEl.innerHTML = '<div class="empty-state"><p>' + t('noNfts') + '</p></div>';
-    pagEl.innerHTML = '';
-    return;
-  }
-  let html = '';
-  for (const item of items) {
-    const walletAddr = item.walletAddr || item.wallet || item.address || item.walletAddress || '';
-    const walletId = item.walletId || item.tokenId || item.id || '?';
-    const streak = Number(item.streak || 0);
-    const occ = Number(item.occurrences || item.occurrence || 0);
-    const ownerAddr = item.currentOwner || item.owner || ethers.ZeroAddress;
-    const purchasable = item.purchasable !== undefined ? item.purchasable : (item.currentOwner === null || item.currentOwner === undefined || item.owner === null || ownerAddr === ethers.ZeroAddress);
-    const priceWei = item.price || item.purchasePrice || 0;
-    const priceBNB = ethers.formatEther(priceWei);
-    const addrShort = walletAddr ? walletAddr.slice(0, 10) + '...' + walletAddr.slice(-6) : '--';
-    const patternType = item.pattern || (item.leading > item.trailing ? 'Leading' : 'Trailing');
-    const digitVal = item.digit !== undefined && item.digit !== null ? item.digit : '?';
-    html += '<div class="addr-card">' +
-      '<div class="addr-id">#' + walletId + (purchasable ? ' <span class="badge badge-green">' + t('unclaimed') + '</span>' : ' <span class="badge badge-blue">' + t('claimed') + '</span>') + '</div>' +
-      '<div class="addr-text">' + addrShort + '</div>' +
-      '<div class="addr-meta">' +
-      tierBadge(streak) +
-      '<span>' + t('digit') + ': ' + digitVal + '</span>' +
-      '<span>' + t('streak') + ': ' + streak + '</span>' +
-      '<span>' + t('pattern') + ': ' + patternType + '</span>' +
-      '<span>' + t('occurrences') + ': ' + occ + '</span>' +
-      '</div>' +
-      '<div class="addr-actions">' +
-      (purchasable
-        ? '<button class="btn-primary" style="font-size:.82rem;padding:10px" onclick="buyAddress(' + (item.salt || 0) + ')">' + t('claim') + ' ' + priceBNB + ' BNB</button>'
-        : '<button class="btn-secondary" style="font-size:.82rem;padding:10px" disabled>' + t('claimed') + '</button>'
-      ) +
-      '<button class="btn-secondary" style="font-size:.82rem;padding:10px;flex:none;width:auto;padding:10px 12px" onclick="window.open(\'https://bscscan.com/address/' + walletAddr + '\',\'_blank\')">BscScan</button>' +
+function renderMarketList(items,total){
+  const listEl=document.getElementById('marketList');const pagEl=document.getElementById('marketPagination');
+  if(!items||items.length===0){listEl.innerHTML='<div class="empty-state"><p>'+t('noNfts')+'</p></div>';pagEl.innerHTML='';return}
+  let html='';
+  for(const item of items){
+    const wAddr=item.walletAddr||item.wallet||item.address||item.walletAddress||'';
+    const wId=item.walletId||item.tokenId||item.id||'?';
+    const s=Number(item.streak||0);
+    const occ=Number(item.occurrences||item.occurrence||0);
+    const ownerAddr=item.currentOwner||item.owner||ethers.ZeroAddress;
+    const purchasable=item.purchasable!==undefined?String(item.purchasable)==='true':(ownerAddr===ethers.ZeroAddress||ownerAddr==='0x0000000000000000000000000000000000000000');
+    const priceWei=item.price||item.purchasePrice||0;
+    const priceBNB=purchasable&&priceWei?ethers.formatEther(priceWei):'--';
+    const pType=item.pattern||(item.leading>item.trailing?'Leading':'Trailing');
+    const dVal=item.digit!==undefined&&item.digit!==null?item.digit:digitOf(wAddr);
+    const hl=hlAddr(wAddr);
+    html+='<div class="addr-card">'+
+      '<div class="addr-id">#'+wId+(purchasable?' <span class="badge badge-green">'+t('unclaimed')+'</span>':' <span class="badge badge-blue">'+t('claimed')+'</span>')+'</div>'+
+      '<div class="addr-display" onclick="copyAddr(\''+wAddr+'\')">'+hl+'<svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div>'+
+      '<div class="addr-meta">'+tierBadge(s)+
+      '<span>'+t('digit')+': '+dVal+'</span><span>'+t('streak')+': '+s+'</span><span>'+t(pType.toLowerCase())+'</span><span>'+t('occurrences')+': '+occ+'</span></div>'+
+      '<div class="addr-actions">'+
+      (purchasable?'<button class="btn-primary" style="font-size:.78rem;padding:9px" onclick="buyAddress('+(item.salt||0)+')">'+t('claim')+' '+priceBNB+' BNB</button>':'<button class="btn-secondary" style="font-size:.78rem;padding:9px" disabled>'+t('claimed')+'</button>')+
+      '<button class="btn-secondary" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px" onclick="window.open(\'https://bscscan.com/address/'+wAddr+'\',\'_blank\')">BscScan</button>'+
       '</div></div>';
   }
-  listEl.innerHTML = html;
-  const pages = Math.ceil(total / PER_PAGE) || 1;
-  pagEl.innerHTML = '<button onclick="marketPage=Math.max(1,marketPage-1);loadMarket()" ' + (marketPage <= 1 ? 'disabled' : '') + '>‹</button>' +
-    '<span class="page-info">' + marketPage + ' / ' + pages + '</span>' +
-    '<button onclick="marketPage=Math.min(' + pages + ',marketPage+1);loadMarket()" ' + (marketPage >= pages ? 'disabled' : '') + '>›</button>';
+  listEl.innerHTML=html;
+  const pages=Math.ceil(total/PER_PAGE)||1;
+  pagEl.innerHTML='<button onclick="marketPage=Math.max(1,marketPage-1);loadMarket()" '+(marketPage<=1?'disabled':'')+'>‹</button>'+
+    '<span class="page-info">'+marketPage+' / '+pages+'</span>'+
+    '<button onclick="marketPage=Math.min('+pages+',marketPage+1);loadMarket()" '+(marketPage>=pages?'disabled':'')+'>›</button>';
 }
 
-async function searchById() {
-  const id = document.getElementById('searchId').value.trim();
-  if (!id) { loadMarket(); return; }
-  try {
-    const resp = await fetch(API_BASE + '/api/addresses/' + id);
-    if (resp.ok) {
-      const raw = await resp.json();
-      const item = extractItems(raw).length ? extractItems(raw)[0] : (raw.data ? raw.data : raw);
-      document.getElementById('marketList').innerHTML = '';
-      renderMarketList([item], 1);
-      document.getElementById('marketPagination').innerHTML = '';
-    } else {
-      showToast(t('toastFetchFail'));
-    }
-  } catch (e) {
-    showToast(t('toastFetchFail'));
-  }
+async function searchById(){
+  const id=document.getElementById('searchId').value.trim();
+  if(!id){loadMarket();return}
+  try{
+    const resp=await fetch(API_BASE+'/api/addresses/'+id);
+    if(resp.ok){
+      const raw=await resp.json();const item=extractItems(raw).length?extractItems(raw)[0]:(raw.data?raw.data:raw);
+      document.getElementById('marketList').innerHTML='';renderMarketList([item],1);document.getElementById('marketPagination').innerHTML=''
+    }else{showToast(t('toastFetchFail'),'error')}
+  }catch(e){showToast(t('toastFetchFail'),'error')}
 }
 
-async function buyAddress(salt) {
-  if (!signer) { showToast(t('toastConnFirst')); return; }
-  try {
-    const price = await amContract.currentPrice(salt);
-    showToast(t('toastClaiming'));
-    const tx = await amContract.claim(salt, { value: price });
-    await tx.wait();
-    showToast(t('toastClaimOk'));
-    loadMarket();
-  } catch (e) { showToast(e.reason || t('toastTxFail')); }
+async function buyAddress(salt){
+  if(!signer){showToast(t('toastConnFirst'),'error');return}
+  try{
+    const price=await amContract.currentPrice(salt);
+    showToast(t('toastClaiming'),'info');
+    const tx=await amContract.claim(salt,{value:price});await tx.wait();
+    showToast(t('toastClaimOk'),'success');loadMarket()
+  }catch(e){showToast(e.reason||t('toastTxFail'),'error')}
+}
+
+async function buyById(){
+  if(!signer){showToast(t('toastConnFirst'),'error');return}
+  const id=document.getElementById('buyIdInput').value.trim();
+  if(!id){showToast(t('toastEnterId'),'error');return}
+  try{
+    const info=await amContract.getAddressInfoById(id);
+    const salt=info.salt;const price=info.price||(await amContract.currentPrice(salt));
+    showToast(t('toastClaiming'),'info');
+    const tx=await amContract.claimById(id,{value:price});await tx.wait();
+    showToast(t('toastClaimOk'),'success');loadMarket()
+  }catch(e){showToast(e.reason||t('toastTxFail'),'error')}
 }
 
 /* === LEADERBOARD === */
-async function loadLeaderboard() {
-  const el = document.getElementById('leaderboardContent');
-  try {
-    const resp = await fetch(API_BASE + '/api/leaderboard');
-    if (!resp.ok) throw new Error('fetch fail');
-    const data = await resp.json();
-    const items = extractItems(data);
-    if (!items || items.length === 0) {
-      el.innerHTML = '<div class="empty-state"><p>' + t('noLeaderboard') + '</p></div>';
-      return;
+async function loadLeaderboard(){
+  const el=document.getElementById('leaderboardContent');
+  try{
+    const resp=await fetch(API_BASE+'/api/leaderboard');
+    if(!resp.ok)throw new Error();
+    const data=await resp.json();const items=extractItems(data);
+    if(!items||items.length===0){el.innerHTML='<div class="empty-state"><p>'+t('noLeaderboard')+'</p></div>';return}
+    let html='';
+    for(let i=0;i<items.length;i++){
+      const item=items[i];const r=i+1;const rc=r===1?'gold':r===2?'silver':r===3?'bronze':'';
+      const addr=item.walletAddr||item.wallet||item.address||item.user||'';
+      const s=item.streak||0;const occ=item.occurrences||0;
+      const wid=item.walletId||item.tokenId||item.id||'';
+      const hl=hlAddr(addr);
+      html+='<div class="lb-item"><div class="rank-num '+rc+'">'+r+'</div>'+
+        '<div class="lb-info"><div class="lb-name">'+(addr?addr.slice(0,8)+'...'+addr.slice(-6):'#'+wid)+'</div>'+
+        '<div class="lb-detail">'+t('streak')+' '+s+' | '+t('occurrences')+' '+occ+' | #'+wid+'</div></div>'+
+        '<div class="lb-val">'+tierBadge(s)+'</div></div>';
     }
-    let html = '';
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      const rank = i + 1;
-      const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
-      const addr = item.walletAddr || item.wallet || item.address || item.user || '';
-      const streak = item.streak || 0;
-      const occ = item.occurrences || 0;
-      const wid = item.walletId || item.tokenId || item.id || '';
-      const addrShort = addr ? addr.slice(0, 8) + '...' + addr.slice(-6) : '#' + wid;
-      html += '<div class="leaderboard-item">' +
-        '<div class="rank ' + rankClass + '">' + rank + '</div>' +
-        '<div class="lb-info">' +
-        '<div class="lb-name">' + addrShort + '</div>' +
-        '<div class="lb-detail">' + t('streak') + ' ' + streak + ' | ' + t('occurrences') + ' ' + occ + ' | #' + wid + '</div>' +
-        '</div>' +
-        '<div class="lb-value">' + tierBadge(streak) + '</div>' +
-        '</div>';
-    }
-    el.innerHTML = '<div class="fade-in">' + html + '</div>';
-  } catch (e) {
-    el.innerHTML = '<div class="empty-state"><p>' + t('toastFetchFail') + '</p></div>';
-  }
+    el.innerHTML='<div class="fade-in">'+html+'</div>';
+  }catch(e){el.innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>'}
 }
 
 /* === MY NFTS === */
-async function refreshMyNfts() {
-  if (!userAddr) { document.getElementById('walletAddr').textContent = t('notConnected'); return; }
-  try {
-    document.getElementById('walletAddr').textContent = userAddr.slice(0, 8) + '...' + userAddr.slice(-6);
-    const [tokenBal, bnbBal] = await pqContract.getUserDashboard(userAddr);
-    document.getElementById('addBalance').textContent = parseFloat(ethers.formatEther(tokenBal)).toLocaleString(undefined, { maximumFractionDigits: 4 }) + ' ADD';
-    document.getElementById('bnbBalance').textContent = parseFloat(ethers.formatEther(bnbBal)).toLocaleString(undefined, { maximumFractionDigits: 6 }) + ' BNB';
-    const nftCount = await amContract.balanceOf(userAddr);
-    document.getElementById('nftCount').textContent = nftCount.toString();
-    const myList = document.getElementById('myAddressesList');
-    if (Number(nftCount) === 0) {
-      myList.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><p>' + t('noNfts') + '</p></div>';
-    } else {
-      try {
-        const resp = await fetch(API_BASE + '/api/user/' + userAddr);
-        if (resp.ok) {
-          const data = await resp.json();
-          const items = extractItems(data);
-          if (items.length === 0) { myList.innerHTML = '<div class="empty-state"><p>' + t('noNfts') + '</p></div>'; return; }
-          let html = '';
-          for (const item of items) {
-            const walletAddr = item.walletAddr || item.wallet || '';
-            const streak2 = Number(item.streak || 0);
-            const addrShort2 = walletAddr ? walletAddr.slice(0, 10) + '...' + walletAddr.slice(-6) : '--';
-            html += '<div class="addr-card">' +
-              '<div class="addr-id">#' + (item.walletId || item.tokenId || '?') + ' <span class="badge badge-blue">' + t('claimed') + '</span></div>' +
-              '<div class="addr-text">' + addrShort2 + '</div>' +
-              '<div class="addr-meta">' + tierBadge(streak2) + '<span>' + t('streak') + ': ' + streak2 + '</span></div>' +
-              '<div class="addr-actions">' +
-              '<button class="btn-secondary" style="font-size:.82rem;padding:10px" onclick="window.open(\'https://bscscan.com/address/' + walletAddr + '\',\'_blank\')">BscScan</button>' +
-              '</div></div>';
-          }
-          myList.innerHTML = html;
-        } else { myList.innerHTML = '<div class="empty-state"><p>' + t('toastFetchFail') + '</p></div>'; }
-      } catch { myList.innerHTML = '<div class="empty-state"><p>' + t('toastFetchFail') + '</p></div>'; }
-    }
-  } catch (e) { console.error('MyNFTs error:', e); }
+async function refreshMyNfts(){
+  if(!userAddr){document.getElementById('walletAddr').textContent=t('notConnected');return}
+  try{
+    document.getElementById('walletAddr').textContent=userAddr.slice(0,8)+'...'+userAddr.slice(-6);
+    const[tokenBal,bnbBal]=await pqContract.getUserDashboard(userAddr);
+    document.getElementById('addBalance').textContent=parseFloat(ethers.formatEther(tokenBal)).toLocaleString(undefined,{maximumFractionDigits:4})+' ADD';
+    document.getElementById('bnbBalance').textContent=parseFloat(ethers.formatEther(bnbBal)).toLocaleString(undefined,{maximumFractionDigits:6})+' BNB';
+    const nftCount=await amContract.balanceOf(userAddr);
+    document.getElementById('nftCount').textContent=nftCount.toString();
+    const myList=document.getElementById('myAddressesList');
+    if(Number(nftCount)===0){myList.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><p>'+t('noNfts')+'</p></div>';return}
+    try{
+      const resp=await fetch(API_BASE+'/api/user/'+userAddr);
+      if(resp.ok){const raw=await resp.json();const items=extractItems(raw);
+        if(!items.length){myList.innerHTML='<div class="empty-state"><p>'+t('noNfts')+'</p></div>';return}
+        let h='';
+        for(const item of items){
+          const wa=item.walletAddr||item.wallet||item.address||'';const s=Number(item.streak||0);
+          const hl=hlAddr(wa);
+          h+='<div class="addr-card"><div class="addr-id">#'+(item.walletId||item.tokenId||'?')+' <span class="badge badge-blue">'+t('claimed')+'</span></div>'+
+            '<div class="addr-display" onclick="copyAddr(\''+wa+'\')">'+hl+'<svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div>'+
+            '<div class="addr-meta">'+tierBadge(s)+'<span>'+t('streak')+': '+s+'</span></div>'+
+            '<div class="addr-actions"><button class="btn-secondary" style="font-size:.78rem;padding:9px" onclick="window.open(\'https://bscscan.com/address/'+wa+'\',\'_blank\')">BscScan</button></div></div>'}
+        myList.innerHTML=h
+      }else{myList.innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>'}
+    }catch{myList.innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>'}
+  }catch(e){console.error('MyNFTs error:',e)}
 }
 
-async function transferADD() {
-  if (!signer) { showToast(t('toastConnFirst')); return; }
-  const to = document.getElementById('transferToInput').value.trim();
-  const amt = document.getElementById('transferAmtInput').value.trim();
-  if (!ethers.isAddress(to)) { showToast(t('toastEnterAddr')); return; }
-  if (!amt || Number(amt) <= 0) { showToast(t('toastEnterAmt')); return; }
-  try {
-    showToast(t('toastTransferring'));
-    const tx = await pnContract.transfer(to, ethers.parseEther(amt));
-    await tx.wait();
-    showToast(t('toastTransferOk'));
-    document.getElementById('transferToInput').value = '';
-    document.getElementById('transferAmtInput').value = '';
-    refreshMyNfts();
-  } catch (e) { showToast(e.reason || t('toastTxFail')); }
+async function transferADD(){
+  if(!signer){showToast(t('toastConnFirst'),'error');return}
+  const to=document.getElementById('transferToInput').value.trim();
+  const amt=document.getElementById('transferAmtInput').value.trim();
+  if(!ethers.isAddress(to)){showToast(t('toastEnterAddr'),'error');return}
+  if(!amt||Number(amt)<=0){showToast(t('toastEnterAmt'),'error');return}
+  try{
+    showToast(t('toastTransferring'),'info');
+    const tx=await pnContract.transfer(to,ethers.parseEther(amt));await tx.wait();
+    showToast(t('toastTransferOk'),'success');
+    document.getElementById('transferToInput').value='';document.getElementById('transferAmtInput').value='';refreshMyNfts()
+  }catch(e){showToast(e.reason||t('toastTxFail'),'error')}
 }
 
 /* === INFO === */
-async function loadInfo() {
-  try {
-    const resp = await fetch(API_BASE + '/api/global');
-    if (resp.ok) {
-      const g = await resp.json();
-      const info = extractObj(g);
-      const fmt = v => parseFloat(ethers.formatEther(v || 0)).toLocaleString(undefined, { maximumFractionDigits: 2 });
-      document.getElementById('globalStatsContent').innerHTML = '<div class="stat-grid-4 fade-in">' +
-        '<div class="stat-card"><div class="sc-value">' + fmt(info.maxSupply || info.MAX_SUPPLY || 0) + '</div><div class="sc-label">' + t('maxSupply') + '</div></div>' +
-        '<div class="stat-card"><div class="sc-value">' + (info.totalMined || info.totalMined_ || 0) + '</div><div class="sc-label">' + t('totalMined') + '</div></div>' +
-        '<div class="stat-card"><div class="sc-value">' + fmt(info.totalMinted || 0) + '</div><div class="sc-label">' + t('totalMinted') + '</div></div>' +
-        '<div class="stat-card"><div class="sc-value">' + fmt(info.totalSupply || info.totalSupply_ || 0) + '</div><div class="sc-label">' + t('totalSupply') + '</div></div>' +
-        '<div class="stat-card"><div class="sc-value">' + fmt(info.currentReward || info.currentReward_ || 0) + ' ADD</div><div class="sc-label">' + t('currentReward') + '</div></div>' +
-        '<div class="stat-card"><div class="sc-value">' + (info.era || info.era_ || 0) + '</div><div class="sc-label">' + t('era') + '</div></div>' +
-        '</div>';
-    } else { throw new Error(); }
-  } catch {
-    try {
-      const [supply, minted, reward, era, mined, maxSup] = await Promise.all([
-        pnContract.totalSupply().catch(() => 0n),
-        pnContract.totalMinted().catch(() => 0n),
-        pnContract.currentReward().catch(() => 0n),
-        pnContract.era().catch(() => 0n),
-        pnContract.totalMined().catch(() => 0n),
-        pnContract.MAX_SUPPLY().catch(() => 0n)
+async function loadInfo(){
+  // Global Stats
+  try{
+    const resp=await fetch(API_BASE+'/api/global');
+    if(resp.ok){
+      const g=await resp.json();const info=extractObj(g);
+      const fmt=v=>parseFloat(ethers.formatEther(v||0)).toLocaleString(undefined,{maximumFractionDigits:2});
+      document.getElementById('globalStatsContent').innerHTML='<div class="stat-grid-4 fade-in">'+
+        '<div class="stat-card"><div class="sc-val">'+fmt(info.maxSupply||info.MAX_SUPPLY||0)+'</div><div class="sc-label">'+t('maxSupply')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+(info.totalMined||info.totalMined_||0)+'</div><div class="sc-label">'+t('totalMined')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+fmt(info.totalMinted||0)+'</div><div class="sc-label">'+t('totalMinted')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+fmt(info.totalSupply||info.totalSupply_||0)+'</div><div class="sc-label">'+t('totalSupply')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+fmt(info.currentReward||info.currentReward_||0)+' ADD</div><div class="sc-label">'+t('currentReward')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+(info.era||info.era_||0)+'</div><div class="sc-label">'+t('era')+'</div></div>'+
+        '</div>'
+    }else{throw new Error()}
+  }catch{
+    try{
+      const [supply,minted,reward,era,mined,maxSup]=await Promise.all([
+        (pnContract?pnContract.totalSupply():Promise.resolve(0n)).catch(()=>0n),
+        (pnContract?pnContract.totalMinted():Promise.resolve(0n)).catch(()=>0n),
+        (pnContract?pnContract.currentReward():Promise.resolve(0n)).catch(()=>0n),
+        (pnContract?pnContract.era():Promise.resolve(0n)).catch(()=>0n),
+        (pnContract?pnContract.totalMined():Promise.resolve(0n)).catch(()=>0n),
+        (pnContract?pnContract.MAX_SUPPLY():Promise.resolve(0n)).catch(()=>0n)
       ]);
-      const fmt = v => parseFloat(ethers.formatEther(v || 0)).toLocaleString(undefined, { maximumFractionDigits: 2 });
-      document.getElementById('globalStatsContent').innerHTML = '<div class="stat-grid-4 fade-in">' +
-        '<div class="stat-card"><div class="sc-value">' + fmt(maxSup) + '</div><div class="sc-label">' + t('maxSupply') + '</div></div>' +
-        '<div class="stat-card"><div class="sc-value">' + (mined || 0) + '</div><div class="sc-label">' + t('totalMined') + '</div></div>' +
-        '<div class="stat-card"><div class="sc-value">' + fmt(minted) + '</div><div class="sc-label">' + t('totalMinted') + '</div></div>' +
-        '<div class="stat-card"><div class="sc-value">' + fmt(supply) + '</div><div class="sc-label">' + t('totalSupply') + '</div></div>' +
-        '<div class="stat-card"><div class="sc-value">' + fmt(reward) + ' ADD</div><div class="sc-label">' + t('currentReward') + '</div></div>' +
-        '<div class="stat-card"><div class="sc-value">' + (era || 0) + '</div><div class="sc-label">' + t('era') + '</div></div>' +
-        '</div>';
-    } catch {
-      document.getElementById('globalStatsContent').innerHTML = '<div class="empty-state"><p>' + t('toastFetchFail') + '</p></div>';
-    }
+      const fmt=v=>parseFloat(ethers.formatEther(v||0)).toLocaleString(undefined,{maximumFractionDigits:2});
+      document.getElementById('globalStatsContent').innerHTML='<div class="stat-grid-4 fade-in">'+
+        '<div class="stat-card"><div class="sc-val">'+fmt(maxSup)+'</div><div class="sc-label">'+t('maxSupply')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+(mined||0)+'</div><div class="sc-label">'+t('totalMined')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+fmt(minted)+'</div><div class="sc-label">'+t('totalMinted')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+fmt(supply)+'</div><div class="sc-label">'+t('totalSupply')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+fmt(reward)+' ADD</div><div class="sc-label">'+t('currentReward')+'</div></div>'+
+        '<div class="stat-card"><div class="sc-val">'+(era||0)+'</div><div class="sc-label">'+t('era')+'</div></div>'+
+        '</div>'
+    }catch{document.getElementById('globalStatsContent').innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>'}
   }
-
-  try {
-    const resp2 = await fetch(API_BASE + '/api/status');
-    if (resp2.ok) {
-      const s = await resp2.json();
-      const st = extractObj(s);
-      document.getElementById('networkStatus').innerHTML = '<ul class="info-list fade-in">' +
-        '<li><span class="label">' + t('status') + '</span><span class="value"><span class="badge badge-green">' + (st.ready === true ? t('synced') : st.message || 'OK') + '</span></span></li>' +
-        '<li><span class="label">' + t('blockNumber') + '</span><span class="value mono">' + (st.lastSyncedId || st.blockNumber || st.block || '--') + '</span></li>' +
-        (st.chainId ? '<li><span class="label">Chain ID</span><span class="value">' + st.chainId + '</span></li>' : '') +
-        (st.lastUpdateTime ? '<li><span class="label">Updated</span><span class="value">' + new Date(st.lastUpdateTime).toLocaleString() + '</span></li>' : '') +
-        '</ul>';
-    } else { throw new Error(); }
-  } catch {
-    document.getElementById('networkStatus').innerHTML = '<ul class="info-list fade-in"><li><span class="label">' + t('network') + '</span><span class="value">BSC Mainnet</span></li><li><span class="label">Chain ID</span><span class="value">56</span></li></ul>';
-  }
+  // Stats
+  try{
+    const resp=await fetch(API_BASE+'/api/stats');
+    if(resp.ok){const d=await resp.json();const info=extractObj(d);
+      const items=[{label:t('total'),val:info.totalAddresses||info.total||info.registered||0},
+        {label:t('available'),val:info.available||info.availableAddresses||info.unclaimed||0,cl:'green'},
+        {label:t('totalMined'),val:info.totalMined||info.mined||0,cl:'accent'},
+        {label:t('purchasePrice'),val:info.purchasePrice||info.price?ethers.formatEther(info.purchasePrice||info.price||0)+' BNB':'--',cl:'accent'}];
+      let h='<div class="stat-grid-4 fade-in">';
+      for(const it of items)h+='<div class="stat-card"><div class="sc-val'+(it.cl?' '+it.cl:'')+'">'+it.val+'</div><div class="sc-label">'+it.label+'</div></div>';
+      h+='</div>';document.getElementById('statsContent').innerHTML=h
+    }else{throw new Error()}
+  }catch{document.getElementById('statsContent').innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>'}
+  // Network Status
+  try{
+    const resp=await fetch(API_BASE+'/api/status');
+    if(resp.ok){const s=await resp.json();const st=extractObj(s);
+      document.getElementById('networkStatus').innerHTML='<ul class="info-list fade-in">'+
+        '<li><span class="label">'+t('status')+'</span><span class="value"><span class="badge badge-green">'+(st.ready===true?t('synced'):st.message||'OK')+'</span></span></li>'+
+        '<li><span class="label">'+t('blockNumber')+'</span><span class="value mono">'+(st.lastSyncedId||st.blockNumber||st.block||'--')+'</span></li>'+
+        (st.chainId?'<li><span class="label">Chain ID</span><span class="value">'+st.chainId+'</span></li>':'')+
+        (st.lastUpdateTime?'<li><span class="label">Updated</span><span class="value">'+new Date(st.lastUpdateTime).toLocaleString()+'</span></li>':'')+
+        '</ul>'
+    }else{throw new Error()}
+  }catch{document.getElementById('networkStatus').innerHTML='<ul class="info-list fade-in"><li><span class="label">'+t('network')+'</span><span class="value">BSC Mainnet</span></li><li><span class="label">Chain ID</span><span class="value">56</span></li></ul>'}
 }
 
 /* === EVENTS === */
-if (window.ethereum) {
-  window.ethereum.on('accountsChanged', () => location.reload());
-  window.ethereum.on('chainChanged', () => location.reload());
-}
+if(window.ethereum){window.ethereum.on('accountsChanged',()=>location.reload());window.ethereum.on('chainChanged',()=>location.reload())}
 
-// Auto-load initial tab
-setTimeout(() => { loadMarket(); loadLeaderboard(); loadInfo(); }, 500);
+/* === AUTO LOAD === */
+setTimeout(()=>{loadMarket();loadMarketOverview();loadLeaderboard();loadInfo()},300);
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
 </body>
 </html>
