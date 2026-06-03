@@ -511,7 +511,7 @@ function renderMarketList(items,total){
       '<div class="addr-meta">'+tierBadge(s)+
       '<span>'+t('digit')+': '+dVal+'</span><span>'+t('streak')+': '+s+'</span><span>'+t(pType.toLowerCase())+'</span><span>'+t('occurrences')+': '+occ+'</span></div>'+
       '<div class="addr-actions">'+
-      (purchasable?'<button class="btn-primary" style="font-size:.78rem;padding:9px" onclick="buyAddress('+(item.salt||0)+')">'+t('claim')+' '+priceBNB+' BNB</button>':'<button class="btn-secondary" style="font-size:.78rem;padding:9px" disabled>'+t('claimed')+'</button>')+
+      (purchasable?'<button class="btn-primary" style="font-size:.78rem;padding:9px" onclick="buyByWid('+wId+')">'+t('claim')+' '+priceBNB+' BNB</button>':'<button class="btn-secondary" style="font-size:.78rem;padding:9px" disabled>'+t('claimed')+'</button>')+
       '<button class="btn-secondary" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px" onclick="window.open(\'https://bscscan.com/address/'+wAddr+'\',\'_blank\')">BscScan</button>'+
       '</div></div>';
   }
@@ -534,12 +534,12 @@ async function searchById(){
   }catch(e){showToast(t('toastFetchFail'),'error')}
 }
 
-async function buyAddress(salt){
+async function buyByWid(wid){
   if(!signer){showToast(t('toastConnFirst'),'error');return}
   try{
-    const price=await amContract.currentPrice(salt);
+    const price=await amContract.purchasePrice();
     showToast(t('toastClaiming'),'info');
-    const tx=await amContract.claim(salt,{value:price});await tx.wait();
+    const tx=await amContract.claimById(wid,{value:price});await tx.wait();
     showToast(t('toastClaimOk'),'success');loadMarket()
   }catch(e){showToast(e.reason||t('toastTxFail'),'error')}
 }
@@ -549,8 +549,7 @@ async function buyById(){
   const id=document.getElementById('buyIdInput').value.trim();
   if(!id){showToast(t('toastEnterId'),'error');return}
   try{
-    const info=await amContract.getAddressInfoById(id);
-    const salt=info.salt;const price=info.price||(await amContract.currentPrice(salt));
+    const price=await amContract.purchasePrice();
     showToast(t('toastClaiming'),'info');
     const tx=await amContract.claimById(id,{value:price});await tx.wait();
     showToast(t('toastClaimOk'),'success');loadMarket()
