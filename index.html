@@ -430,22 +430,33 @@ function tierName(s) { if (s >= 14) return 'Legendary'; if (s >= 12) return 'Epi
 function tierBadge(s) { const tn = tierName(s); const cls = tn === 'Common' ? 'badge-tier-c' : tn === 'Rare' ? 'badge-tier-r' : tn === 'Epic' ? 'badge-tier-e' : 'badge-tier-l'; return '<span class="badge ' + cls + '">' + tn + '</span>'; }
 
 /* === DATA EXTRACTOR === */
+function unwrap(d) {
+  if (!d || typeof d !== 'object') return d;
+  if (d.success === true && d.data !== undefined) return d.data;
+  return d;
+}
 function extractItems(d) {
-  if (Array.isArray(d)) return d;
-  if (d && Array.isArray(d.items)) return d.items;
-  if (d && Array.isArray(d.data)) return d.data;
-  if (d && Array.isArray(d.list)) return d.list;
-  if (d && Array.isArray(d.records)) return d.records;
-  if (d && Array.isArray(d.result)) return d.result;
+  if (!d || typeof d !== 'object') return [];
+  let r = unwrap(d);
+  if (Array.isArray(r)) return r;
+  if (Array.isArray(r.items)) return r.items;
+  if (Array.isArray(r.data)) return r.data;
+  if (Array.isArray(r.list)) return r.list;
+  if (Array.isArray(r.records)) return r.records;
+  if (Array.isArray(r.result)) return r.result;
   return [];
 }
 function extractTotal(d) {
   if (!d || typeof d !== 'object') return 0;
-  return Number(d.total || d.totalCount || d.count || d.recordsTotal || d.totalRecords || 0);
+  let r = unwrap(d);
+  if (r.pagination && r.pagination.total) return Number(r.pagination.total);
+  return Number(r.total || r.totalCount || r.count || r.recordsTotal || r.totalRecords || 0);
 }
 function extractObj(d) {
   if (!d || typeof d !== 'object') return {};
-  return d.data || d.info || d;
+  let r = unwrap(d);
+  if (r.info) return r.info;
+  return r;
 }
 
 /* === MARKET === */
@@ -581,17 +592,18 @@ async function loadLeaderboard() {
       const item = items[i];
       const rank = i + 1;
       const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
-      const addr = item.address || item.miner || item.wallet || item.walletAddr || item.user || '';
-      const count = item.count || item.total || item.score || item.nftCount || 0;
-      const detail = item.detail || item.label || (item.streak ? t('streak') + ': ' + item.streak : '') || (item.occurrences ? t('occurrences') + ': ' + item.occurrences : '');
-      const value = item.value || item.reward || item.score || item.points || count;
+      const addr = item.walletAddr || item.wallet || item.address || item.user || '';
+      const streak = item.streak || 0;
+      const occ = item.occurrences || 0;
+      const wid = item.walletId || item.tokenId || item.id || '';
+      const addrShort = addr ? addr.slice(0, 8) + '...' + addr.slice(-6) : '#' + wid;
       html += '<div class="leaderboard-item">' +
         '<div class="rank ' + rankClass + '">' + rank + '</div>' +
         '<div class="lb-info">' +
-        '<div class="lb-name">' + (addr ? addr.slice(0, 8) + '...' + addr.slice(-6) : '#' + (item.walletId || item.id || i)) + '</div>' +
-        (detail ? '<div class="lb-detail">' + detail + '</div>' : '') +
+        '<div class="lb-name">' + addrShort + '</div>' +
+        '<div class="lb-detail">' + t('streak') + ' ' + streak + ' | ' + t('occurrences') + ' ' + occ + ' | #' + wid + '</div>' +
         '</div>' +
-        '<div class="lb-value">' + value + '</div>' +
+        '<div class="lb-value">' + tierBadge(streak) + '</div>' +
         '</div>';
     }
     el.innerHTML = '<div class="fade-in">' + html + '</div>';
@@ -704,10 +716,10 @@ async function loadInfo() {
       const s = await resp2.json();
       const st = extractObj(s);
       document.getElementById('networkStatus').innerHTML = '<ul class="info-list fade-in">' +
-        '<li><span class="label">' + t('status') + '</span><span class="value"><span class="badge badge-green">' + (st.synced !== false ? t('synced') : st.message || 'OK') + '</span></span></li>' +
-        '<li><span class="label">' + t('blockNumber') + '</span><span class="value mono">' + (st.blockNumber || st.block || st.latestBlock || '--') + '</span></li>' +
+        '<li><span class="label">' + t('status') + '</span><span class="value"><span class="badge badge-green">' + (st.ready === true ? t('synced') : st.message || 'OK') + '</span></span></li>' +
+        '<li><span class="label">' + t('blockNumber') + '</span><span class="value mono">' + (st.lastSyncedId || st.blockNumber || st.block || '--') + '</span></li>' +
         (st.chainId ? '<li><span class="label">Chain ID</span><span class="value">' + st.chainId + '</span></li>' : '') +
-        (st.updatedAt || st.lastUpdate || st.timestamp ? '<li><span class="label">Updated</span><span class="value">' + (st.updatedAt || st.lastUpdate || st.timestamp) + '</span></li>' : '') +
+        (st.lastUpdateTime ? '<li><span class="label">Updated</span><span class="value">' + new Date(st.lastUpdateTime).toLocaleString() + '</span></li>' : '') +
         '</ul>';
     } else { throw new Error(); }
   } catch {
