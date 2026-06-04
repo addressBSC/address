@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#0b0e14" />
+<title>PADD Token Launchpad</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/addressBSC/address/refs/heads/main/owner/padd.png" />
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/addressBSC/address/refs/heads/main/owner/padd.png" />
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0b0e14;
+    --bg-card:#141923;
+    --bg-elev:#1c2230;
+    --border:#262d3d;
+    --text:#e6edf7;
+    --text-dim:#8b96ad;
+    --accent:#f0b90b;
+    --accent-2:#fcd535;
+    --success:#22c55e;
+    --danger:#ef4444;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.5;min-height:100vh}
+  body{background:radial-gradient(1200px 600px at 50% -200px, rgba(240,185,11,0.10), transparent 60%), var(--bg)}
+  .wrap{max-width:520px;margin:0 auto;padding:16px;padding-bottom:48px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand img{width:36px;height:36px;border-radius:10px;background:#fff;padding:3px}
+  .brand-title{font-size:17px;font-weight:700;letter-spacing:0.3px}
+  .brand-sub{font-size:11px;color:var(--text-dim);margin-top:1px}
+  .top-right{display:flex;align-items:center;gap:8px}
+  .lang-toggle{background:var(--bg-elev);border:1px solid var(--border);color:var(--text);border-radius:999px;padding:6px 12px;font-size:12px;cursor:pointer;font-weight:600}
+  .lang-toggle:active{transform:scale(0.97)}
+
+  .hero{background:linear-gradient(135deg, rgba(240,185,11,0.12), rgba(252,213,53,0.04));border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px;position:relative;overflow:hidden}
+  .hero h1{margin:0 0 6px;font-size:20px;font-weight:700}
+  .hero p{margin:0;color:var(--text-dim);font-size:13px}
+  .hero .badge{display:inline-block;background:rgba(240,185,11,0.15);color:var(--accent);font-size:11px;padding:3px 9px;border-radius:999px;margin-bottom:10px;font-weight:600;letter-spacing:0.3px}
+
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+  .card h2{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px}
+
+  .wallet-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .wallet-pill{flex:1;background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}
+  .wallet-pill.empty{color:var(--text-dim);font-style:italic;font-family:inherit}
+  .net-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);margin-top:6px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--text-dim);display:inline-block}
+  .dot.ok{background:var(--success)}
+  .dot.bad{background:var(--danger)}
+
+  label{display:block;font-size:12px;color:var(--text-dim);margin-bottom:6px;font-weight:600}
+  .field{margin-bottom:14px}
+  input[type=text],input[type=number]{width:100%;background:var(--bg-elev);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit;outline:none;transition:border-color .15s}
+  input:focus{border-color:var(--accent)}
+  .hint{font-size:11px;color:var(--text-dim);margin-top:6px}
+
+  .btn{display:block;width:100%;background:linear-gradient(180deg,var(--accent-2),var(--accent));color:#0b0e14;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;transition:transform .1s;font-family:inherit}
+  .btn:active{transform:scale(0.98)}
+  .btn:disabled{opacity:0.5;cursor:not-allowed}
+  .btn-secondary{background:var(--bg-elev);color:var(--text);border:1px solid var(--border)}
+  .btn-row{display:flex;gap:8px}
+  .btn-row .btn{flex:1}
+
+  .predict-box{background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--text-dim);margin-top:8px;word-break:break-all;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;display:none}
+  .predict-box.show{display:block}
+  .predict-box b{color:var(--accent);font-weight:600}
+
+  .status{margin-top:12px;padding:11px 12px;border-radius:10px;font-size:13px;display:none;word-break:break-all}
+  .status.show{display:block}
+  .status.info{background:rgba(59,130,246,0.12);color:#93c5fd;border:1px solid rgba(59,130,246,0.3)}
+  .status.success{background:rgba(34,197,94,0.12);color:#86efac;border:1px solid rgba(34,197,94,0.3)}
+  .status.error{background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.3)}
+  .status a{color:inherit;text-decoration:underline}
+
+  .info-list{list-style:none;padding:0;margin:0;font-size:12px}
+  .info-list li{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);gap:10px}
+  .info-list li:last-child{border-bottom:none}
+  .info-list .k{color:var(--text-dim);flex-shrink:0}
+  .info-list .v{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;word-break:break-all;text-align:right}
+  .info-list a{color:var(--accent);text-decoration:none}
+
+  footer{text-align:center;color:var(--text-dim);font-size:11px;margin-top:20px;padding:0 10px}
+  footer a{color:var(--accent);text-decoration:none}
+
+  .spinner{display:inline-block;width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  @media (max-width:380px){
+    .wrap{padding:12px}
+    .hero h1{font-size:18px}
+    .brand-title{font-size:15px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <img src="https://raw.githubusercontent.com/addressBSC/address/refs/heads/main/owner/padd.png" alt="PADD" />
+      <div>
+        <div class="brand-title">PADD Launchpad</div>
+        <div class="brand-sub" data-i18n="brandSub">Vanity ERC20 on BSC</div>
+      </div>
+    </div>
+    <div class="top-right">
+      <button class="lang-toggle" id="langBtn">中文</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <span class="badge" data-i18n="badge">BNB Smart Chain</span>
+    <h1 data-i18n="heroTitle">Launch Your Vanity ERC20</h1>
+    <p data-i18n="heroDesc">Upgrade your PADD NFT into a fully decentralized, immutable ERC20 token on its own vanity address.</p>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="walletTitle">Wallet</h2>
+    <div class="wallet-row">
+      <div class="wallet-pill empty" id="walletAddr" data-i18n="notConnected">Not connected</div>
+    </div>
+    <div class="net-tag"><span class="dot" id="netDot"></span><span id="netText" data-i18n="netUnknown">Network: —</span></div>
+    <div style="margin-top:12px">
+      <button class="btn" id="connectBtn" data-i18n="connectBtn">Connect Wallet</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="deployTitle">Deploy Token</h2>
+
+    <div class="field">
+      <label for="tokenId" data-i18n="tokenIdLabel">PADD NFT Token ID</label>
+      <input type="number" id="tokenId" placeholder="e.g. 12345" min="0" inputmode="numeric" />
+      <div class="hint" data-i18n="tokenIdHint">You must own the PADD NFT for this Token ID.</div>
+    </div>
+
+    <div class="field">
+      <label for="tokenName" data-i18n="nameLabel">Token Name</label>
+      <input type="text" id="tokenName" placeholder="My Vanity Token" maxlength="64" />
+    </div>
+
+    <div class="field">
+      <label for="tokenSymbol" data-i18n="symbolLabel">Token Symbol</label>
+      <input type="text" id="tokenSymbol" placeholder="MVT" maxlength="12" />
+    </div>
+
+    <div class="field">
+      <label for="tokenSupply" data-i18n="supplyLabel">Total Supply</label>
+      <input type="text" id="tokenSupply" placeholder="1000000000" inputmode="decimal" />
+      <div class="hint" data-i18n="supplyHint">Whole-token amount. Decimals are 18 (handled automatically).</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="predictBtn" data-i18n="predictBtn">Predict Address</button>
+      <button class="btn" id="deployBtn" data-i18n="deployBtn">Deploy</button>
+    </div>
+
+    <div class="predict-box" id="predictBox"></div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="contractTitle">Contract Info</h2>
+    <ul class="info-list">
+      <li><span class="k" data-i18n="netRow">Network</span><span class="v">BSC Mainnet (56)</span></li>
+      <li><span class="k">Factory</span><span class="v"><a href="https://bscscan.com/address/0x78127790105D75D31b2634cd474cEA18FcF6Aa5B#code" target="_blank" rel="noopener">0x7812…Aa5B</a></span></li>
+      <li><span class="k">Logic</span><span class="v"><a href="https://bscscan.com/address/0xA74985a3df0B275230377A70Ca4987b9C7FbA334#code" target="_blank" rel="noopener">0xA749…A334</a></span></li>
+      <li><span class="k">AddressManager</span><span class="v"><a href="https://bscscan.com/address/0x78B11198268619728E4b53c642E8d68941004c11" target="_blank" rel="noopener">0x78B1…4c11</a></span></li>
+    </ul>
+  </div>
+
+  <footer>
+    <span data-i18n="footer">Trustless · Immutable · No admin keys</span>
+  </footer>
+
+</div>
+
+<script>
+/* ============ Constants ============ */
+const FACTORY_ADDR = "0x78127790105D75D31b2634cd474cEA18FcF6Aa5B";
+const ADDR_MGR     = "0x78B11198268619728E4b53c642E8d68941004c11";
+const BSC_CHAIN_ID = 56;
+const BSC_HEX      = "0x38";
+
+const FACTORY_ABI = [
+  "function deployToken(uint256 tokenId, string name_, string symbol_, uint256 totalSupply_) external returns (address)",
+  "function predictTokenAddress(uint256 tokenId) external view returns (address)",
+  "function deployable(uint256 tokenId) external view returns (bool)",
+  "event TokenDeployed(uint256 indexed tokenId, address indexed tokenAddress, address indexed deployer, string name, string symbol, uint256 totalSupply)"
+];
+const ADDR_MGR_ABI = [
+  "function ownerOf(uint256 tokenId) external view returns (address)",
+  "function approve(address to, uint256 tokenId) external",
+  "function getApproved(uint256 tokenId) external view returns (address)",
+  "function isApprovedForAll(address owner, address operator) external view returns (bool)"
+];
+
+/* ============ i18n ============ */
+const I18N = {
+  en:{
+    brandSub:"Vanity ERC20 on BSC",
+    badge:"BNB Smart Chain",
+    heroTitle:"Launch Your Vanity ERC20",
+    heroDesc:"Upgrade your PADD NFT into a fully decentralized, immutable ERC20 token on its own vanity address.",
+    walletTitle:"Wallet",
+    notConnected:"Not connected",
+    netUnknown:"Network: —",
+    netBSC:"Network: BSC Mainnet",
+    netWrong:"Wrong network — switch to BSC",
+    connectBtn:"Connect Wallet",
+    disconnectBtn:"Disconnect",
+    switchBtn:"Switch to BSC",
+    deployTitle:"Deploy Token",
+    tokenIdLabel:"PADD NFT Token ID",
+    tokenIdHint:"You must own the PADD NFT for this Token ID.",
+    nameLabel:"Token Name",
+    symbolLabel:"Token Symbol",
+    supplyLabel:"Total Supply",
+    supplyHint:"Whole-token amount. Decimals are 18 (handled automatically).",
+    predictBtn:"Predict Address",
+    deployBtn:"Deploy",
+    contractTitle:"Contract Info",
+    netRow:"Network",
+    footer:"Trustless · Immutable · No admin keys",
+    /* dynamic */
+    noWallet:"No wallet detected. Please install MetaMask or open in a Web3 wallet browser.",
+    connecting:"Connecting…",
+    switching:"Switching network…",
+    checking:"Checking ownership…",
+    approving:"Approving NFT to Factory…",
+    deploying:"Deploying token…",
+    waiting:"Waiting for confirmation…",
+    successDeploy:"Token deployed successfully!",
+    viewTx:"View transaction",
+    viewToken:"View token",
+    errOwner:"You are not the owner of this Token ID.",
+    errNotDeployable:"This Token ID is not deployable (already deployed or not registered).",
+    errFillAll:"Please fill in all fields.",
+    errConnect:"Please connect your wallet first.",
+    errBSC:"Please switch to BSC Mainnet.",
+    errSupply:"Total supply must be a positive number.",
+    predicted:"Predicted token address",
+    notDeployable:"Not deployable",
+    deployableYes:"Deployable ✓"
+  },
+  zh:{
+    brandSub:"BSC 靓号 ERC20",
+    badge:"币安智能链",
+    heroTitle:"发行你的靓号 ERC20 代币",
+    heroDesc:"将你的 PADD 靓号 NFT 升级为部署在该靓号地址上的、完全去中心化且不可篡改的 ERC20 代币。",
+    walletTitle:"钱包",
+    notConnected:"未连接",
+    netUnknown:"网络：—",
+    netBSC:"网络：BSC 主网",
+    netWrong:"网络错误 — 请切换到 BSC",
+    connectBtn:"连接钱包",
+    disconnectBtn:"断开连接",
+    switchBtn:"切换到 BSC",
+    deployTitle:"部署代币",
+    tokenIdLabel:"PADD NFT Token ID",
+    tokenIdHint:"你必须持有该 Token ID 对应的 PADD NFT。",
+    nameLabel:"代币名称",
+    symbolLabel:"代币符号",
+    supplyLabel:"发行总量",
+    supplyHint:"整数枚数，精度为 18 位（自动处理）。",
+    predictBtn:"预测地址",
+    deployBtn:"立即发币",
+    contractTitle:"合约信息",
+    netRow:"网络",
+    footer:"无需信任 · 不可篡改 · 无管理员密钥",
+    noWallet:"未检测到钱包，请安装 MetaMask 或在 Web3 钱包浏览器中打开。",
+    connecting:"连接中…",
+    switching:"切换网络中…",
+    checking:"验证持有权…",
+    approving:"授权 NFT 给 Factory…",
+    deploying:"部署代币中…",
+    waiting:"等待链上确认…",
+    successDeploy:"代币部署成功！",
+    viewTx:"查看交易",
+    viewToken:"查看代币",
+    errOwner:"你不是该 Token ID 的持有者。",
+    errNotDeployable:"该 Token ID 不可部署（已部署或未注册）。",
+    errFillAll:"请填写所有字段。",
+    errConnect:"请先连接钱包。",
+    errBSC:"请切换到 BSC 主网。",
+    errSupply:"发行总量必须为正数。",
+    predicted:"预测代币地址",
+    notDeployable:"不可部署",
+    deployableYes:"可部署 ✓"
+  }
+};
+let lang = (navigator.language||"en").toLowerCase().startsWith("zh") ? "en" : "en"; // default English per requirement
+function t(k){ return (I18N[lang]&&I18N[lang][k]) || I18N.en[k] || k; }
+function applyI18n(){
+  document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k = el.getAttribute("data-i18n");
+    if (I18N[lang][k] !== undefined) el.textContent = I18N[lang][k];
+  });
+  document.getElementById("langBtn").textContent = lang === "en" ? "中文" : "EN";
+  // Refresh dynamic UI
+  refreshWalletUI();
+}
+document.getElementById("langBtn").addEventListener("click",()=>{
+  lang = (lang === "en") ? "zh" : "en";
+  applyI18n();
+});
+
+/* ============ Wallet ============ */
+let provider, signer, account, chainId;
+
+function shortAddr(a){ return a ? a.slice(0,6)+"…"+a.slice(-4) : ""; }
+
+function refreshWalletUI(){
+  const elAddr = document.getElementById("walletAddr");
+  const elDot  = document.getElementById("netDot");
+  const elNet  = document.getElementById("netText");
+  const btn    = document.getElementById("connectBtn");
+
+  if (!account){
+    elAddr.className = "wallet-pill empty";
+    elAddr.textContent = t("notConnected");
+    elDot.className = "dot";
+    elNet.textContent = t("netUnknown");
+    btn.textContent = t("connectBtn");
+    btn.onclick = connectWallet;
+    return;
+  }
+  elAddr.className = "wallet-pill";
+  elAddr.textContent = shortAddr(account);
+
+  if (chainId === BSC_CHAIN_ID){
+    elDot.className = "dot ok";
+    elNet.textContent = t("netBSC");
+    btn.textContent = t("disconnectBtn");
+    btn.onclick = disconnectWallet;
+  } else {
+    elDot.className = "dot bad";
+    elNet.textContent = t("netWrong");
+    btn.textContent = t("switchBtn");
+    btn.onclick = switchToBSC;
+  }
+}
+
+async function connectWallet(){
+  if (!window.ethereum){ setStatus(t("noWallet"),"error"); return; }
+  try {
+    setStatus(t("connecting"),"info",true);
+    provider = new ethers.BrowserProvider(window.ethereum);
+    const accounts = await provider.send("eth_requestAccounts",[]);
+    account = accounts[0];
+    const net = await provider.getNetwork();
+    chainId = Number(net.chainId);
+    signer = await provider.getSigner();
+    if (chainId !== BSC_CHAIN_ID){
+      await switchToBSC(true);
+    }
+    refreshWalletUI();
+    clearStatus();
+    window.ethereum.on("accountsChanged",(accs)=>{ account = accs[0]; refreshWalletUI(); });
+    window.ethereum.on("chainChanged",(cid)=>{ chainId = parseInt(cid,16); refreshWalletUI(); });
+  } catch(e){
+    setStatus(parseErr(e),"error");
+  }
+}
+async function disconnectWallet(){
+  account = null; signer = null; provider = null; chainId = null;
+  refreshWalletUI();
+  clearStatus();
+}
+async function switchToBSC(silent){
+  if (!window.ethereum) return;
+  try {
+    if (!silent) setStatus(t("switching"),"info",true);
+    await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId: BSC_HEX }] });
+  } catch(err){
+    if (err && err.code === 4902){
+      await window.ethereum.request({
+        method:"wallet_addEthereumChain",
+        params:[{
+          chainId: BSC_HEX,
+          chainName:"BNB Smart Chain",
+          nativeCurrency:{ name:"BNB", symbol:"BNB", decimals:18 },
+          rpcUrls:["https://bsc-dataseed.binance.org/"],
+          blockExplorerUrls:["https://bscscan.com/"]
+        }]
+      });
+    } else {
+      if (!silent) setStatus(parseErr(err),"error");
+    }
+  }
+  try {
+    const net = await provider.getNetwork();
+    chainId = Number(net.chainId);
+    signer = await provider.getSigner();
+  } catch(_){}
+  refreshWalletUI();
+  if (!silent) clearStatus();
+}
+
+/* ============ Status helpers ============ */
+function setStatus(msg, kind, spin){
+  const el = document.getElementById("status");
+  el.className = "status show " + (kind||"info");
+  el.innerHTML = (spin ? '<span class="spinner"></span>' : '') + msg;
+}
+function setStatusHTML(html, kind){
+  const el = document.getElementById("status");
+  el.className = "status show " + (kind||"info");
+  el.innerHTML = html;
+}
+function clearStatus(){
+  const el = document.getElementById("status");
+  el.className = "status";
+  el.innerHTML = "";
+}
+function parseErr(e){
+  if (!e) return "Unknown error";
+  if (e.shortMessage) return e.shortMessage;
+  if (e.reason) return e.reason;
+  if (e.info && e.info.error && e.info.error.message) return e.info.error.message;
+  if (e.message) return e.message;
+  return String(e);
+}
+
+/* ============ Predict address ============ */
+document.getElementById("predictBtn").addEventListener("click", async ()=>{
+  const tokenId = document.getElementById("tokenId").value.trim();
+  if (!tokenId){ setStatus(t("errFillAll"),"error"); return; }
+  try {
+    const ro = new ethers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
+    const factoryRO = new ethers.Contract(FACTORY_ADDR, FACTORY_ABI, ro);
+    setStatus(t("checking"),"info",true);
+    const [addr, ok] = await Promise.all([
+      factoryRO.predictTokenAddress(tokenId),
+      factoryRO.deployable(tokenId)
+    ]);
+    const box = document.getElementById("predictBox");
+    box.classList.add("show");
+    box.innerHTML = `<b>${t("predicted")}:</b><br>${addr}<br><br>` +
+      (ok ? `<span style="color:#86efac">${t("deployableYes")}</span>`
+          : `<span style="color:#fca5a5">${t("notDeployable")}</span>`);
+    clearStatus();
+  } catch(e){
+    setStatus(parseErr(e),"error");
+  }
+});
+
+/* ============ Deploy ============ */
+document.getElementById("deployBtn").addEventListener("click", async ()=>{
+  if (!account || !signer){ setStatus(t("errConnect"),"error"); return; }
+  if (chainId !== BSC_CHAIN_ID){ setStatus(t("errBSC"),"error"); return; }
+
+  const tokenId = document.getElementById("tokenId").value.trim();
+  const name    = document.getElementById("tokenName").value.trim();
+  const symbol  = document.getElementById("tokenSymbol").value.trim();
+  const supplyStr = document.getElementById("tokenSupply").value.trim().replace(/,/g,"");
+  if (!tokenId || !name || !symbol || !supplyStr){ setStatus(t("errFillAll"),"error"); return; }
+
+  let supplyWei;
+  try {
+    if (!/^\d+(\.\d+)?$/.test(supplyStr) || Number(supplyStr) <= 0) throw new Error("supply");
+    supplyWei = ethers.parseUnits(supplyStr, 18);
+  } catch(_){ setStatus(t("errSupply"),"error"); return; }
+
+  const deployBtn = document.getElementById("deployBtn");
+  deployBtn.disabled = true;
+
+  try {
+    const factory = new ethers.Contract(FACTORY_ADDR, FACTORY_ABI, signer);
+    const mgr     = new ethers.Contract(ADDR_MGR, ADDR_MGR_ABI, signer);
+
+    setStatus(t("checking"),"info",true);
+    const owner = await mgr.ownerOf(tokenId);
+    if (owner.toLowerCase() !== account.toLowerCase()){
+      throw new Error(t("errOwner"));
+    }
+    const ok = await factory.deployable(tokenId);
+    if (!ok) throw new Error(t("errNotDeployable"));
+
+    // approve if needed
+    const approved = await mgr.getApproved(tokenId);
+    const allApproved = await mgr.isApprovedForAll(account, FACTORY_ADDR);
+    if (approved.toLowerCase() !== FACTORY_ADDR.toLowerCase() && !allApproved){
+      setStatus(t("approving"),"info",true);
+      const txa = await mgr.approve(FACTORY_ADDR, tokenId);
+      await txa.wait();
+    }
+
+    setStatus(t("deploying"),"info",true);
+    const tx = await factory.deployToken(tokenId, name, symbol, supplyWei);
+    setStatusHTML(`<span class="spinner"></span>${t("waiting")} — <a href="https://bscscan.com/tx/${tx.hash}" target="_blank" rel="noopener">${t("viewTx")}</a>`,"info");
+    const rc = await tx.wait();
+
+    // Parse TokenDeployed event
+    let tokenAddr = null;
+    for (const log of rc.logs){
+      try {
+        const parsed = factory.interface.parseLog(log);
+        if (parsed && parsed.name === "TokenDeployed"){
+          tokenAddr = parsed.args.tokenAddress;
+          break;
+        }
+      } catch(_){}
+    }
+    if (!tokenAddr){
+      try { tokenAddr = await factory.predictTokenAddress(tokenId); } catch(_){}
+    }
+
+    let html = `✅ ${t("successDeploy")}`;
+    if (tokenAddr){
+      html += `<br><br><b>${tokenAddr}</b>`;
+      html += `<br><a href="https://bscscan.com/token/${tokenAddr}" target="_blank" rel="noopener">${t("viewToken")}</a> · `;
+    }
+    html += `<a href="https://bscscan.com/tx/${tx.hash}" target="_blank" rel="noopener">${t("viewTx")}</a>`;
+    setStatusHTML(html,"success");
+
+  } catch(e){
+    setStatus(parseErr(e),"error");
+  } finally {
+    deployBtn.disabled = false;
+  }
+});
+
+/* ============ Init ============ */
+applyI18n();
+
+/* Auto-detect already-connected wallet */
+(async ()=>{
+  if (window.ethereum){
+    try {
+      const accs = await window.ethereum.request({ method:"eth_accounts" });
+      if (accs && accs.length){
+        provider = new ethers.BrowserProvider(window.ethereum);
+        account = accs[0];
+        const net = await provider.getNetwork();
+        chainId = Number(net.chainId);
+        signer = await provider.getSigner();
+        refreshWalletUI();
+        window.ethereum.on("accountsChanged",(a)=>{ account = a[0]; refreshWalletUI(); });
+        window.ethereum.on("chainChanged",(c)=>{ chainId = parseInt(c,16); refreshWalletUI(); });
+      }
+    } catch(_){}
+  }
+})();
+</script>
+</body>
+</html>
