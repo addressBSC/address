@@ -1,515 +1,631 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>OneClickLaunch · 一键发币 (BSC)</title>
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="theme-color" content="#0b0d12" />
+<title>OneClickLaunch · 一键发射</title>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <style>
-  :root {
-    --bg: #0b0d12;
-    --card: #141821;
-    --card2: #1b2030;
-    --border: #252b3b;
-    --text: #e6e9ef;
-    --muted: #8a92a6;
-    --accent: #f0b90b;       /* BSC 黄 */
-    --accent2: #ffd44d;
-    --green: #00d18c;
-    --red: #ff5b6e;
-    --blue: #4ea8ff;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
-      "Microsoft YaHei", Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    background: radial-gradient(1200px 600px at 80% -10%, #1a1f2e 0%, var(--bg) 60%);
-    color: var(--text);
-    min-height: 100vh;
-  }
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 28px; border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(8px);
-    position: sticky; top: 0; z-index: 5;
-    background: rgba(11,13,18,.7);
-  }
-  .logo { display:flex; align-items:center; gap:10px; font-weight:700; font-size:18px; }
-  .logo .dot { width: 28px; height: 28px; border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, var(--accent2), var(--accent)); }
-  .net { font-size: 12px; padding: 4px 10px; border-radius: 999px;
-    background: #2a2010; color: var(--accent); border: 1px solid #5b450a; }
-  .btn {
-    cursor: pointer; border: 0; padding: 10px 16px; border-radius: 10px;
-    font-weight: 600; font-size: 14px; transition: .15s;
-  }
-  .btn-primary { background: linear-gradient(180deg, var(--accent2), var(--accent)); color:#1a1300; }
-  .btn-primary:hover { filter: brightness(1.05); }
-  .btn-ghost { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
-  .btn-ghost:hover { border-color: var(--accent); }
-  .btn:disabled { opacity:.5; cursor: not-allowed; filter: grayscale(.4); }
-  .container { max-width: 1100px; margin: 28px auto; padding: 0 20px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } }
-  .card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-    padding: 22px;
-  }
-  .card h2 { margin: 0 0 14px 0; font-size: 16px; color: var(--text); }
-  .card .sub { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
-  label { display:block; font-size:12px; color: var(--muted); margin: 12px 0 6px; }
-  input {
-    width: 100%; padding: 12px 14px; border-radius: 10px;
-    background: var(--card2); border: 1px solid var(--border); color: var(--text);
-    font-size: 14px; outline: none;
-  }
-  input:focus { border-color: var(--accent); }
-  .row { display:flex; gap:10px; flex-wrap: wrap; align-items: center; }
-  .row > .btn { flex: 1; }
-  .status {
-    padding: 12px 14px; border-radius: 10px; font-size: 13px;
-    background: var(--card2); border: 1px solid var(--border); color: var(--muted);
-    line-height: 1.6; word-break: break-all;
-  }
-  .status.ok { border-color: #1b4d3b; background: #0d1f18; color: #9fefcd; }
-  .status.warn { border-color: #5b450a; background: #211a07; color: #ffd97a; }
-  .status.err { border-color: #5a1b22; background: #21090d; color: #ffb1bc; }
-  .status.info { border-color: #1d3a5c; background: #0c1622; color: #a8d2ff; }
-  .pill {
-    display: inline-block; padding: 2px 8px; border-radius: 999px;
-    font-size: 11px; margin-left: 6px;
-  }
-  .pill.s1 { background:#1b4d3b; color:#9fefcd; }
-  .pill.s2 { background:#1d3a5c; color:#a8d2ff; }
-  .pill.s3 { background:#5b450a; color:#ffd97a; }
-  .pill.s4 { background:#5a1b22; color:#ffb1bc; }
-  .pill.s0 { background:#333; color:#bbb; }
-  .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px;
-    font-size: 13px; padding: 10px 0; border-bottom: 1px dashed var(--border); }
-  .kv:last-child { border-bottom: 0; }
-  .kv .k { color: var(--muted); }
-  .kv .v { color: var(--text); word-break: break-all; }
-  .log {
-    margin-top: 14px; max-height: 260px; overflow:auto; font-size: 12px;
-    background: #0a0c11; border: 1px solid var(--border); border-radius: 10px;
-    padding: 10px; font-family: ui-monospace, Menlo, monospace; color: #b9c1d3;
-  }
-  .log .l-info { color: #a8d2ff; }
-  .log .l-ok { color: #9fefcd; }
-  .log .l-warn { color: #ffd97a; }
-  .log .l-err { color: #ffb1bc; }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .small { font-size: 12px; color: var(--muted); }
-  .hash { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
-  .list-item {
-    padding: 10px 12px; border:1px solid var(--border); border-radius:10px;
-    margin-bottom: 8px; background: var(--card2); font-size: 12px;
-  }
+:root{
+  --bg:#0b0d12; --bg2:#11141c; --card:#161a24; --line:#222837;
+  --text:#e7ecf3; --sub:#8a93a6; --muted:#5b6478;
+  --pri:#f5b400; --pri-2:#ffd34d; --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; --info:#3b82f6;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5}
+body{min-height:100vh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#app{max-width:560px;margin:0 auto;padding:14px 14px 80px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 4px 14px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;letter-spacing:.3px}
+.logo .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--pri),#ff8a00);box-shadow:0 0 12px rgba(245,180,0,.6)}
+.btn{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--text);
+  border-radius:12px;padding:11px 14px;font-size:14px;font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(135deg,var(--pri),#ff9d2a);color:#1a1300;border-color:transparent}
+.btn.primary:disabled{opacity:.55;cursor:not-allowed}
+.btn.ghost{background:transparent}
+.btn.block{width:100%;min-height:48px;font-size:15px}
+.btn.sm{padding:6px 10px;font-size:12px;min-height:32px;border-radius:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:12px 0}
+.card h3{margin:0 0 10px;font-size:14px;color:var(--sub);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed var(--line)}
+.row:first-of-type{border-top:0;padding-top:0}
+.row .k{color:var(--sub);font-size:13px}
+.row .v{color:var(--text);font-size:13px;word-break:break-all;text-align:right;max-width:65%;font-variant-numeric:tabular-nums}
+.row .v.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+label{display:block;color:var(--sub);font-size:12px;margin:10px 0 6px;letter-spacing:.3px}
+input[type=text],input[type=number]{
+  width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--text);
+  border-radius:12px;padding:12px 14px;font-size:15px;outline:none;font-family:inherit
+}
+input:focus{border-color:var(--pri)}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--bg2)}
+.badge .d{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.badge.ok .d{background:var(--ok)} .badge.ok{color:var(--ok);border-color:rgba(34,197,94,.35)}
+.badge.warn .d{background:var(--warn)} .badge.warn{color:var(--warn);border-color:rgba(245,158,11,.35)}
+.badge.err .d{background:var(--err)} .badge.err{color:var(--err);border-color:rgba(239,68,68,.35)}
+.badge.info .d{background:var(--info)} .badge.info{color:var(--info);border-color:rgba(59,130,246,.35)}
+.muted{color:var(--muted);font-size:12px}
+.steps{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.step{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg2);font-size:13px}
+.step .num{width:22px;height:22px;border-radius:50%;background:#222837;color:var(--sub);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.step.done .num{background:var(--ok);color:#062b13}
+.step.cur .num{background:var(--pri);color:#1a1300}
+.step.err .num{background:var(--err);color:#fff}
+.log{margin-top:10px;max-height:240px;overflow:auto;background:#0a0d14;border:1px solid var(--line);border-radius:12px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.55}
+.log .l{padding:2px 0;border-bottom:1px dashed #1b202c;color:#cdd5e3;word-break:break-all}
+.log .l.err{color:#ff8b8b} .log .l.ok{color:#86efac} .log .l.warn{color:#fcd34d} .log .l.info{color:#93c5fd}
+.toast-wrap{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0);display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px;pointer-events:none;z-index:99}
+.toast{background:#1a1f2c;border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:13px;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:auto}
+.toast.ok{border-color:rgba(34,197,94,.45);color:#bef0c8}
+.toast.err{border-color:rgba(239,68,68,.45);color:#ffc4c4}
+.toast.warn{border-color:rgba(245,158,11,.45);color:#ffe2a8}
+.modal-bd{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:88}
+.modal-bd.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;max-width:420px;width:100%}
+.modal h4{margin:0 0 8px;font-size:16px}
+.modal p{color:var(--sub);font-size:13px;line-height:1.6;margin:6px 0}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{font-size:11px;padding:2px 8px;border-radius:999px;background:#1c2230;border:1px solid var(--line);color:var(--sub)}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sp 1s linear infinite;display:inline-block;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.link{color:var(--pri-2);text-decoration:none;border-bottom:1px dashed rgba(255,211,77,.4)}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:18px 4px 4px}
+.section-title h2{margin:0;font-size:13px;color:var(--sub);font-weight:600;letter-spacing:.6px;text-transform:uppercase}
+@media (max-width:380px){#app{padding:12px 10px 80px}}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo"><div class="dot"></div> OneClickLaunch · 一键发币</div>
-  <div class="row">
-    <span id="netBadge" class="net">未连接</span>
-    <button id="btnConnect" class="btn btn-primary">连接钱包</button>
+<div id="app">
+  <div class="toast-wrap" id="toasts"></div>
+
+  <header>
+    <div class="logo"><span class="dot"></span><span>OneClickLaunch · 一键发射</span></div>
+    <button id="btn-info" class="btn ghost sm">说明</button>
+  </header>
+
+  <!-- 钱包卡片 -->
+  <div class="card" id="card-wallet">
+    <h3>钱包</h3>
+    <div class="row"><div class="k">状态</div><div class="v"><span id="wallet-badge" class="badge"><span class="d"></span>未连接</span></div></div>
+    <div class="row"><div class="k">网络</div><div class="v" id="wallet-chain">—</div></div>
+    <div class="row"><div class="k">地址</div><div class="v mono" id="wallet-addr">—</div></div>
+    <div class="row"><div class="k">BNB 余额</div><div class="v" id="wallet-bal">—</div></div>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button id="btn-connect" class="btn primary block">连接钱包</button>
+      <button id="btn-disconnect" class="btn ghost" style="display:none">断开</button>
+    </div>
+    <div class="hint">需要 BSC 主网（Chain ID 56）。若不在 BSC，将自动请求切换 / 添加。</div>
   </div>
-</header>
 
-<div class="container">
-
-  <div class="card" style="margin-bottom:18px;">
-    <h2>合约信息</h2>
-    <div class="kv"><div class="k">网络</div><div class="v">BNB Smart Chain (chainId 56)</div></div>
-    <div class="kv"><div class="k">OneClickLaunch</div><div class="v hash" id="caLaunch"></div></div>
-    <div class="kv"><div class="k">AddressManager (NFT)</div><div class="v hash">0x78B11198268619728E4b53c642E8d68941004c11</div></div>
-    <div class="kv"><div class="k">PADDFactory</div><div class="v hash">0x78127790105D75D31b2634cd474cEA18FcF6Aa5B</div></div>
-    <div class="kv"><div class="k">LiquidityLauncher</div><div class="v hash">0x15Ca00E44B6Bbe19FF230F2e3294443a70BACdda</div></div>
-    <div class="kv"><div class="k">总供应量</div><div class="v">1,000,000,000（其中 9.9 亿入 LP 锁仓，1000 万给 dev）</div></div>
+  <!-- 合约信息 -->
+  <div class="section-title"><h2>合约信息</h2><span class="muted" id="meta-loading">未加载</span></div>
+  <div class="card" id="card-meta">
+    <div class="row"><div class="k">OneClickLaunch</div><div class="v mono"><a class="link" id="link-launch" target="_blank" rel="noreferrer">0xA484…3AD3</a></div></div>
+    <div class="row"><div class="k">NFT (AddressManager)</div><div class="v mono"><a class="link" id="link-nft" target="_blank" rel="noreferrer">—</a></div></div>
+    <div class="row"><div class="k">Liquidity Launcher</div><div class="v mono"><a class="link" id="link-launcher" target="_blank" rel="noreferrer">—</a></div></div>
+    <div class="row"><div class="k">Factory</div><div class="v mono"><a class="link" id="link-factory" target="_blank" rel="noreferrer">—</a></div></div>
+    <div class="row"><div class="k">Total Supply</div><div class="v" id="meta-total">—</div></div>
+    <div class="row"><div class="k">Liquidity 占比</div><div class="v" id="meta-liq">—</div></div>
+    <div class="row"><div class="k">Dev 转给你</div><div class="v" id="meta-dev">—</div></div>
+    <div class="row"><div class="k">已发射数量</div><div class="v" id="meta-totallaunched">—</div></div>
   </div>
 
-  <div class="grid">
-    <!-- 左：查询 / 发币 -->
-    <div class="card">
-      <h2>1. 查询状态 & 一键发币</h2>
-      <div class="sub">输入 NFT 的 tokenId（即靓号地址在 AddressManager 中的 ID），系统会自动识别 4 种状态并执行对应流程。</div>
+  <!-- 发射表单 -->
+  <div class="section-title"><h2>发射参数</h2></div>
+  <div class="card">
+    <label for="in-tokenid">NFT TokenId（来自 AddressManager 中的"地址 NFT"）</label>
+    <input id="in-tokenid" type="text" inputmode="numeric" placeholder="例如 12345" autocomplete="off" />
+    <div class="hint">合约会根据此 TokenId 推导出新代币的合约地址（预测地址）。</div>
 
-      <label>NFT TokenId</label>
-      <input id="tokenId" placeholder="例如：123456" />
-
-      <div class="row" style="margin-top:10px;">
-        <button id="btnPreview" class="btn btn-ghost">查询状态</button>
-        <button id="btnApprove" class="btn btn-ghost" disabled>授权 NFT</button>
+    <div class="grid2">
+      <div>
+        <label for="in-name">代币名称 name_</label>
+        <input id="in-name" type="text" placeholder="例如 MyToken" autocomplete="off" />
       </div>
-
-      <div id="statusBox" class="status info" style="margin-top:12px;">请先连接钱包并输入 tokenId 查询状态</div>
-
-      <label>代币名称 Name</label>
-      <input id="tName" placeholder="例如：MyMemeToken" />
-      <label>代币符号 Symbol</label>
-      <input id="tSymbol" placeholder="例如：MMT" />
-
-      <label>附加 BNB（可选，建议留空，系统会自动取价并退还多余 BNB）</label>
-      <input id="bnbValue" placeholder="0" />
-
-      <div class="row" style="margin-top:14px;">
-        <button id="btnLaunch" class="btn btn-primary" disabled>🚀 发射 Launch</button>
-      </div>
-
-      <div id="logBox" class="log">
-        <div class="l-info">[日志] 等待操作...</div>
+      <div>
+        <label for="in-symbol">代币符号 symbol_</label>
+        <input id="in-symbol" type="text" placeholder="例如 MTK" autocomplete="off" />
       </div>
     </div>
-
-    <!-- 右：我的发射记录 -->
-    <div class="card">
-      <h2>2. 我的发射记录</h2>
-      <div class="sub">读取链上 <code>getUserLaunches(address)</code> + <code>launches(id)</code>。</div>
-
-      <div class="row">
-        <button id="btnRefresh" class="btn btn-ghost">刷新我的记录</button>
-        <button id="btnTotal" class="btn btn-ghost">查询全局已发射总数</button>
-      </div>
-      <div id="totalBox" class="status info" style="margin-top:12px;">尚未查询</div>
-
-      <div id="launchList" style="margin-top:14px;"></div>
-
-      <h2 style="margin-top:24px;">3. 按 launchId 查询</h2>
-      <label>launchId</label>
-      <input id="qid" placeholder="例如：1" />
-      <div class="row" style="margin-top:10px;">
-        <button id="btnQid" class="btn btn-ghost">查询该 Launch 详情</button>
-      </div>
-      <div id="qidBox" class="status info" style="margin-top:12px;">尚未查询</div>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button id="btn-preview" class="btn block">查询状态 / 价格</button>
     </div>
   </div>
 
-  <p class="small" style="margin-top:24px; text-align:center;">
-    所有交易在 BSC 主网执行，请确认钱包网络。点击交易前请确认参数。
-    本页面仅为合约 ABI 调用前端，不托管任何资产。
+  <!-- 状态结果 -->
+  <div class="section-title"><h2>状态检查</h2></div>
+  <div class="card" id="card-status">
+    <div class="row"><div class="k">previewStatus</div><div class="v"><span id="status-badge" class="badge"><span class="d"></span>未查询</span></div></div>
+    <div class="row"><div class="k">NFT 当前持有者</div><div class="v mono" id="status-owner">—</div></div>
+    <div class="row"><div class="k">预测代币地址</div><div class="v mono" id="status-predicted">—</div></div>
+    <div class="row"><div class="k">是否已被发射</div><div class="v" id="status-launched">—</div></div>
+    <div class="row"><div class="k">需支付 BNB</div><div class="v" id="status-price">—</div></div>
+    <div class="row"><div class="k">NFT 已授权给本合约</div><div class="v" id="status-approved">—</div></div>
+
+    <div class="steps" id="step-list">
+      <div class="step" id="s-1"><span class="num">1</span><span>连接钱包并切换到 BSC</span></div>
+      <div class="step" id="s-2"><span class="num">2</span><span>输入 TokenId / Name / Symbol 并查询状态</span></div>
+      <div class="step" id="s-3"><span class="num">3</span><span>按需授权 NFT 或准备 BNB 溢价</span></div>
+      <div class="step" id="s-4"><span class="num">4</span><span>调用 launch 完成发射</span></div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+      <button id="btn-approve" class="btn block" disabled>授权 NFT 给本合约 (approve)</button>
+      <button id="btn-launch" class="btn primary block" disabled>发射 launch()</button>
+    </div>
+
+    <div class="tags">
+      <span class="tag">状态1=你持有该NFT(免费/仅气费)</span>
+      <span class="tag">状态2=合约暂存中</span>
+      <span class="tag">状态3=可付费购买</span>
+      <span class="tag">状态4=不可用</span>
+    </div>
+  </div>
+
+  <!-- 日志 -->
+  <div class="section-title"><h2>执行日志</h2><button class="btn ghost sm" id="btn-clearlog">清空</button></div>
+  <div class="card" style="padding:10px"><div class="log" id="log"></div></div>
+
+  <p class="muted" style="text-align:center;margin:24px 8px 0">
+    本页面纯前端，私钥不出本地。请仔细核对参数与目标合约后再签名。<br/>
+    合约: <a class="link" target="_blank" rel="noreferrer" href="https://bscscan.com/address/0xA4843bB434a46Ae4A8A8d632f0Af29785fe13AD3#code">BscScan</a>
   </p>
-</div>
 
+  <!-- 说明弹窗 -->
+  <div class="modal-bd" id="modal">
+    <div class="modal">
+      <h4>使用说明</h4>
+      <p>本工具严格按合约 <b>OneClickLaunch.launch(tokenId, name_, symbol_)</b> 的逻辑构建：</p>
+      <p>1) 若你已是该 NFT 持有者：合约调用 <code>transferFrom</code> 将 NFT 转入本合约，因此需先在 NFT 合约对本合约 <code>approve</code>（或 <code>setApprovalForAll</code>）。msg.value 可为 0。</p>
+      <p>2) 若你不是持有者但 <code>isAvailable</code>=true：合约会调用 <code>claimById</code> 领取，需以 <code>quotePremiumPrice</code> 返回的金额作为 msg.value。</p>
+      <p>3) 合约会自动完成：部署代币 → 转入 LiquidityLauncher 锁仓 → 将 DEV_AMOUNT 转给你。</p>
+      <p>4) 同一代币地址只能发射一次（通过 <code>tokenToLaunchId</code> 检查）。</p>
+      <p style="color:var(--warn)">风险自担：请确认地址与价格无误后再签名。</p>
+      <div style="text-align:right;margin-top:10px"><button class="btn primary sm" id="modal-close">我知道了</button></div>
+    </div>
+  </div>
+</div>
 <script>
-/* ====== 配置 ====== */
-const ONECLICK_ADDR = "0x03552A125C677C66057C8440EA2CAD0866C65f70";
-const NFT_ADDR      = "0x78B11198268619728E4b53c642E8d68941004c11";
-const BSC_CHAIN_ID  = 56;
+/* === 常量与 ABI（来自 BscScan 链上数据） === */
+const LAUNCH_ADDR = "0xA4843bB434a46Ae4A8A8d632f0Af29785fe13AD3";
+const BSC_CHAIN_ID = 56;
+const BSC_HEX = "0x38";
 const BSC_PARAMS = {
-  chainId: "0x38",
-  chainName: "BNB Smart Chain",
+  chainId: BSC_HEX, chainName: "BNB Smart Chain",
   nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
-  rpcUrls: ["https://bsc-dataseed.binance.org/"],
+  rpcUrls: ["https://bsc-dataseed.binance.org","https://bsc-dataseed1.defibit.io","https://bsc-dataseed1.ninicoin.io"],
   blockExplorerUrls: ["https://bscscan.com"]
 };
 
-/* ====== ABI ====== */
-const ONECLICK_ABI = [
-  "function launch(uint256 tokenId, string name_, string symbol_) external payable returns (uint256, address, uint256)",
-  "function quotePremiumPrice(uint256 tokenId) external view returns (uint256)",
-  "function previewStatus(uint256 tokenId, address user) external view returns (uint8 status, uint256 priceIfBuy, address predictedToken)",
-  "function getLaunch(uint256 launchId) external view returns (tuple(uint256 launchId,address user,uint256 nftTokenId,address token,uint256 lpNftId,uint256 bnbPaid,uint256 timestamp))",
-  "function getUserLaunches(address user) external view returns (uint256[])",
-  "function totalLaunched() external view returns (uint256)",
+const LAUNCH_ABI = [
+  "function DEV_AMOUNT() view returns (uint256)",
+  "function FACTORY() view returns (address)",
+  "function LAUNCHER() view returns (address)",
+  "function LIQUIDITY_AMOUNT() view returns (uint256)",
+  "function NFT() view returns (address)",
+  "function TOTAL_SUPPLY() view returns (uint256)",
+  "function totalLaunched() view returns (uint256)",
+  "function nextLaunchId() view returns (uint256)",
+  "function tokenToLaunchId(address) view returns (uint256)",
+  "function quotePremiumPrice(uint256 tokenId) view returns (uint256)",
+  "function previewStatus(uint256 tokenId, address user) view returns (uint8 status, uint256 priceIfBuy, address predictedToken)",
+  "function launch(uint256 tokenId, string name_, string symbol_) payable returns (uint256 launchId, address token, uint256 lpNftId)",
   "event Launched(uint256 indexed launchId, address indexed user, uint256 indexed nftTokenId, address token, uint256 lpNftId, uint256 bnbPaid, uint256 devShare)"
 ];
 
+// NFT (AddressManager) 是 ERC721 风格；这里仅用到 ownerOf / getApproved / isApprovedForAll / approve / setApprovalForAll
 const NFT_ABI = [
-  "function ownerOf(uint256) view returns (address)",
-  "function getApproved(uint256) view returns (address)",
-  "function isApprovedForAll(address,address) view returns (bool)",
-  "function approve(address,uint256)",
-  "function setApprovalForAll(address,bool)"
+  "function ownerOf(uint256 tokenId) view returns (address)",
+  "function getApproved(uint256 tokenId) view returns (address)",
+  "function isApprovedForAll(address owner, address operator) view returns (bool)",
+  "function approve(address to, uint256 tokenId)",
+  "function setApprovalForAll(address operator, bool approved)"
 ];
 
-/* ====== 全局 ====== */
-let provider, signer, account;
-let oneclick, nft;
+/* === 全局状态 === */
+const S = {
+  provider:null, signer:null, addr:null, chainId:null,
+  launchRO:null, launchRW:null, nftAddr:null, nftRO:null, nftRW:null,
+  constants:{}, // FACTORY/LAUNCHER/NFT/TOTAL/LIQ/DEV
+  current:{ tokenId:null, status:null, price:ethers.BigNumber.from(0), predicted:null, owner:null, approved:false, launched:false }
+};
 
-document.getElementById("caLaunch").textContent = ONECLICK_ADDR;
+/* === 工具 === */
+const $ = sel => document.querySelector(sel);
+const fmt = (bn, dec=18, max=6) => {
+  try { const s = ethers.utils.formatUnits(bn, dec); const [i,f]=s.split("."); return f? `${i}.${f.slice(0,max)}` : i; } catch { return String(bn); }
+};
+const short = a => a ? a.slice(0,6)+"…"+a.slice(-4) : "—";
+const log = (msg, type="") => {
+  const el = document.createElement("div"); el.className = "l "+type;
+  const t = new Date().toTimeString().slice(0,8);
+  el.textContent = `[${t}] ${msg}`;
+  $("#log").prepend(el);
+};
+const toast = (msg, type="") => {
+  const t = document.createElement("div"); t.className="toast "+type; t.textContent=msg;
+  $("#toasts").appendChild(t);
+  setTimeout(()=>{ t.style.opacity="0"; t.style.transition="opacity .3s"; setTimeout(()=>t.remove(),320); }, 2600);
+};
+const setBadge = (el, text, kind="") => { el.className = "badge "+kind; el.innerHTML = `<span class="d"></span>${text}`; };
+const setStep = (id, state) => { const el=document.getElementById(id); if(!el) return; el.classList.remove("done","cur","err"); if(state) el.classList.add(state); };
+const setBtn = (sel, enable, text) => { const b=$(sel); b.disabled=!enable; if(text!==undefined) b.innerHTML=text; };
 
-/* ====== 工具 ====== */
-function log(msg, type="info") {
-  const box = document.getElementById("logBox");
-  const t = new Date().toLocaleTimeString();
-  const div = document.createElement("div");
-  div.className = "l-" + type;
-  div.innerHTML = `[${t}] ${msg}`;
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
+function parseErr(e){
+  if(!e) return "未知错误";
+  const m = e?.error?.data?.message || e?.data?.message || e?.error?.message || e?.reason || e?.shortMessage || e?.message || String(e);
+  // 常见 require 关键字提取
+  const known = ["Premium address owned by another","Premium address not available","Insufficient BNB for premium address","NFT not approved to this contract","already launched","launch failed","quote failed","deploy failed"];
+  for(const k of known){ if(m && m.includes(k)) return m; }
+  return m.length>240 ? m.slice(0,240)+"…" : m;
 }
-function setStatus(id, text, type="info") {
-  const el = document.getElementById(id);
-  el.className = "status " + type;
-  el.innerHTML = text;
-}
-function short(a){ return a ? a.slice(0,6)+"..."+a.slice(-4) : "-"; }
 
-/* ====== 钱包 ====== */
-async function connect() {
-  if (!window.ethereum) {
-    alert("请安装 MetaMask 或 OKX 等以太坊钱包");
-    return;
+/* === 初始化 UI 链接 === */
+function initLinks(){
+  $("#link-launch").href = `https://bscscan.com/address/${LAUNCH_ADDR}`;
+  $("#link-launch").textContent = short(LAUNCH_ADDR);
+}
+
+/* === 钱包连接 === */
+async function ensureBsc(){
+  const eth = window.ethereum;
+  const cid = await eth.request({ method:"eth_chainId" });
+  if(cid === BSC_HEX) return true;
+  log("当前网络非 BSC，尝试切换…", "warn");
+  try{
+    await eth.request({ method:"wallet_switchEthereumChain", params:[{chainId:BSC_HEX}] });
+  }catch(e){
+    if(e?.code === 4902 || /Unrecognized chain ID/.test(e?.message||"")){
+      log("未添加 BSC 网络，尝试添加…","warn");
+      await eth.request({ method:"wallet_addEthereumChain", params:[BSC_PARAMS] });
+    } else { throw e; }
   }
-  try {
-    await window.ethereum.request({ method: "eth_requestAccounts" });
-    provider = new ethers.BrowserProvider(window.ethereum);
-    const net = await provider.getNetwork();
-    if (Number(net.chainId) !== BSC_CHAIN_ID) {
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: BSC_PARAMS.chainId }]
-        });
-      } catch (e) {
-        if (e.code === 4902) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [BSC_PARAMS]
-          });
-        } else throw e;
-      }
-      provider = new ethers.BrowserProvider(window.ethereum);
-    }
-    signer = await provider.getSigner();
-    account = await signer.getAddress();
-    oneclick = new ethers.Contract(ONECLICK_ADDR, ONECLICK_ABI, signer);
-    nft = new ethers.Contract(NFT_ADDR, NFT_ABI, signer);
-    document.getElementById("netBadge").textContent = "BSC · " + short(account);
-    document.getElementById("btnConnect").textContent = "已连接";
-    log("钱包连接成功: " + account, "ok");
+  return true;
+}
 
-    window.ethereum.on("accountsChanged", () => location.reload());
-    window.ethereum.on("chainChanged", () => location.reload());
-  } catch (e) {
-    log("连接失败: " + (e.message || e), "err");
+async function connect(){
+  if(!window.ethereum){ toast("未检测到钱包，请在手机钱包浏览器或安装 MetaMask 后访问","err"); return; }
+  try{
+    setBtn("#btn-connect", false, '<span class="spinner"></span> 连接中…');
+    await window.ethereum.request({ method:"eth_requestAccounts" });
+    await ensureBsc();
+    S.provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+    S.signer = S.provider.getSigner();
+    S.addr = (await S.signer.getAddress());
+    const net = await S.provider.getNetwork();
+    S.chainId = net.chainId;
+    if(S.chainId !== BSC_CHAIN_ID) throw new Error("请将网络切换到 BSC (Chain ID 56)");
+
+    S.launchRO = new ethers.Contract(LAUNCH_ADDR, LAUNCH_ABI, S.provider);
+    S.launchRW = S.launchRO.connect(S.signer);
+
+    await loadConstants();
+    await refreshWallet();
+
+    setBadge($("#wallet-badge"),"已连接","ok");
+    $("#btn-connect").style.display = "none";
+    $("#btn-disconnect").style.display = "inline-flex";
+    setStep("s-1","done");
+    log("钱包已连接: "+S.addr, "ok");
+
+    // 监听账户/网络变化
+    window.ethereum.removeAllListeners?.("accountsChanged");
+    window.ethereum.removeAllListeners?.("chainChanged");
+    window.ethereum.on("accountsChanged", ()=> location.reload());
+    window.ethereum.on("chainChanged", ()=> location.reload());
+  }catch(e){
+    log("连接失败: "+parseErr(e),"err"); toast(parseErr(e),"err");
+    setBtn("#btn-connect", true, "连接钱包");
   }
 }
 
-/* ====== 查询状态 ====== */
-async function preview() {
-  if (!signer) { alert("请先连接钱包"); return; }
-  const tid = document.getElementById("tokenId").value.trim();
-  if (!tid) { alert("请输入 tokenId"); return; }
+function disconnect(){
+  S.provider=null; S.signer=null; S.addr=null; S.launchRO=null; S.launchRW=null;
+  S.nftRO=null; S.nftRW=null;
+  setBadge($("#wallet-badge"),"未连接","");
+  $("#wallet-addr").textContent="—"; $("#wallet-chain").textContent="—"; $("#wallet-bal").textContent="—";
+  $("#btn-connect").style.display="inline-flex"; setBtn("#btn-connect",true,"连接钱包");
+  $("#btn-disconnect").style.display="none";
+  setBtn("#btn-approve",false,"授权 NFT 给本合约 (approve)");
+  setBtn("#btn-launch",false,"发射 launch()");
+  setStep("s-1",""); setStep("s-2",""); setStep("s-3",""); setStep("s-4","");
+  log("已断开钱包","info");
+}
 
-  try {
-    setStatus("statusBox", "查询中...", "info");
-    const res = await oneclick.previewStatus(tid, account);
-    const status = Number(res[0]);
-    const price  = res[1];
-    const predicted = res[2];
+async function refreshWallet(){
+  if(!S.signer) return;
+  const bal = await S.provider.getBalance(S.addr);
+  $("#wallet-addr").textContent = short(S.addr);
+  $("#wallet-chain").textContent = `BSC (chainId ${S.chainId})`;
+  $("#wallet-bal").textContent = fmt(bal,18,6)+" BNB";
+}
 
-    const stateMap = {
-      1: { label:"你已持有 NFT", pill:"s1",
-           tip:"需要先把 NFT 授权给合约（点击下方 “授权 NFT”），然后再点击发射。" },
-      2: { label:"合约已托管", pill:"s2",
-           tip:"NFT 已在 OneClickLaunch 合约里，直接点击发射即可，无需授权和付费。" },
-      3: { label:"未被认领（需付 BNB 购买）", pill:"s3",
-           tip:`点击发射时会自动用 <b>${ethers.formatEther(price)} BNB</b> 购买该靓号并发币。多余 BNB 会退还。` },
-      4: { label:"已被其他用户持有", pill:"s4",
-           tip:"无法发射，请更换 tokenId。" }
-    };
-    const info = stateMap[status] || { label:"未知", pill:"s0", tip:"" };
+/* === 加载合约常量 === */
+async function loadConstants(){
+  $("#meta-loading").textContent = "加载中…";
+  try{
+    const ro = S.launchRO;
+    const [nft, launcher, factory, total, liq, dev, totalLaunched] = await Promise.all([
+      ro.NFT(), ro.LAUNCHER(), ro.FACTORY(), ro.TOTAL_SUPPLY(), ro.LIQUIDITY_AMOUNT(), ro.DEV_AMOUNT(), ro.totalLaunched()
+    ]);
+    S.constants = { nft, launcher, factory, total, liq, dev };
+    S.nftAddr = nft;
+    S.nftRO = new ethers.Contract(nft, NFT_ABI, S.provider);
+    S.nftRW = S.nftRO.connect(S.signer);
 
-    let html = `<b>当前状态：${info.label}</b><span class="pill ${info.pill}">status=${status}</span><br>`;
-    html += `<div style="margin-top:6px;">${info.tip}</div>`;
-    html += `<div class="small" style="margin-top:8px;">预测代币地址: <span class="hash">${predicted}</span></div>`;
-    if (status === 3) {
-      html += `<div class="small">所需 BNB: <b>${ethers.formatEther(price)}</b></div>`;
-      document.getElementById("bnbValue").value = ethers.formatEther(price);
+    $("#link-nft").href = `https://bscscan.com/address/${nft}`; $("#link-nft").textContent = short(nft);
+    $("#link-launcher").href = `https://bscscan.com/address/${launcher}`; $("#link-launcher").textContent = short(launcher);
+    $("#link-factory").href = `https://bscscan.com/address/${factory}`; $("#link-factory").textContent = short(factory);
+
+    const pct = total.gt(0) ? liq.mul(10000).div(total).toNumber()/100 : 0;
+    const pctDev = total.gt(0) ? dev.mul(10000).div(total).toNumber()/100 : 0;
+    $("#meta-total").textContent = `${fmt(total,18,0)} (1e18 decimals)`;
+    $("#meta-liq").textContent = `${fmt(liq,18,0)}  (${pct}%)`;
+    $("#meta-dev").textContent = `${fmt(dev,18,0)}  (${pctDev}%)`;
+    $("#meta-totallaunched").textContent = totalLaunched.toString();
+    $("#meta-loading").textContent = "已加载";
+    log("合约常量加载完成","ok");
+  }catch(e){
+    $("#meta-loading").textContent = "加载失败";
+    log("加载常量失败: "+parseErr(e),"err");
+  }
+}
+
+/* === 查询状态 === */
+function validInputs(needNameSymbol=true){
+  const idStr = $("#in-tokenid").value.trim();
+  if(!idStr || !/^\d+$/.test(idStr)){ toast("TokenId 必须是非负整数","warn"); return null; }
+  const tokenId = ethers.BigNumber.from(idStr);
+  if(needNameSymbol){
+    const name = $("#in-name").value.trim();
+    const symbol = $("#in-symbol").value.trim();
+    if(!name){ toast("代币名称不能为空","warn"); return null; }
+    if(!symbol){ toast("代币符号不能为空","warn"); return null; }
+    if(name.length>64){ toast("代币名称过长(≤64)","warn"); return null; }
+    if(symbol.length>16){ toast("代币符号过长(≤16)","warn"); return null; }
+    return { tokenId, name, symbol };
+  }
+  return { tokenId };
+}
+
+async function previewStatus(){
+  if(!S.signer){ toast("请先连接钱包","warn"); return; }
+  const v = validInputs(false); if(!v) return;
+  const tokenId = v.tokenId;
+  S.current.tokenId = tokenId;
+
+  setBtn("#btn-preview", false, '<span class="spinner"></span> 查询中…');
+  setStep("s-2","cur");
+  try{
+    // previewStatus
+    const ps = await S.launchRO.previewStatus(tokenId, S.addr);
+    const status = ps.status;       // 1/2/3/4
+    const priceIfBuy = ps.priceIfBuy; // 仅 status 内部用
+    const predicted = ps.predictedToken;
+    S.current.status = status; S.current.predicted = predicted;
+
+    // 实际持有者
+    let owner = null;
+    try { owner = await S.nftRO.ownerOf(tokenId); } catch(e){ owner = null; }
+    S.current.owner = owner;
+    $("#status-owner").textContent = owner ? short(owner)+(owner.toLowerCase()===S.addr.toLowerCase()? " (你)":"") : "未铸造 / 查询失败";
+
+    // 是否已被发射 (tokenToLaunchId(predicted) != 0)
+    let launchedId = ethers.BigNumber.from(0);
+    if(predicted && predicted !== ethers.constants.AddressZero){
+      try { launchedId = await S.launchRO.tokenToLaunchId(predicted); } catch{}
     }
-    setStatus("statusBox", html, status===4 ? "err" : (status===3?"warn":"ok"));
+    S.current.launched = launchedId.gt(0);
+    $("#status-launched").textContent = S.current.launched ? `是 (launchId=${launchedId.toString()})` : "否";
+    $("#status-predicted").textContent = predicted ? short(predicted) : "—";
 
-    // 按钮可用性
-    document.getElementById("btnApprove").disabled = (status !== 1);
-    document.getElementById("btnLaunch").disabled  = (status === 4);
+    // 价格 + 授权
+    let price = ethers.BigNumber.from(0);
+    let approvedOk = false;
+    let label="", kind="";
+    if(status === 1){
+      label = "状态 1 · 你持有该 NFT"; kind="ok";
+      // 必须授权
+      const [getAppr, isAll] = await Promise.all([
+        S.nftRO.getApproved(tokenId).catch(()=>ethers.constants.AddressZero),
+        S.nftRO.isApprovedForAll(S.addr, LAUNCH_ADDR).catch(()=>false)
+      ]);
+      approvedOk = (getAppr.toLowerCase() === LAUNCH_ADDR.toLowerCase()) || !!isAll;
+      $("#status-approved").textContent = approvedOk ? "是" : "否（需 approve）";
+      $("#status-price").textContent = "0 BNB（仅气费）";
+    } else if(status === 2){
+      label = "状态 2 · 合约暂存中（异常）"; kind="warn";
+      $("#status-approved").textContent = "不适用";
+      $("#status-price").textContent = "—";
+    } else if(status === 3){
+      label = "状态 3 · 可付费购买"; kind="info";
+      try { price = await S.launchRO.quotePremiumPrice(tokenId); } catch(e){ throw new Error("获取价格失败: "+parseErr(e)); }
+      $("#status-price").textContent = fmt(price,18,6)+" BNB";
+      $("#status-approved").textContent = "不需要（合约会代为 claim）";
+      approvedOk = true; // launch 路径不需要 NFT 授权
+    } else {
+      label = "状态 4 · 该 NFT 不可用"; kind="err";
+      $("#status-approved").textContent = "—";
+      $("#status-price").textContent = "—";
+    }
+    S.current.price = price; S.current.approved = approvedOk;
+    setBadge($("#status-badge"), label, kind);
 
-    // 状态 1 时检查是否已经授权
-    if (status === 1) {
-      const approved = await nft.getApproved(tid);
-      const all = await nft.isApprovedForAll(account, ONECLICK_ADDR);
-      if (approved.toLowerCase() === ONECLICK_ADDR.toLowerCase() || all) {
-        log("NFT 已授权给合约，可直接发射。", "ok");
-        document.getElementById("btnApprove").disabled = true;
+    // 决定按钮可用性
+    if(S.current.launched){
+      log("该代币地址已被发射，无法再次发射","warn");
+      setBtn("#btn-approve",false,"授权 NFT 给本合约 (approve)");
+      setBtn("#btn-launch",false,"已发射，无法再次操作");
+      setStep("s-3","err"); setStep("s-4","err");
+    } else if(status === 1){
+      if(approvedOk){
+        setBtn("#btn-approve",false,"已授权 ✓");
+        setBtn("#btn-launch",true,"发射 launch()  (msg.value = 0)");
+        setStep("s-3","done"); setStep("s-4","cur");
       } else {
-        log("NFT 尚未授权，请先点击“授权 NFT”。", "warn");
+        setBtn("#btn-approve",true,"授权 NFT 给本合约 (approve)");
+        setBtn("#btn-launch",false,"请先授权 NFT");
+        setStep("s-3","cur"); setStep("s-4","");
       }
+    } else if(status === 3){
+      setBtn("#btn-approve",false,"无需授权（claim 路径）");
+      // 检查 BNB 余额
+      const bal = await S.provider.getBalance(S.addr);
+      if(bal.lt(price)){
+        setBtn("#btn-launch",false,`BNB 余额不足（需要 ${fmt(price,18,6)} BNB）`);
+        setStep("s-3","err"); setStep("s-4","");
+      } else {
+        setBtn("#btn-launch",true,`发射 launch()  支付 ${fmt(price,18,6)} BNB`);
+        setStep("s-3","done"); setStep("s-4","cur");
+      }
+    } else {
+      setBtn("#btn-approve",false,"—");
+      setBtn("#btn-launch",false,"该 NFT 不可发射");
+      setStep("s-3","err"); setStep("s-4","");
     }
-    log(`previewStatus(${tid}) => status=${status}`, "info");
-  } catch (e) {
-    setStatus("statusBox", "查询失败: " + (e.shortMessage || e.message), "err");
-    log("查询失败: " + (e.message || e), "err");
+
+    setStep("s-2","done");
+    log(`previewStatus = ${status} · 预测地址 ${short(predicted)} · 价格 ${fmt(price,18,6)} BNB`,"ok");
+  }catch(e){
+    log("查询失败: "+parseErr(e),"err"); toast(parseErr(e),"err");
+    setStep("s-2","err");
+  }finally{
+    setBtn("#btn-preview", true, "查询状态 / 价格");
   }
 }
 
-/* ====== 授权 NFT ====== */
-async function approveNft() {
-  if (!signer) { alert("请先连接钱包"); return; }
-  const tid = document.getElementById("tokenId").value.trim();
-  if (!tid) { alert("请输入 tokenId"); return; }
-  try {
-    log("发送 approve 交易...", "info");
-    const tx = await nft.approve(ONECLICK_ADDR, tid);
-    log("交易哈希: " + tx.hash, "info");
-    await tx.wait();
-    log("授权成功 ✅", "ok");
-    document.getElementById("btnApprove").disabled = true;
-  } catch (e) {
-    log("授权失败: " + (e.shortMessage || e.message), "err");
+/* === 授权 NFT === */
+async function approveNft(){
+  if(!S.signer){ toast("请先连接钱包","warn"); return; }
+  if(S.current.status !== 1){ toast("当前状态不需要授权","warn"); return; }
+  const tokenId = S.current.tokenId;
+  setBtn("#btn-approve", false, '<span class="spinner"></span> 提交授权…');
+  try{
+    // 再次确认你仍是持有者
+    const owner = await S.nftRO.ownerOf(tokenId);
+    if(owner.toLowerCase() !== S.addr.toLowerCase()) throw new Error("你已不是该 NFT 的持有者");
+
+    const tx = await S.nftRW.approve(LAUNCH_ADDR, tokenId);
+    log("approve 已提交: "+tx.hash,"info");
+    setBtn("#btn-approve", false, '<span class="spinner"></span> 等待打包…');
+    const rc = await tx.wait();
+    log("approve 已确认，区块 "+rc.blockNumber,"ok");
+    toast("授权成功","ok");
+    // 重新查询状态
+    await previewStatus();
+  }catch(e){
+    log("授权失败: "+parseErr(e),"err"); toast(parseErr(e),"err");
+    setBtn("#btn-approve", true, "授权 NFT 给本合约 (approve)");
   }
 }
 
-/* ====== 发射 ====== */
-async function launch() {
-  if (!signer) { alert("请先连接钱包"); return; }
-  const tid = document.getElementById("tokenId").value.trim();
-  const name = document.getElementById("tName").value.trim();
-  const symbol = document.getElementById("tSymbol").value.trim();
-  let bnbStr = document.getElementById("bnbValue").value.trim() || "0";
-  if (!tid || !name || !symbol) { alert("tokenId / 名称 / 符号都必填"); return; }
-  let value;
-  try { value = ethers.parseEther(bnbStr); }
-  catch { alert("BNB 数额格式错误"); return; }
+/* === 发射 launch === */
+async function doLaunch(){
+  if(!S.signer){ toast("请先连接钱包","warn"); return; }
+  const v = validInputs(true); if(!v) return;
+  if(!S.current.status){ toast("请先查询状态","warn"); return; }
+  if(S.current.launched){ toast("该代币已发射","err"); return; }
+  if(![1,3].includes(S.current.status)){ toast("当前状态不可发射","err"); return; }
+  if(!v.tokenId.eq(S.current.tokenId)){ toast("TokenId 与已查询不一致，请重新查询","warn"); return; }
 
-  try {
-    // 二次校验状态，避免误操作
-    const [status, priceIfBuy] = await oneclick.previewStatus(tid, account);
-    const s = Number(status);
-    if (s === 4) { alert("该 NFT 已被他人持有，无法发射"); return; }
-    if (s === 1) {
-      const approved = await nft.getApproved(tid);
-      const all = await nft.isApprovedForAll(account, ONECLICK_ADDR);
-      if (approved.toLowerCase() !== ONECLICK_ADDR.toLowerCase() && !all) {
-        alert("你拥有该 NFT，但尚未授权给合约，请先点击 “授权 NFT”");
-        return;
-      }
-    }
-    if (s === 3 && value < priceIfBuy) {
-      if (!confirm(`此 NFT 需要至少 ${ethers.formatEther(priceIfBuy)} BNB，是否自动调整？`)) return;
-      value = priceIfBuy;
-    }
+  // 状态 1 必须授权
+  if(S.current.status === 1 && !S.current.approved){
+    toast("请先授权 NFT","warn"); return;
+  }
 
-    log(`调用 launch(${tid}, "${name}", "${symbol}") value=${ethers.formatEther(value)} BNB`, "info");
-    let gas;
+  // 估算价格 / value
+  let value = ethers.BigNumber.from(0);
+  if(S.current.status === 3){
+    // 重新拉取最新价格，防止价格更新
     try {
-      gas = await oneclick.launch.estimateGas(tid, name, symbol, { value });
-      log("预估 gas: " + gas.toString(), "info");
-    } catch (e) {
-      log("Gas 预估失败：" + (e.shortMessage || e.message), "warn");
-      if (!confirm("Gas 预估失败，可能会 revert。仍要发送交易吗？")) return;
+      value = await S.launchRO.quotePremiumPrice(v.tokenId);
+    } catch(e){ log("重新拉取价格失败: "+parseErr(e),"err"); toast("价格查询失败","err"); return; }
+    log("最新价格 = "+fmt(value,18,6)+" BNB","info");
+    const bal = await S.provider.getBalance(S.addr);
+    if(bal.lt(value)){ toast("BNB 余额不足","err"); return; }
+  }
+
+  setBtn("#btn-launch", false, '<span class="spinner"></span> 估算 Gas…');
+  setStep("s-4","cur");
+  try{
+    // estimateGas 先行，提早发现 revert
+    let gasLimit;
+    try {
+      const gas = await S.launchRW.estimateGas.launch(v.tokenId, v.name, v.symbol, { value });
+      gasLimit = gas.mul(120).div(100); // +20% buffer
+      log("estimateGas = "+gas.toString()+", gasLimit = "+gasLimit.toString(),"info");
+    } catch(e){
+      throw new Error("预估失败(将会 revert): "+parseErr(e));
     }
 
-    const tx = await oneclick.launch(tid, name, symbol, {
-      value,
-      gasLimit: gas ? (gas * 12n / 10n) : 3000000n
+    setBtn("#btn-launch", false, '<span class="spinner"></span> 等待签名…');
+    const tx = await S.launchRW.launch(v.tokenId, v.name, v.symbol, { value, gasLimit });
+    log("launch 已提交: "+tx.hash,"info");
+    toast("已提交，等待打包…","ok");
+    setBtn("#btn-launch", false, '<span class="spinner"></span> 打包中…');
+
+    const rc = await tx.wait();
+    log("launch 已确认，区块 "+rc.blockNumber,"ok");
+
+    // 解析 Launched 事件
+    const iface = new ethers.utils.Interface(LAUNCH_ABI);
+    let parsed = null;
+    for(const lg of rc.logs){
+      try{
+        const p = iface.parseLog(lg);
+        if(p && p.name === "Launched"){ parsed = p; break; }
+      }catch{}
+    }
+    if(parsed){
+      const { launchId, user, nftTokenId, token, lpNftId, bnbPaid, devShare } = parsed.args;
+      log(`🎉 Launched! launchId=${launchId} token=${token} lpNftId=${lpNftId} bnbPaid=${fmt(bnbPaid,18,6)} BNB devShare=${fmt(devShare,18,0)}`,"ok");
+      toast("发射成功！","ok");
+    } else {
+      log("已确认，但未解析到 Launched 事件","warn");
+    }
+    setStep("s-4","done");
+    setBtn("#btn-launch", false, "发射完成 ✓");
+    // 刷新数据
+    await refreshWallet();
+    await loadConstants();
+  }catch(e){
+    log("发射失败: "+parseErr(e),"err"); toast(parseErr(e),"err");
+    setStep("s-4","err");
+    setBtn("#btn-launch", true, "重试发射 launch()");
+  }
+}
+
+/* === 事件绑定 === */
+function bind(){
+  initLinks();
+  $("#btn-connect").addEventListener("click", connect);
+  $("#btn-disconnect").addEventListener("click", disconnect);
+  $("#btn-preview").addEventListener("click", previewStatus);
+  $("#btn-approve").addEventListener("click", approveNft);
+  $("#btn-launch").addEventListener("click", doLaunch);
+  $("#btn-info").addEventListener("click", ()=> $("#modal").classList.add("show"));
+  $("#modal-close").addEventListener("click", ()=> $("#modal").classList.remove("show"));
+  $("#modal").addEventListener("click", e=>{ if(e.target.id==="modal") $("#modal").classList.remove("show"); });
+  $("#btn-clearlog").addEventListener("click", ()=> $("#log").innerHTML="");
+  // 输入框任何变化都清空已有状态（避免数据陈旧）
+  ["in-tokenid","in-name","in-symbol"].forEach(id=>{
+    document.getElementById(id).addEventListener("input", ()=>{
+      S.current = { tokenId:null, status:null, price:ethers.BigNumber.from(0), predicted:null, owner:null, approved:false, launched:false };
+      setBadge($("#status-badge"),"未查询","");
+      $("#status-owner").textContent="—"; $("#status-predicted").textContent="—"; $("#status-launched").textContent="—"; $("#status-price").textContent="—"; $("#status-approved").textContent="—";
+      setBtn("#btn-approve",false,"授权 NFT 给本合约 (approve)");
+      setBtn("#btn-launch",false,"发射 launch()");
+      setStep("s-2",""); setStep("s-3",""); setStep("s-4","");
     });
-    log("交易已广播: " + tx.hash, "info");
-    setStatus("statusBox",
-      `🚀 交易已提交，等待打包...<br><a target="_blank" href="https://bscscan.com/tx/${tx.hash}">在 BscScan 查看</a>`,
-      "info");
-
-    const rcpt = await tx.wait();
-    log("交易确认 ✅ block=" + rcpt.blockNumber, "ok");
-
-    // 解析事件
-    let result = "";
-    for (const lg of rcpt.logs) {
-      try {
-        const parsed = oneclick.interface.parseLog(lg);
-        if (parsed && parsed.name === "Launched") {
-          result = `
-            <b>🎉 发射成功！</b><br>
-            launchId: <b>${parsed.args.launchId}</b><br>
-            token 地址: <span class="hash">${parsed.args.token}</span>
-            <a target="_blank" href="https://bscscan.com/token/${parsed.args.token}">查看</a><br>
-            LP NFT ID: ${parsed.args.lpNftId}<br>
-            dev 份额: ${ethers.formatEther(parsed.args.devShare)}<br>
-            交易: <a target="_blank" href="https://bscscan.com/tx/${tx.hash}">${tx.hash.slice(0,10)}...</a>`;
-          break;
-        }
-      } catch {}
-    }
-    setStatus("statusBox", result || "交易成功 ✅", "ok");
-    refreshMine();
-  } catch (e) {
-    log("发射失败: " + (e.shortMessage || e.reason || e.message), "err");
-    setStatus("statusBox", "失败: " + (e.shortMessage || e.reason || e.message), "err");
-  }
+  });
+  log("页面就绪","info");
 }
-
-/* ====== 我的记录 ====== */
-async function refreshMine() {
-  if (!signer) { alert("请先连接钱包"); return; }
-  try {
-    const ids = await oneclick.getUserLaunches(account);
-    const list = document.getElementById("launchList");
-    list.innerHTML = "";
-    if (ids.length === 0) {
-      list.innerHTML = `<div class="status info">暂无发射记录</div>`;
-      return;
-    }
-    for (const id of ids) {
-      const info = await oneclick.getLaunch(id);
-      const div = document.createElement("div");
-      div.className = "list-item";
-      div.innerHTML = `
-        <b>launchId #${info.launchId}</b> &nbsp; nftId=${info.nftTokenId}<br>
-        token: <a target="_blank" href="https://bscscan.com/token/${info.token}">${info.token}</a><br>
-        LP NFT: ${info.lpNftId} &nbsp; · &nbsp; 支付: ${ethers.formatEther(info.bnbPaid)} BNB<br>
-        时间: ${new Date(Number(info.timestamp)*1000).toLocaleString()}
-      `;
-      list.appendChild(div);
-    }
-    log(`已加载 ${ids.length} 条记录`, "ok");
-  } catch (e) {
-    log("加载记录失败: " + (e.message || e), "err");
-  }
-}
-
-async function queryTotal() {
-  if (!provider) { alert("请先连接钱包"); return; }
-  try {
-    const n = await oneclick.totalLaunched();
-    setStatus("totalBox", `全网累计已发射代币数：<b>${n}</b>`, "ok");
-  } catch (e) {
-    setStatus("totalBox", "查询失败: " + e.message, "err");
-  }
-}
-
-async function queryById() {
-  if (!provider) { alert("请先连接钱包"); return; }
-  const id = document.getElementById("qid").value.trim();
-  if (!id) return;
-  try {
-    const info = await oneclick.getLaunch(id);
-    if (info.token === "0x0000000000000000000000000000000000000000") {
-      setStatus("qidBox", "未找到该 launchId 的记录", "warn");
-      return;
-    }
-    setStatus("qidBox", `
-      launchId: ${info.launchId}<br>
-      用户: <span class="hash">${info.user}</span><br>
-      NFT id: ${info.nftTokenId}<br>
-      token: <a target="_blank" href="https://bscscan.com/token/${info.token}">${info.token}</a><br>
-      LP NFT: ${info.lpNftId}<br>
-      支付 BNB: ${ethers.formatEther(info.bnbPaid)}<br>
-      时间: ${new Date(Number(info.timestamp)*1000).toLocaleString()}
-    `, "ok");
-  } catch (e) {
-    setStatus("qidBox", "查询失败: " + e.message, "err");
-  }
-}
-
-/* ====== 事件绑定 ====== */
-document.getElementById("btnConnect").onclick = connect;
-document.getElementById("btnPreview").onclick = preview;
-document.getElementById("btnApprove").onclick = approveNft;
-document.getElementById("btnLaunch").onclick  = launch;
-document.getElementById("btnRefresh").onclick = refreshMine;
-document.getElementById("btnTotal").onclick   = queryTotal;
-document.getElementById("btnQid").onclick     = queryById;
+document.addEventListener("DOMContentLoaded", bind);
 </script>
 </body>
 </html>
