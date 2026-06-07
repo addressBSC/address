@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shiba Liquidity Launcher</title>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #000000;
+    --panel: #111111;
+    --panel-2: #1a1a1a;
+    --text: #ffffff;
+    --muted: #b8b8b8;
+    --orange: #ff8a1f;
+    --orange-2: #ffae5c;
+    --orange-dark: #d96a00;
+    --border: #2a2a2a;
+    --ok: #4ade80;
+    --err: #ff5c5c;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  body {
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,138,31,0.12), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(255,138,31,0.08), transparent 40%),
+      #000;
+  }
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+  }
+  .brand .logo {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--orange);
+    display: grid; place-items: center;
+    font-size: 26px;
+    box-shadow: 0 0 0 3px #000, 0 0 0 5px var(--orange);
+  }
+  .top-right { display: flex; gap: 10px; align-items: center; }
+  .lang-btn, .wallet-btn {
+    background: var(--orange);
+    color: #000;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    transition: transform 0.05s ease, background 0.15s ease;
+  }
+  .lang-btn { background: transparent; color: var(--orange); border: 2px solid var(--orange); padding: 8px 14px; }
+  .lang-btn:hover { background: var(--orange); color: #000; }
+  .wallet-btn:hover { background: var(--orange-2); }
+  .wallet-btn:active, .lang-btn:active { transform: translateY(1px); }
+  .wallet-btn.connected { background: #222; color: var(--orange); border: 2px solid var(--orange); }
+
+  main {
+    max-width: 720px;
+    margin: 36px auto 80px;
+    padding: 0 20px;
+  }
+  .hero {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-size: 38px;
+    margin: 0 0 8px;
+    color: #fff;
+    text-shadow: 0 2px 0 var(--orange-dark);
+  }
+  .hero h1 .accent { color: var(--orange); }
+  .hero p {
+    color: var(--muted);
+    margin: 0;
+    font-size: 15px;
+  }
+  .doge {
+    font-size: 64px;
+    margin: 0 0 6px;
+    filter: drop-shadow(0 4px 0 rgba(255,138,31,0.4));
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  }
+  .info {
+    background: var(--panel-2);
+    border: 1px dashed #333;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    word-break: break-all;
+  }
+  .info b { color: var(--orange); }
+  .row { margin-bottom: 16px; }
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: #fff;
+    font-size: 14px;
+  }
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    background: #0a0a0a;
+    color: #fff;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  input:focus { border-color: var(--orange); }
+  .small {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 6px;
+  }
+  .token-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .token-meta span b { color: #fff; }
+
+  .actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    flex: 1;
+    min-width: 200px;
+    background: var(--orange);
+    color: #000;
+    border: none;
+    padding: 16px 18px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease, transform 0.05s ease;
+  }
+  .btn:hover { background: var(--orange-2); }
+  .btn:active { transform: translateY(1px); }
+  .btn[disabled] {
+    background: #333;
+    color: #888;
+    cursor: not-allowed;
+  }
+  .btn.secondary {
+    background: transparent;
+    color: var(--orange);
+    border: 2px solid var(--orange);
+  }
+  .btn.secondary:hover { background: var(--orange); color: #000; }
+
+  .status {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+    min-height: 22px;
+    word-break: break-all;
+    line-height: 1.6;
+  }
+  .status .ok { color: var(--ok); }
+  .status .err { color: var(--err); }
+  .status a { color: var(--orange); text-decoration: none; }
+  .status a:hover { text-decoration: underline; }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: #555;
+    font-size: 12px;
+  }
+  footer a { color: var(--orange); text-decoration: none; }
+
+  @media (max-width: 540px) {
+    .hero h1 { font-size: 28px; }
+    .top { padding: 14px 16px; }
+    .brand { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <div class="logo">SHIB</div>
+    <div data-i18n="brand">Shiba Liquidity Launcher</div>
+  </div>
+  <div class="top-right">
+    <button class="lang-btn" id="langBtn">中文</button>
+    <button class="wallet-btn" id="walletBtn" data-i18n="connect">Connect Wallet</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="doge">DOGE</div>
+    <h1>
+      <span data-i18n="heroLeft">One-click</span>
+      <span class="accent" data-i18n="heroAccent">Launch &amp; Lock</span>
+    </h1>
+    <p data-i18n="heroSub">Single-sided PancakeSwap V3 liquidity, then auto-locked forever. Much wow.</p>
+  </section>
+
+  <section class="card">
+    <div class="info">
+      <div><b data-i18n="iLauncher">Launcher:</b> 0x2250b93905f2fE7Bc90C03018f56badB77709B50</div>
+      <div><b data-i18n="iLocker">Locker:</b> 0x0000000000008038Cea4957003dd8cE7c48a77A6</div>
+      <div><b data-i18n="iFee">Fee tier:</b> 0.3% &nbsp;|&nbsp; <b data-i18n="iNet">Network:</b> BNB Smart Chain</div>
+    </div>
+
+    <div class="row">
+      <label for="tokenAddr" data-i18n="lToken">Token contract address</label>
+      <input id="tokenAddr" type="text" placeholder="0x..." spellcheck="false" autocomplete="off" />
+      <div class="token-meta" id="tokenMeta"></div>
+    </div>
+
+    <div class="row">
+      <label for="amount" data-i18n="lAmount">Amount of tokens to deposit</label>
+      <input id="amount" type="text" placeholder="e.g. 1000000" spellcheck="false" autocomplete="off" />
+      <div class="small" data-i18n="amountHint">All deposited tokens go into the V3 position as single-sided sell orders.</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="goBtn" disabled data-i18n="bGo">Launch &amp; Lock</button>
+    </div>
+
+    <div class="status" id="status" data-i18n="sIdle">Connect your wallet to start.</div>
+  </section>
+</main>
+
+<footer>
+  <span data-i18n="fNote">No owner. No withdraw. LP NFT permanently locked.</span> &middot;
+  <a id="scanLink" href="https://bscscan.com/address/0x2250b93905f2fE7Bc90C03018f56badB77709B50#code" target="_blank" rel="noopener">BscScan</a>
+</footer>
+
+<script>
+/* ---------------- i18n ---------------- */
+const I18N = {
+  en: {
+    brand: "Shiba Liquidity Launcher",
+    connect: "Connect Wallet",
+    connected: "Connected",
+    heroLeft: "One-click",
+    heroAccent: "Launch & Lock",
+    heroSub: "Single-sided PancakeSwap V3 liquidity, then auto-locked forever. Much wow.",
+    iLauncher: "Launcher:",
+    iLocker: "Locker:",
+    iFee: "Fee tier:",
+    iNet: "Network:",
+    lToken: "Token contract address",
+    lAmount: "Amount of tokens to deposit",
+    amountHint: "All deposited tokens go into the V3 position as single-sided sell orders.",
+    bApprove: "Approve",
+    bLaunch: "Launch & Lock",
+    bGo: "Launch & Lock",
+    bGoNeedApprove: "Approve & Launch",
+    sIdle: "Connect your wallet to start.",
+    fNote: "No owner. No withdraw. LP NFT permanently locked.",
+    needWallet: "Please install MetaMask or a BSC compatible wallet.",
+    wrongNet: "Wrong network. Switching to BNB Smart Chain...",
+    netSwitched: "Network switched to BNB Smart Chain.",
+    netSwitchFail: "Failed to switch network. Please switch to BSC manually.",
+    invalidAddr: "Invalid token address.",
+    invalidAmount: "Invalid amount.",
+    fetchingToken: "Reading token info...",
+    tokenLoaded: "Token loaded.",
+    tokenFail: "Could not read token. Make sure it is a valid BEP20 on BSC.",
+    approving: "Approving... waiting for wallet signature.",
+    approveSent: "Approve tx sent:",
+    approveOk: "Approve confirmed. You can now launch.",
+    approveFail: "Approve failed.",
+    launching: "Launching... waiting for wallet signature.",
+    launchSent: "Launch tx sent:",
+    launchOk: "Liquidity launched and LP NFT locked! Tx:",
+    launchFail: "Launch failed.",
+    needConnect: "Connect wallet first.",
+    needToken: "Enter a token address first.",
+    needAmount: "Enter an amount first.",
+    insufficientBal: "Insufficient token balance.",
+    sym: "Symbol:",
+    dec: "Decimals:",
+    bal: "Your balance:",
+    allowance: "Allowance:"
+  },
+  zh: {
+    brand: "柴犬流动性启动器",
+    connect: "连接钱包",
+    connected: "已连接",
+    heroLeft: "一键",
+    heroAccent: "加池并锁仓",
+    heroSub: "PancakeSwap V3 单边流动性，自动永久锁仓。Much wow。",
+    iLauncher: "启动器：",
+    iLocker: "锁仓器：",
+    iFee: "费率档：",
+    iNet: "网络：",
+    lToken: "代币合约地址",
+    lAmount: "要加入流动性的代币数量",
+    amountHint: "全部代币以单边卖单形式挂入 V3 头寸。",
+    bApprove: "授权",
+    bLaunch: "加池 & 锁仓",
+    bGo: "加池 & 锁仓",
+    bGoNeedApprove: "授权并加池",
+    sIdle: "请先连接钱包。",
+    fNote: "无 owner，无 withdraw，LP NFT 永久锁定。",
+    needWallet: "请先安装 MetaMask 或兼容 BSC 的钱包。",
+    wrongNet: "网络不对，正在切换到 BNB Smart Chain ...",
+    netSwitched: "已切换到 BNB Smart Chain。",
+    netSwitchFail: "切换网络失败，请在钱包里手动切到 BSC。",
+    invalidAddr: "代币地址无效。",
+    invalidAmount: "数量无效。",
+    fetchingToken: "正在读取代币信息 ...",
+    tokenLoaded: "代币信息已加载。",
+    tokenFail: "无法读取代币，请确认是 BSC 上的有效 BEP20。",
+    approving: "正在授权 ... 请在钱包里签名。",
+    approveSent: "授权交易已发送：",
+    approveOk: "授权成功，现在可以加池了。",
+    approveFail: "授权失败。",
+    launching: "正在加池 ... 请在钱包里签名。",
+    launchSent: "加池交易已发送：",
+    launchOk: "已成功加池并锁仓 LP NFT！交易：",
+    launchFail: "加池失败。",
+    needConnect: "请先连接钱包。",
+    needToken: "请先填代币地址。",
+    needAmount: "请先填数量。",
+    insufficientBal: "代币余额不足。",
+    sym: "符号：",
+    dec: "精度：",
+    bal: "你的余额：",
+    allowance: "已授权额度："
+  }
+};
+
+let lang = "en";
+function t(key) { return (I18N[lang] && I18N[lang][key]) || key; }
+function applyI18n() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const k = el.getAttribute("data-i18n");
+    el.textContent = t(k);
+  });
+  document.getElementById("langBtn").textContent = lang === "en" ? "中文" : "EN";
+  document.documentElement.lang = lang === "en" ? "en" : "zh";
+  refreshTokenMeta();
+}
+
+document.getElementById("langBtn").onclick = () => {
+  lang = lang === "en" ? "zh" : "en";
+  applyI18n();
+};
+
+/* ---------------- constants ---------------- */
+const LAUNCHER = "0x2250b93905f2fE7Bc90C03018f56badB77709B50";
+const BSC_CHAIN_ID_HEX = "0x38"; // 56
+const BSC_PARAMS = {
+  chainId: BSC_CHAIN_ID_HEX,
+  chainName: "BNB Smart Chain",
+  nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
+  rpcUrls: ["https://bsc-dataseed.bnbchain.org"],
+  blockExplorerUrls: ["https://bscscan.com"]
+};
+
+const ERC20_ABI = [
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)",
+  "function balanceOf(address) view returns (uint256)",
+  "function allowance(address,address) view returns (uint256)",
+  "function approve(address,uint256) returns (bool)"
+];
+const LAUNCHER_ABI = [
+  "function launchAndLock(address token, uint256 amount) returns (uint256 tokenId)"
+];
+
+/* ---------------- state ---------------- */
+let provider, signer, userAddr;
+let tokenInfo = null; // { address, symbol, decimals, balance, allowance }
+
+const $ = id => document.getElementById(id);
+const statusEl = $("status");
+const walletBtn = $("walletBtn");
+const tokenInput = $("tokenAddr");
+const amountInput = $("amount");
+const approveBtn = null;
+const launchBtn = null;
+const goBtn = $("goBtn");
+const tokenMetaEl = $("tokenMeta");
+
+function setStatus(msg, kind) {
+  statusEl.innerHTML = kind ? `<span class="${kind}">${msg}</span>` : msg;
+}
+function shortAddr(a) { return a.slice(0, 6) + "..." + a.slice(-4); }
+
+/* ---------------- wallet ---------------- */
+async function ensureBsc() {
+  const chainId = await window.ethereum.request({ method: "eth_chainId" });
+  if (chainId === BSC_CHAIN_ID_HEX) return true;
+  setStatus(t("wrongNet"));
+  try {
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: BSC_CHAIN_ID_HEX }]
+    });
+    return true;
+  } catch (e) {
+    if (e && e.code === 4902) {
+      try {
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [BSC_PARAMS]
+        });
+        return true;
+      } catch (e2) {
+        setStatus(t("netSwitchFail"), "err");
+        return false;
+      }
+    }
+    setStatus(t("netSwitchFail"), "err");
+    return false;
+  }
+}
+
+async function connect() {
+  if (!window.ethereum) {
+    setStatus(t("needWallet"), "err");
+    return;
+  }
+  try {
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    userAddr = accounts[0];
+    const ok = await ensureBsc();
+    if (!ok) return;
+
+    provider = new ethers.BrowserProvider(window.ethereum);
+    signer = await provider.getSigner();
+    walletBtn.textContent = shortAddr(userAddr);
+    walletBtn.classList.add("connected");
+    setStatus(t("netSwitched"), "ok");
+
+    window.ethereum.on("accountsChanged", () => location.reload());
+    window.ethereum.on("chainChanged", () => location.reload());
+
+    if (tokenInput.value.trim()) loadToken();
+  } catch (e) {
+    setStatus(e.message || String(e), "err");
+  }
+}
+walletBtn.onclick = connect;
+
+/* ---------------- token info ---------------- */
+let loadTokenTimer = null;
+tokenInput.addEventListener("input", () => {
+  clearTimeout(loadTokenTimer);
+  tokenInfo = null;
+  refreshButtons();
+  loadTokenTimer = setTimeout(loadToken, 400);
+});
+amountInput.addEventListener("input", refreshButtons);
+
+async function loadToken() {
+  const addr = tokenInput.value.trim();
+  if (!addr) { tokenMetaEl.innerHTML = ""; return; }
+  if (!ethers.isAddress(addr)) {
+    setStatus(t("invalidAddr"), "err");
+    tokenMetaEl.innerHTML = "";
+    return;
+  }
+  if (!signer) {
+    setStatus(t("needConnect"), "err");
+    return;
+  }
+  setStatus(t("fetchingToken"));
+  try {
+    const c = new ethers.Contract(addr, ERC20_ABI, signer);
+    const [sym, dec, bal, allow] = await Promise.all([
+      c.symbol().catch(() => "?"),
+      c.decimals(),
+      c.balanceOf(userAddr),
+      c.allowance(userAddr, LAUNCHER)
+    ]);
+    tokenInfo = { address: addr, symbol: sym, decimals: Number(dec), balance: bal, allowance: allow };
+    setStatus(t("tokenLoaded"), "ok");
+    refreshTokenMeta();
+    refreshButtons();
+  } catch (e) {
+    tokenInfo = null;
+    tokenMetaEl.innerHTML = "";
+    setStatus(t("tokenFail"), "err");
+    refreshButtons();
+  }
+}
+
+function refreshTokenMeta() {
+  if (!tokenInfo) { tokenMetaEl.innerHTML = ""; return; }
+  const bal = ethers.formatUnits(tokenInfo.balance, tokenInfo.decimals);
+  const allow = ethers.formatUnits(tokenInfo.allowance, tokenInfo.decimals);
+  tokenMetaEl.innerHTML =
+    `<span>${t("sym")} <b>${escapeHtml(tokenInfo.symbol)}</b></span>` +
+    `<span>${t("dec")} <b>${tokenInfo.decimals}</b></span>` +
+    `<span>${t("bal")} <b>${formatNum(bal)}</b></span>` +
+    `<span>${t("allowance")} <b>${formatNum(allow)}</b></span>`;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+  }[c]));
+}
+function formatNum(s) {
+  const n = Number(s);
+  if (!isFinite(n)) return s;
+  if (n === 0) return "0";
+  if (n < 0.0001) return n.toExponential(2);
+  return n.toLocaleString("en-US", { maximumFractionDigits: 6 });
+}
+
+function parseAmount() {
+  if (!tokenInfo) return null;
+  const raw = amountInput.value.trim();
+  if (!raw) return null;
+  try {
+    return ethers.parseUnits(raw, tokenInfo.decimals);
+  } catch {
+    return null;
+  }
+}
+
+function refreshButtons() {
+  const amt = parseAmount();
+  const ready = !!(signer && tokenInfo && amt && amt > 0n);
+  const enoughBal = ready && amt <= tokenInfo.balance;
+  const needsApprove = ready && enoughBal && amt > tokenInfo.allowance;
+  goBtn.disabled = !(ready && enoughBal);
+  goBtn.textContent = needsApprove ? t("bGoNeedApprove") : t("bGo");
+}
+
+/* ---------------- actions ---------------- */
+goBtn.onclick = async () => {
+  if (!signer) return setStatus(t("needConnect"), "err");
+  if (!tokenInfo) return setStatus(t("needToken"), "err");
+  const amt = parseAmount();
+  if (!amt || amt <= 0n) return setStatus(t("invalidAmount"), "err");
+  if (amt > tokenInfo.balance) return setStatus(t("insufficientBal"), "err");
+
+  goBtn.disabled = true;
+  try {
+    // Step 1: approve if allowance is not enough
+    if (amt > tokenInfo.allowance) {
+      setStatus(t("approving"));
+      const erc = new ethers.Contract(tokenInfo.address, ERC20_ABI, signer);
+      const txA = await erc.approve(LAUNCHER, amt);
+      setStatus(`${t("approveSent")} <a href="https://bscscan.com/tx/${txA.hash}" target="_blank">${shortAddr(txA.hash)}</a>`);
+      await txA.wait();
+      tokenInfo.allowance = await erc.allowance(userAddr, LAUNCHER);
+      refreshTokenMeta();
+      setStatus(t("approveOk"), "ok");
+    }
+
+    // Step 2: launch & lock
+    setStatus(t("launching"));
+    const c = new ethers.Contract(LAUNCHER, LAUNCHER_ABI, signer);
+    const tx = await c.launchAndLock(tokenInfo.address, amt);
+    setStatus(`${t("launchSent")} <a href="https://bscscan.com/tx/${tx.hash}" target="_blank">${shortAddr(tx.hash)}</a>`);
+    await tx.wait();
+    setStatus(`${t("launchOk")} <a href="https://bscscan.com/tx/${tx.hash}" target="_blank">${shortAddr(tx.hash)}</a>`, "ok");
+
+    // refresh balances
+    const erc2 = new ethers.Contract(tokenInfo.address, ERC20_ABI, signer);
+    tokenInfo.balance = await erc2.balanceOf(userAddr);
+    tokenInfo.allowance = await erc2.allowance(userAddr, LAUNCHER);
+    refreshTokenMeta();
+  } catch (e) {
+    const msg = e.shortMessage || e.message || String(e);
+    setStatus(`${t("launchFail")} ${msg}`, "err");
+  } finally {
+    refreshButtons();
+  }
+};
+
+/* ---------------- init ---------------- */
+applyI18n();
+</script>
+</body>
+</html>
