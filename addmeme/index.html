@@ -145,6 +145,7 @@ input:focus{border-color:var(--pri)}
     <div class="row"><div class="k">预测代币地址</div><div class="v mono" id="status-predicted">—</div></div>
     <div class="row"><div class="k">是否已被发射</div><div class="v" id="status-launched">—</div></div>
     <div class="row"><div class="k">需支付 BNB</div><div class="v" id="status-price">—</div></div>
+    <div class="row"><div class="k">NFT 当前溢价价(他人购买价)</div><div class="v" id="status-premium">—</div></div>
     <div class="row"><div class="k">NFT 已授权给本合约</div><div class="v" id="status-approved">—</div></div>
 
     <div class="steps" id="step-list">
@@ -426,6 +427,11 @@ async function previewStatus(){
 
     // 价格 + 授权
     let price = ethers.BigNumber.from(0);
+    let premium = ethers.BigNumber.from(0);
+    // 无论哪种状态，都尝试读取一次 quotePremiumPrice 以便显示"他人购买价"
+    try { premium = await S.launchRO.quotePremiumPrice(tokenId); } catch(e){ premium = ethers.BigNumber.from(0); }
+    $("#status-premium").textContent = premium.gt(0) ? (fmt(premium,18,8)+" BNB") : "0 / 未设置";
+
     let approvedOk = false;
     let label="", kind="";
     if(status === 1){
@@ -437,17 +443,21 @@ async function previewStatus(){
       ]);
       approvedOk = (getAppr.toLowerCase() === LAUNCH_ADDR.toLowerCase()) || !!isAll;
       $("#status-approved").textContent = approvedOk ? "是" : "否（需 approve）";
-      $("#status-price").textContent = "0 BNB（仅气费）";
+      $("#status-price").textContent = "0 BNB（你是持有者，走 transferFrom 路径，仅气费）";
     } else if(status === 2){
       label = "状态 2 · 合约暂存中（异常）"; kind="warn";
       $("#status-approved").textContent = "不适用";
       $("#status-price").textContent = "—";
     } else if(status === 3){
-      label = "状态 3 · 可付费购买"; kind="info";
-      try { price = await S.launchRO.quotePremiumPrice(tokenId); } catch(e){ throw new Error("获取价格失败: "+parseErr(e)); }
-      $("#status-price").textContent = fmt(price,18,6)+" BNB";
+      label = "状态 3 · 可付费购买（claim 路径）"; kind="info";
+      price = premium; // 同一个 currentPrice
+      if(price.isZero()){
+        // 兜底再查一次
+        try { price = await S.launchRO.quotePremiumPrice(tokenId); } catch(e){ throw new Error("获取价格失败: "+parseErr(e)); }
+      }
+      $("#status-price").textContent = fmt(price,18,8)+" BNB";
       $("#status-approved").textContent = "不需要（合约会代为 claim）";
-      approvedOk = true; // launch 路径不需要 NFT 授权
+      approvedOk = true;
     } else {
       label = "状态 4 · 该 NFT 不可用"; kind="err";
       $("#status-approved").textContent = "—";
@@ -617,7 +627,7 @@ function bind(){
     document.getElementById(id).addEventListener("input", ()=>{
       S.current = { tokenId:null, status:null, price:ethers.BigNumber.from(0), predicted:null, owner:null, approved:false, launched:false };
       setBadge($("#status-badge"),"未查询","");
-      $("#status-owner").textContent="—"; $("#status-predicted").textContent="—"; $("#status-launched").textContent="—"; $("#status-price").textContent="—"; $("#status-approved").textContent="—";
+      $("#status-owner").textContent="—"; $("#status-predicted").textContent="—"; $("#status-launched").textContent="—"; $("#status-price").textContent="—"; $("#status-premium").textContent="—"; $("#status-approved").textContent="—";
       setBtn("#btn-approve",false,"授权 NFT 给本合约 (approve)");
       setBtn("#btn-launch",false,"发射 launch()");
       setStep("s-2",""); setStep("s-3",""); setStep("s-4","");
