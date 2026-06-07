@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shiba Locker · PancakeSwap V3 NFT Lock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --bg2:#141414;
+    --fg:#ffffff;
+    --muted:#a0a0a0;
+    --orange:#ff7a18;
+    --orange-2:#ffae3d;
+    --line:#222;
+    --danger:#ff4d4f;
+    --ok:#22c55e;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;}
+  body{min-height:100vh;background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(255,122,24,.15), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(255,174,61,.10), transparent 60%),
+    var(--bg);
+  }
+  a{color:var(--orange-2)}
+  header{position:sticky;top:0;z-index:50;backdrop-filter:blur(8px);background:rgba(10,10,10,.7);border-bottom:1px solid var(--line);}
+  .nav{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px;}
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Bangers',cursive;letter-spacing:1px;font-size:24px;color:#fff;}
+  .brand .logo{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#ff7a18,#ffae3d);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 20px rgba(255,122,24,.4)}
+  .grow{flex:1}
+  .btn{cursor:pointer;border:0;outline:0;padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;background:linear-gradient(180deg,var(--orange-2),var(--orange));color:#1a0d00;transition:transform .08s ease, box-shadow .2s ease, opacity .2s;box-shadow:0 6px 18px rgba(255,122,24,.35);}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(255,122,24,.5)}
+  .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+  .btn.ghost{background:transparent;color:#fff;border:1px solid var(--line);box-shadow:none}
+  .btn.ghost:hover{border-color:var(--orange)}
+  .btn.sm{padding:6px 12px;font-size:12px;border-radius:10px}
+  .lang{display:inline-flex;background:#1b1b1b;border:1px solid var(--line);border-radius:999px;padding:3px}
+  .lang button{background:transparent;border:0;color:#bbb;padding:6px 12px;border-radius:999px;cursor:pointer;font-size:12px;font-weight:600}
+  .lang button.on{background:var(--orange);color:#1a0d00}
+  main{max-width:1180px;margin:0 auto;padding:28px 20px 80px;}
+  .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center;margin-bottom:28px;}
+  @media (max-width:860px){.hero{grid-template-columns:1fr}}
+  .hero h1{font-family:'Bangers',cursive;font-size:54px;line-height:1.05;margin:0 0 14px;letter-spacing:1px}
+  .hero h1 .accent{color:var(--orange)}
+  .hero p{color:var(--muted);font-size:15px;line-height:1.6;margin:0 0 18px;max-width:560px}
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:#ccc;margin-right:6px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block}
+  .hero-card{background:linear-gradient(180deg,#181818,#0e0e0e);border:1px solid var(--line);border-radius:24px;padding:22px;position:relative;overflow:hidden}
+  .hero-card .shib{font-size:120px;text-align:center;line-height:1;filter:drop-shadow(0 8px 24px rgba(255,122,24,.4))}
+  .hero-card .quote{font-family:'Bangers',cursive;text-align:center;color:var(--orange-2);font-size:22px;letter-spacing:1px;margin-top:8px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media (max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,#151515,#0d0d0d);border:1px solid var(--line);border-radius:20px;padding:20px;}
+  .card h2{margin:0 0 4px;font-size:18px;letter-spacing:.3px}
+  .card .sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .input{flex:1;min-width:160px;background:#0a0a0a;border:1px solid var(--line);color:#fff;padding:10px 12px;border-radius:12px;font-family:inherit;font-size:14px;outline:none}
+  .input:focus{border-color:var(--orange)}
+  .select{background:#0a0a0a;border:1px solid var(--line);color:#fff;padding:10px 12px;border-radius:12px;font-size:14px}
+  .kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #1f1f1f;font-size:13px}
+  .kv:last-child{border-bottom:0}
+  .kv b{color:#fff}
+  .kv span{color:var(--muted)}
+  .nft-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:14px}
+  .nft{background:#101010;border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px}
+  .nft .tid{font-family:'Bangers',cursive;color:var(--orange);font-size:22px;letter-spacing:1px}
+  .nft small{color:var(--muted);font-size:12px}
+  .nft .actions{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+  .empty{padding:18px;border:1px dashed #2a2a2a;border-radius:14px;color:var(--muted);text-align:center;font-size:13px}
+  .toast{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:10px;z-index:99}
+  .toast .t{background:#1a1a1a;border:1px solid var(--line);border-left:4px solid var(--orange);padding:12px 14px;border-radius:10px;min-width:240px;max-width:360px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  .toast .t.ok{border-left-color:var(--ok)}
+  .toast .t.err{border-left-color:var(--danger)}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:#ddd;word-break:break-all}
+  footer{max-width:1180px;margin:0 auto;padding:20px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+  .switch-row{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .pill{padding:3px 8px;border-radius:999px;font-size:11px;background:#1a1a1a;border:1px solid var(--line);color:#bbb}
+  .pill.warn{color:#ffd180;border-color:#5a3a00;background:#2a1a00}
+  .danger{color:var(--danger)}
+  .ok{color:var(--ok)}
+  details{background:#0e0e0e;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-top:10px}
+  details summary{cursor:pointer;color:#ddd;font-size:13px}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid #fff3;border-top-color:var(--orange);border-radius:50%;animation:sp 0.8s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand"><div class="logo">🔒</div><span data-i18n="brand">Shiba Locker</span></div>
+    <div class="grow"></div>
+    <div class="lang" id="lang">
+      <button data-lang="en" class="on">EN</button>
+      <button data-lang="zh">中文</button>
+    </div>
+    <button id="connectBtn" class="btn" data-i18n="connect">Connect Wallet</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div>
+      <div style="margin-bottom:14px">
+        <span class="badge"><span class="dot"></span><span data-i18n="net">BSC Mainnet</span></span>
+        <span class="badge">🥞 PancakeSwap V3</span>
+        <span class="badge">🔒 <span data-i18n="lockNFT">Lock NFT</span></span>
+      </div>
+      <h1><span class="accent">Much Lock.</span> <span data-i18n="heroTitle">Very Trust. Wow.</span></h1>
+      <p data-i18n="heroDesc">Lock your PancakeSwap V3 liquidity positions into the Shiba Locker. Once locked, NFTs cannot be withdrawn — but anyone can trigger fee collection, sent directly to the project beneficiary.</p>
+      <div class="row">
+        <a class="btn" href="#lockSection" data-i18n="ctaLock">🔒 Lock a Position</a>
+        <a class="btn ghost" href="#collectSection" data-i18n="ctaCollect">💰 Collect Fees</a>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="shib" style="font-size:90px">🔒</div>
+      <div class="quote">SUCH LP · MANY FEES</div>
+      <div style="margin-top:14px;font-size:12px;color:var(--muted);text-align:center" data-i18n="heroFoot">Powered by an immutable on-chain locker</div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2 data-i18n="lockerTitle">Locker Info</h2>
+      <div class="sub" data-i18n="lockerSub">On-chain status of this locker contract.</div>
+      <div class="kv"><span data-i18n="addr">Locker Address</span><b class="mono" id="lockerAddr">—</b></div>
+      <div class="kv"><span data-i18n="benef">Beneficiary</span><b class="mono" id="benefAddr">—</b></div>
+      <div class="kv"><span data-i18n="lockedCount">Total Locked NFTs</span><b id="lockedCount">—</b></div>
+      <div class="kv"><span data-i18n="ownerLbl">Owner</span><b class="mono" id="ownerAddr">—</b></div>
+      <div class="switch-row">
+        <button class="btn sm ghost" id="refreshLocker" data-i18n="refresh">↻ Refresh</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="walletTitle">Your Wallet</h2>
+      <div class="sub" data-i18n="walletSub">Connected wallet on BSC mainnet (chainId 56).</div>
+      <div class="kv"><span data-i18n="account">Account</span><b class="mono" id="acct">—</b></div>
+      <div class="kv"><span data-i18n="chain">Chain</span><b id="chain">—</b></div>
+      <div class="kv"><span data-i18n="bnb">BNB Balance</span><b id="bnbBal">—</b></div>
+      <div class="kv"><span data-i18n="nftCount">PancakeV3 NFTs Owned</span><b id="nftCount">—</b></div>
+    </div>
+  </section>
+
+  <section class="card" id="lockSection" style="margin-top:20px">
+    <h2>🔒 <span data-i18n="lockTitle">Lock a PancakeSwap V3 Position</span></h2>
+    <div class="sub" data-i18n="lockSub">Select an NFT collection (defaults to PancakeSwap V3 on BSC) and load your positions. Locking transfers your NFT to the locker contract — this is permanent.</div>
+    <div class="row" style="margin-bottom:12px">
+      <select class="select" id="nftSelect">
+        <option value="0x46A15B0b27311cedF172AB29E4f4766fbE7F4364">PancakeSwap V3 (BSC) — 0x46A1…4364</option>
+      </select>
+      <input class="input" id="customNFT" placeholder="0x… custom NFT manager (optional)" />
+      <button class="btn sm ghost" id="addNFT" data-i18n="addNftBtn">+ Add</button>
+      <button class="btn" id="loadMyNFTs" data-i18n="loadBtn">Load My NFTs</button>
+    </div>
+    <div id="myNFTs" class="nft-list"></div>
+    <details>
+      <summary data-i18n="manualLock">Lock by token ID manually</summary>
+      <div class="row" style="margin-top:10px">
+        <input class="input" id="manualTokenId" placeholder="Token ID" />
+        <button class="btn" id="manualLockBtn" data-i18n="lockBtn">Lock</button>
+      </div>
+    </details>
+  </section>
+
+  <section class="card" id="collectSection" style="margin-top:20px">
+    <h2>💰 <span data-i18n="collectTitle">Collect Fees</span></h2>
+    <div class="sub" data-i18n="collectSub">Anyone can trigger fee collection. Collected fees are always sent to the beneficiary, never to the caller.</div>
+    <div class="row">
+      <button class="btn" id="loadLocked" data-i18n="loadLocked">📋 Load Locked Positions</button>
+      <button class="btn ghost" id="collectAllBtn" data-i18n="collectAll">⚡ Collect All Fees</button>
+    </div>
+    <div id="lockedList" class="nft-list"></div>
+  </section>
+
+  <footer>
+    <div><span data-i18n="footWarn">⚠️ Locking is permanent. Read the contract before interacting.</span></div>
+    <div style="margin-top:6px">Shiba Locker · UI v1.0 · <a id="bscScan" href="#" target="_blank" rel="noopener">View on BscScan</a></div>
+  </footer>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== Config ===================== */
+const LOCKER_ADDR = "0x0000000000008038cea4957003dd8ce7c48a77a6";
+const DEFAULT_NFTS = [
+  { addr: "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364", label: "PancakeSwap V3 (BSC)" }
+];
+const BSC = {
+  chainIdHex: "0x38",
+  chainId: 56n,
+  rpcUrls: ["https://bsc-dataseed.binance.org/","https://bsc-dataseed1.defibit.io/","https://bsc.publicnode.com"],
+  name: "BNB Smart Chain",
+  nativeCurrency: { name:"BNB", symbol:"BNB", decimals:18 },
+  blockExplorerUrls: ["https://bscscan.com/"]
+};
+
+const LOCKER_ABI = [
+  "function beneficiary() view returns (address)",
+  "function owner() view returns (address)",
+  "function lockedTokenIdsLength() view returns (uint256)",
+  "function lockedTokenIds() view returns (uint256[])",
+  "function lockedTokenIdsSlice(uint256 start,uint256 end) view returns (uint256[])",
+  "function nftContractOf(uint256) view returns (address)",
+  "function isLocked(uint256) view returns (bool)",
+  "function pendingTokensOwed(uint256 tokenId) view returns (uint128 tokensOwed0,uint128 tokensOwed1)",
+  "function collectFees(uint256 tokenId) returns (uint256 amount0,uint256 amount1)",
+  "function collectFeesBatch(uint256[] tokenIds)",
+  "function collectAllFees()",
+  "function registerNFT(address nftContract,uint256 tokenId)"
+];
+
+const ERC721_ABI = [
+  "function balanceOf(address owner) view returns (uint256)",
+  "function tokenOfOwnerByIndex(address owner,uint256 index) view returns (uint256)",
+  "function ownerOf(uint256 tokenId) view returns (address)",
+  "function safeTransferFrom(address from,address to,uint256 tokenId)",
+  "function name() view returns (string)",
+  "function symbol() view returns (string)"
+];
+
+const V3_POS_ABI = [
+  "function positions(uint256 tokenId) view returns (uint96 nonce,address operator,address token0,address token1,uint24 fee,int24 tickLower,int24 tickUpper,uint128 liquidity,uint256 fg0,uint256 fg1,uint128 tokensOwed0,uint128 tokensOwed1)"
+];
+
+const ERC20_ABI = [
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)"
+];
+
+/* ===================== i18n ===================== */
+const I18N = {
+  en:{
+    brand:"Shiba Locker",connect:"Connect Wallet",net:"BSC Mainnet",lockNFT:"Lock NFT",
+    heroTitle:"Very Trust. Wow.",heroDesc:"Lock your PancakeSwap V3 liquidity positions into the Shiba Locker. Once locked, NFTs cannot be withdrawn — but anyone can trigger fee collection, sent directly to the project beneficiary.",
+    ctaLock:"🔒 Lock a Position",ctaCollect:"💰 Collect Fees",heroFoot:"Powered by an immutable on-chain locker",
+    lockerTitle:"Locker Info",lockerSub:"On-chain status of this locker contract.",
+    addr:"Locker Address",benef:"Beneficiary",lockedCount:"Total Locked NFTs",ownerLbl:"Owner",refresh:"↻ Refresh",
+    walletTitle:"Your Wallet",walletSub:"Connected wallet on BSC mainnet (chainId 56).",
+    account:"Account",chain:"Chain",bnb:"BNB Balance",nftCount:"PancakeV3 NFTs Owned",
+    lockTitle:"Lock a PancakeSwap V3 Position",lockSub:"Select an NFT collection (defaults to PancakeSwap V3 on BSC) and load your positions. Locking transfers your NFT to the locker contract — this is permanent.",
+    addNftBtn:"+ Add",loadBtn:"Load My NFTs",manualLock:"Lock by token ID manually",lockBtn:"Lock",
+    collectTitle:"Collect Fees",collectSub:"Anyone can trigger fee collection. Collected fees are always sent to the beneficiary, never to the caller.",
+    loadLocked:"📋 Load Locked Positions",collectAll:"⚡ Collect All Fees",
+    footWarn:"⚠️ Locking is permanent. Read the contract before interacting.",
+    noNFTs:"No PancakeSwap V3 NFTs found in this wallet.",
+    noLocked:"No locked positions yet.",
+    pending:"Pending fees",fee:"Fee Tier",liq:"Liquidity",
+    lock:"Lock",collect:"Collect",details:"Details",
+    confirmLock:"Confirm permanent lock of token #",
+    success:"Success",failed:"Failed",
+    needConnect:"Please connect your wallet first.",
+    wrongChain:"Wrong network, switching to BSC…",
+    loading:"Loading…",
+    addedNft:"Added custom NFT collection.",
+    invalidAddr:"Invalid address.",
+    txSent:"Transaction sent",txMined:"Transaction confirmed",
+  },
+  zh:{
+    brand:"柴犬锁仓",connect:"连接钱包",net:"BSC 主网",lockNFT:"锁定 NFT",
+    heroTitle:"信任拉满。哇哦。",heroDesc:"把你的 PancakeSwap V3 流动性头寸锁进柴犬锁仓合约。一旦锁定将无法取回，但任何人都可以触发手续费提取，资金会直接发送到项目受益人地址。",
+    ctaLock:"🔒 锁定头寸",ctaCollect:"💰 提取手续费",heroFoot:"由不可升级的链上锁仓合约驱动",
+    lockerTitle:"锁仓合约信息",lockerSub:"该锁仓合约的链上实时状态。",
+    addr:"合约地址",benef:"受益人",lockedCount:"已锁定 NFT 数量",ownerLbl:"所有者",refresh:"↻ 刷新",
+    walletTitle:"你的钱包",walletSub:"已连接到 BSC 主网（chainId 56）。",
+    account:"账户",chain:"链",bnb:"BNB 余额",nftCount:"持有的 PancakeV3 NFT",
+    lockTitle:"锁定 PancakeSwap V3 头寸",lockSub:"选择 NFT 合约（默认 BSC 上的 PancakeSwap V3）并加载你的头寸。锁定会把 NFT 转入锁仓合约——这是不可逆操作。",
+    addNftBtn:"+ 添加",loadBtn:"加载我的 NFT",manualLock:"手动按 Token ID 锁定",lockBtn:"锁定",
+    collectTitle:"提取手续费",collectSub:"任何人都能触发手续费提取，资金始终发往受益人地址，不会发给调用者。",
+    loadLocked:"📋 加载已锁仓头寸",collectAll:"⚡ 一键提取全部手续费",
+    footWarn:"⚠️ 锁仓不可逆，请在交互前阅读合约源码。",
+    noNFTs:"该钱包没有 PancakeSwap V3 NFT。",
+    noLocked:"暂无已锁定头寸。",
+    pending:"待领手续费",fee:"费率档",liq:"流动性",
+    lock:"锁定",collect:"提取",details:"详情",
+    confirmLock:"确认永久锁定 Token #",
+    success:"成功",failed:"失败",
+    needConnect:"请先连接钱包。",
+    wrongChain:"网络错误，正在切换到 BSC…",
+    loading:"加载中…",
+    addedNft:"已添加自定义 NFT 合约。",
+    invalidAddr:"地址无效。",
+    txSent:"交易已提交",txMined:"交易已确认",
+  }
+};
+let LANG = "en";
+function t(k){return (I18N[LANG]&&I18N[LANG][k])||I18N.en[k]||k}
+function applyI18n(){
+  document.documentElement.lang = LANG==="zh"?"zh-CN":"en";
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k = el.getAttribute("data-i18n");
+    el.textContent = t(k);
+  });
+}
+document.querySelectorAll("#lang button").forEach(b=>{
+  b.onclick = ()=>{
+    LANG = b.dataset.lang;
+    document.querySelectorAll("#lang button").forEach(x=>x.classList.toggle("on",x===b));
+    applyI18n();
+    // refresh dynamic content text
+    if(state.myNFTsRendered) renderMyNFTs(state.myNFTsRendered);
+    if(state.lockedRendered) renderLocked(state.lockedRendered);
+  };
+});
+
+/* ===================== Toast ===================== */
+function toast(msg, type=""){
+  const wrap = document.getElementById("toast");
+  const el = document.createElement("div");
+  el.className = "t " + (type||"");
+  el.innerHTML = msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{el.style.opacity=0;el.style.transition="opacity .4s";setTimeout(()=>el.remove(),400)},5200);
+}
+
+/* ===================== State ===================== */
+const state = {
+  provider:null, signer:null, account:null, chainId:null,
+  locker:null, lockerRO:null,
+  beneficiary:null, ownerAddr:null,
+  nftAddrs: DEFAULT_NFTS.map(x=>x.addr),
+  tokenMeta: {}, // tokenAddr -> {symbol, decimals}
+  myNFTsRendered:null, lockedRendered:null,
+};
+
+/* ===================== Helpers ===================== */
+const short = a => a ? a.slice(0,6)+"…"+a.slice(-4) : "—";
+function setText(id,v){document.getElementById(id).textContent=v}
+async function getTokenMeta(addr){
+  if(state.tokenMeta[addr]) return state.tokenMeta[addr];
+  try{
+    const c = new ethers.Contract(addr, ERC20_ABI, state.provider || readOnlyProvider());
+    const [sym, dec] = await Promise.all([c.symbol(), c.decimals()]);
+    state.tokenMeta[addr] = {symbol:sym, decimals:Number(dec)};
+  }catch(e){
+    state.tokenMeta[addr] = {symbol: short(addr), decimals:18};
+  }
+  return state.tokenMeta[addr];
+}
+function fmt(amount, decimals){
+  try{
+    const s = ethers.formatUnits(amount, decimals);
+    const n = Number(s);
+    if(n===0) return "0";
+    if(n<0.0001) return n.toExponential(2);
+    if(n<1) return n.toFixed(6).replace(/0+$/,'').replace(/\.$/,'');
+    if(n<1000) return n.toFixed(4).replace(/0+$/,'').replace(/\.$/,'');
+    return n.toLocaleString(undefined,{maximumFractionDigits:2});
+  }catch{return amount.toString()}
+}
+function readOnlyProvider(){
+  if(!state._roProv){
+    state._roProv = new ethers.JsonRpcProvider(BSC.rpcUrls[0], 56);
+  }
+  return state._roProv;
+}
+
+/* ===================== Wallet ===================== */
+async function ensureBSC(){
+  if(!window.ethereum) throw new Error("No wallet (MetaMask) detected");
+  const cid = await window.ethereum.request({method:"eth_chainId"});
+  if(cid !== BSC.chainIdHex){
+    toast(`<span class="spinner"></span>${t("wrongChain")}`);
+    try{
+      await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:BSC.chainIdHex}]});
+    }catch(e){
+      if(e.code === 4902){
+        await window.ethereum.request({method:"wallet_addEthereumChain", params:[{
+          chainId: BSC.chainIdHex, chainName: BSC.name, rpcUrls: BSC.rpcUrls,
+          nativeCurrency: BSC.nativeCurrency, blockExplorerUrls: BSC.blockExplorerUrls
+        }]});
+      } else throw e;
+    }
+  }
+}
+async function connect(){
+  try{
+    if(!window.ethereum){ toast("❌ "+t("needConnect")+" (No wallet found)", "err"); return; }
+    await ensureBSC();
+    const accs = await window.ethereum.request({method:"eth_requestAccounts"});
+    state.provider = new ethers.BrowserProvider(window.ethereum);
+    state.signer = await state.provider.getSigner();
+    state.account = accs[0];
+    state.chainId = (await state.provider.getNetwork()).chainId;
+    state.locker = new ethers.Contract(LOCKER_ADDR, LOCKER_ABI, state.signer);
+    document.getElementById("connectBtn").textContent = short(state.account);
+    await refreshWallet();
+    await refreshLocker();
+    toast("✅ Wallet connected","ok");
+    // auto-load user's NFTs and locked positions
+    document.getElementById("loadMyNFTs").click();
+    loadLocked();
+    window.ethereum.on("accountsChanged", ()=>location.reload());
+    window.ethereum.on("chainChanged", ()=>location.reload());
+  }catch(e){
+    console.error(e);
+    toast("❌ "+(e.message||e), "err");
+  }
+}
+document.getElementById("connectBtn").onclick = connect;
+
+/* ===================== Locker info ===================== */
+async function refreshLocker(){
+  state.lockerRO = new ethers.Contract(LOCKER_ADDR, LOCKER_ABI, readOnlyProvider());
+  setText("lockerAddr", short(LOCKER_ADDR));
+  document.getElementById("bscScan").href = "https://bscscan.com/address/"+LOCKER_ADDR;
+  try{
+    const [b, o, len] = await Promise.all([
+      state.lockerRO.beneficiary(),
+      state.lockerRO.owner().catch(()=>ethers.ZeroAddress),
+      state.lockerRO.lockedTokenIdsLength()
+    ]);
+    state.beneficiary = b; state.ownerAddr = o;
+    setText("benefAddr", short(b));
+    setText("ownerAddr", short(o));
+    setText("lockedCount", len.toString());
+  }catch(e){
+    console.error(e);
+    setText("benefAddr","—");setText("ownerAddr","—");setText("lockedCount","err");
+  }
+}
+document.getElementById("refreshLocker").onclick = refreshLocker;
+
+async function refreshWallet(){
+  if(!state.account) return;
+  setText("acct", short(state.account));
+  setText("chain", state.chainId===56n? "BSC (56)" : ("⚠ "+state.chainId));
+  try{
+    const bal = await state.provider.getBalance(state.account);
+    setText("bnbBal", fmt(bal,18)+" BNB");
+  }catch{}
+  try{
+    const nft = new ethers.Contract(DEFAULT_NFTS[0].addr, ERC721_ABI, state.provider);
+    const bal = await nft.balanceOf(state.account);
+    setText("nftCount", bal.toString());
+  }catch{ setText("nftCount","—") }
+}
+
+/* ===================== NFT collection picker ===================== */
+document.getElementById("addNFT").onclick = ()=>{
+  const v = document.getElementById("customNFT").value.trim();
+  if(!ethers.isAddress(v)){ toast("❌ "+t("invalidAddr"),"err"); return; }
+  const sel = document.getElementById("nftSelect");
+  const opt = document.createElement("option");
+  opt.value = v; opt.textContent = "Custom — "+short(v);
+  sel.appendChild(opt); sel.value = v;
+  state.nftAddrs.push(v);
+  toast("✅ "+t("addedNft"),"ok");
+};
+
+/* ===================== Load user NFTs ===================== */
+document.getElementById("loadMyNFTs").onclick = async ()=>{
+  if(!state.account){ toast("❌ "+t("needConnect"),"err"); return; }
+  const addr = document.getElementById("nftSelect").value;
+  const container = document.getElementById("myNFTs");
+  container.innerHTML = `<div class="empty"><span class="spinner"></span>${t("loading")}</div>`;
+  try{
+    const nft = new ethers.Contract(addr, ERC721_ABI, state.provider);
+    const bal = Number(await nft.balanceOf(state.account));
+    if(bal===0){ container.innerHTML = `<div class="empty">${t("noNFTs")}</div>`; state.myNFTsRendered=null; return; }
+    const ids = [];
+    for(let i=0;i<bal;i++){
+      try{ ids.push(await nft.tokenOfOwnerByIndex(state.account, i)); }catch(e){ break; }
+    }
+    const v3 = new ethers.Contract(addr, V3_POS_ABI, state.provider);
+    const positions = await Promise.all(ids.map(async id=>{
+      try{
+        const p = await v3.positions(id);
+        const [m0,m1] = await Promise.all([getTokenMeta(p.token0), getTokenMeta(p.token1)]);
+        return { id, fee:Number(p.fee), liquidity:p.liquidity, t0:m0, t1:m1, owed0:p.tokensOwed0, owed1:p.tokensOwed1 };
+      }catch{ return { id, fee:0, liquidity:0n, t0:{symbol:"?"}, t1:{symbol:"?"}, owed0:0n, owed1:0n }; }
+    }));
+    state.myNFTsRendered = { addr, positions };
+    renderMyNFTs(state.myNFTsRendered);
+  }catch(e){
+    console.error(e);
+    container.innerHTML = `<div class="empty danger">${e.message||e}</div>`;
+  }
+};
+function renderMyNFTs(data){
+  const container = document.getElementById("myNFTs");
+  if(!data || !data.positions.length){ container.innerHTML = `<div class="empty">${t("noNFTs")}</div>`; return; }
+  container.innerHTML = "";
+  data.positions.forEach(p=>{
+    const el = document.createElement("div");
+    el.className = "nft";
+    el.innerHTML = `
+      <div class="tid">#${p.id}</div>
+      <small>${p.t0.symbol} / ${p.t1.symbol} <span class="pill">${(p.fee/10000).toFixed(2)}%</span></small>
+      <small>${t("liq")}: ${p.liquidity.toString()}</small>
+      <div class="actions">
+        <button class="btn sm" data-act="lock" data-id="${p.id}">🔒 ${t("lock")}</button>
+        <a class="btn sm ghost" href="https://bscscan.com/token/${data.addr}?a=${p.id}" target="_blank">${t("details")}</a>
+      </div>`;
+    container.appendChild(el);
+  });
+  container.querySelectorAll("button[data-act=lock]").forEach(b=>{
+    b.onclick = ()=>lockNFT(data.addr, b.dataset.id);
+  });
+}
+
+/* ===================== Lock NFT ===================== */
+async function lockNFT(nftAddr, tokenId){
+  if(!state.signer){ toast("❌ "+t("needConnect"),"err"); return; }
+  if(!confirm(t("confirmLock")+tokenId+" ?")) return;
+  try{
+    const nft = new ethers.Contract(nftAddr, ERC721_ABI, state.signer);
+    const fn = nft.getFunction("safeTransferFrom(address,address,uint256)");
+    const tx = await fn(state.account, LOCKER_ADDR, tokenId);
+    toast(`<span class="spinner"></span>${t("txSent")}: <a href="https://bscscan.com/tx/${tx.hash}" target="_blank" class="mono">${short(tx.hash)}</a>`);
+    await tx.wait();
+    toast(`✅ ${t("txMined")} — ${t("lock")} #${tokenId}`, "ok");
+    refreshLocker();
+    document.getElementById("loadMyNFTs").click();
+  }catch(e){
+    console.error(e);
+    toast("❌ "+t("failed")+": "+(e.shortMessage||e.message||e),"err");
+  }
+}
+document.getElementById("manualLockBtn").onclick = ()=>{
+  const id = document.getElementById("manualTokenId").value.trim();
+  const addr = document.getElementById("nftSelect").value;
+  if(!id) return;
+  lockNFT(addr, id);
+};
+
+/* ===================== Locked positions ===================== */
+document.getElementById("loadLocked").onclick = loadLocked;
+async function loadLocked(){
+  const c = document.getElementById("lockedList");
+  c.innerHTML = `<div class="empty"><span class="spinner"></span>${t("loading")}</div>`;
+  try{
+    const ro = state.lockerRO || new ethers.Contract(LOCKER_ADDR, LOCKER_ABI, readOnlyProvider());
+    const ids = await ro.lockedTokenIds();
+    if(ids.length===0){ c.innerHTML = `<div class="empty">${t("noLocked")}</div>`; state.lockedRendered=null; return; }
+    const items = await Promise.all(ids.map(async id=>{
+      try{
+        const nftAddr = await ro.nftContractOf(id);
+        const v3 = new ethers.Contract(nftAddr, V3_POS_ABI, readOnlyProvider());
+        const p = await v3.positions(id);
+        const [m0,m1] = await Promise.all([getTokenMeta(p.token0), getTokenMeta(p.token1)]);
+        return { id, nftAddr, fee:Number(p.fee), liquidity:p.liquidity, t0:m0, t1:m1, owed0:p.tokensOwed0, owed1:p.tokensOwed1 };
+      }catch(e){
+        return { id, nftAddr:"?", fee:0, liquidity:0n, t0:{symbol:"?",decimals:18}, t1:{symbol:"?",decimals:18}, owed0:0n, owed1:0n };
+      }
+    }));
+    state.lockedRendered = items;
+    renderLocked(items);
+  }catch(e){
+    console.error(e);
+    c.innerHTML = `<div class="empty danger">${e.message||e}</div>`;
+  }
+}
+function renderLocked(items){
+  const c = document.getElementById("lockedList");
+  c.innerHTML = "";
+  items.forEach(p=>{
+    const el = document.createElement("div");
+    el.className = "nft";
+    el.innerHTML = `
+      <div class="tid">#${p.id}</div>
+      <small>${p.t0.symbol} / ${p.t1.symbol} <span class="pill">${(p.fee/10000).toFixed(2)}%</span></small>
+      <small>${t("pending")}: ${fmt(p.owed0,p.t0.decimals||18)} ${p.t0.symbol} · ${fmt(p.owed1,p.t1.decimals||18)} ${p.t1.symbol}</small>
+      <div class="actions">
+        <button class="btn sm" data-act="collect" data-id="${p.id}">💰 ${t("collect")}</button>
+        <a class="btn sm ghost" href="https://bscscan.com/token/${p.nftAddr}?a=${p.id}" target="_blank">${t("details")}</a>
+      </div>`;
+    c.appendChild(el);
+  });
+  c.querySelectorAll("button[data-act=collect]").forEach(b=>{
+    b.onclick = ()=>collectOne(b.dataset.id);
+  });
+}
+async function collectOne(tokenId){
+  if(!state.signer){ toast("❌ "+t("needConnect"),"err"); return; }
+  try{
+    const tx = await state.locker.collectFees(tokenId);
+    toast(`<span class="spinner"></span>${t("txSent")}: <a href="https://bscscan.com/tx/${tx.hash}" target="_blank" class="mono">${short(tx.hash)}</a>`);
+    await tx.wait();
+    toast(`✅ ${t("txMined")} — ${t("collect")} #${tokenId}`,"ok");
+    loadLocked();
+  }catch(e){
+    console.error(e);
+    toast("❌ "+t("failed")+": "+(e.shortMessage||e.message||e),"err");
+  }
+}
+document.getElementById("collectAllBtn").onclick = async ()=>{
+  if(!state.signer){ toast("❌ "+t("needConnect"),"err"); return; }
+  try{
+    const tx = await state.locker.collectAllFees();
+    toast(`<span class="spinner"></span>${t("txSent")}: <a href="https://bscscan.com/tx/${tx.hash}" target="_blank" class="mono">${short(tx.hash)}</a>`);
+    await tx.wait();
+    toast(`✅ ${t("txMined")} — Collect All`,"ok");
+    loadLocked();
+  }catch(e){
+    console.error(e);
+    toast("❌ "+t("failed")+": "+(e.shortMessage||e.message||e),"err");
+  }
+};
+
+/* ===================== Boot ===================== */
+applyI18n();
+refreshLocker();
+</script>
+</body>
+</html>
