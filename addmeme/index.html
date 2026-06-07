@@ -213,7 +213,7 @@ body{
     <div class="card card-wide">
       <h2 data-i18n="step3.title">3. Approve &amp; Launch</h2>
       <p class="muted" data-i18n="step3.desc">
-        You must <b>approve(FACTORY, tokenId)</b> on the NFT first. Otherwise <code>launch()</code> will revert. Then send BNB equal to the quoted premium to launch.
+        You must <b>approve(OneClickLaunch, tokenId)</b> on the NFT first. Otherwise <code>launch()</code> will revert. Then send BNB equal to the quoted premium to launch.
       </p>
       <div class="row row-3">
         <button id="launchBtn" class="btn btn-primary big" data-i18n="step3.launch">🚀 Approve &amp; Launch</button>
@@ -295,7 +295,7 @@ const I18N = {
     "step2.name": "Token name",
     "step2.symbol": "Token symbol",
     "step3.title": "3. Approve & Launch",
-    "step3.desc": "You must <b>approve(FACTORY, tokenId)</b> on the NFT first. Otherwise <code>launch()</code> will revert. Then send BNB equal to the quoted premium to launch.",
+    "step3.desc": "You must <b>approve(OneClickLaunch, tokenId)</b> on the NFT first. Otherwise <code>launch()</code> will revert. Then send BNB equal to the quoted premium to launch.",
     "step3.launch": "🚀 Approve & Launch",
     "step3.refresh": "Refresh Info",
     "step4.title": "4. Your launches",
@@ -307,9 +307,9 @@ const I18N = {
     "msg.notOwner": "You don't own this NFT tokenId.",
     "msg.quoting": "Quoting price…",
     "msg.quote": "Premium price for tokenId ",
-    "msg.approving": "Sending approve(FACTORY, tokenId)…",
+    "msg.approving": "Sending approve(OneClickLaunch, tokenId)…",
     "msg.approved": "Approved. You can now launch.",
-    "msg.alreadyApproved": "Already approved to FACTORY. You can launch.",
+    "msg.alreadyApproved": "Already approved to OneClickLaunch. You can launch.",
     "msg.launching": "Sending launch() with BNB premium…",
     "msg.launched": "Launched! Token: ",
     "msg.tx": "Tx: ",
@@ -342,7 +342,7 @@ const I18N = {
     "step2.name": "代币名称",
     "step2.symbol": "代币符号",
     "step3.title": "3. 授权 & 发射",
-    "step3.desc": "你必须先在 NFT 合约上执行 <b>approve(FACTORY, tokenId)</b>,否则 <code>launch()</code> 一定会回滚。然后附带等于溢价费用的 BNB 调用 launch。",
+    "step3.desc": "你必须先在 NFT 合约上执行 <b>approve(OneClickLaunch, tokenId)</b>,否则 <code>launch()</code> 一定会回滚。然后附带等于溢价费用的 BNB 调用 launch。",
     "step3.launch": "🚀 授权并发射",
     "step3.refresh": "刷新信息",
     "step4.title": "4. 我的发射记录",
@@ -354,9 +354,9 @@ const I18N = {
     "msg.notOwner": "你并未持有此 NFT tokenId。",
     "msg.quoting": "查询价格中…",
     "msg.quote": "tokenId 的溢价费用 ",
-    "msg.approving": "发送 approve(FACTORY, tokenId) 中…",
+    "msg.approving": "发送 approve(OneClickLaunch, tokenId) 中…",
     "msg.approved": "授权成功,可以发射了。",
-    "msg.alreadyApproved": "已授权给 FACTORY,可以直接发射。",
+    "msg.alreadyApproved": "已授权给 OneClickLaunch,可以直接发射。",
     "msg.launching": "携带溢价 BNB 调用 launch() 中…",
     "msg.launched": "发射成功! 代币地址: ",
     "msg.tx": "交易: ",
@@ -461,7 +461,7 @@ async function loadConstants(){
     state.oneclick.NFT(),
     state.oneclick.LAUNCHER()
   ]);
-  state.factory = factory;
+  ONECLICK_ADDR = factory;
   state.nftAddr = nftAddr;
   state.launcher = launcher;
   state.nft = new ethers.Contract(nftAddr, ERC721_ABI, state.signer);
@@ -515,12 +515,12 @@ async function approveNFT(){
     }
     // Already approved?
     const cur = await state.nft.getApproved(tokenId);
-    const all = await state.nft.isApprovedForAll(state.account, state.factory);
-    if(cur.toLowerCase() === state.factory.toLowerCase() || all){
+    const all = await state.nft.isApprovedForAll(state.account, ONECLICK_ADDR);
+    if(cur.toLowerCase() === ONECLICK_ADDR.toLowerCase() || all){
       setStatus(t("msg.alreadyApproved"),"ok"); return;
     }
     setStatus(t("msg.approving"));
-    const tx = await state.nft.approve(state.factory, tokenId);
+    const tx = await state.nft.approve(ONECLICK_ADDR, tokenId);
     appendStatus(`${t("msg.tx")}<a href="${explorerTx(tx.hash)}" target="_blank">${tx.hash}</a>`);
     await tx.wait();
     appendStatus(t("msg.approved"),"ok");
@@ -541,27 +541,42 @@ async function launchToken(){
   const btn = document.getElementById("launchBtn");
   btn.disabled = true;
   try{
-    // 1) Ownership check
-    const owner = await state.nft.ownerOf(tokenId);
-    if(owner.toLowerCase() !== state.account.toLowerCase()){
-      setStatus(t("msg.notOwner"),"err"); return;
-    }
-    // 2) Mandatory: ensure approve(FACTORY, tokenId) — otherwise launch() will revert
-    const cur = await state.nft.getApproved(tokenId);
-    const all = await state.nft.isApprovedForAll(state.account, state.factory);
-    if(cur.toLowerCase() !== state.factory.toLowerCase() && !all){
-      setStatus(t("msg.approving"));
-      const txA = await state.nft.approve(state.factory, tokenId);
-      appendStatus(`${t("msg.tx")}<a href="${explorerTx(txA.hash)}" target="_blank">${txA.hash}</a>`);
-      await txA.wait();
-      appendStatus(t("msg.approved"),"ok");
+
+        const r = await state.oneclick.previewStatus(tokenId, state.account);
+    const status = Number(r[0]);
+    const priceIfBuy = r[1];      // bigint
+
+    let valueToSend = 0n;
+
+    if (status === 1) {
+        // 用户自持：需要 approve OneClickLaunch
+        const cur = await state.nft.getApproved(tokenId);
+        const all = await state.nft.isApprovedForAll(state.account, ONECLICK_ADDR);
+        if(cur.toLowerCase() !== ONECLICK_ADDR.toLowerCase() && !all){
+            setStatus(t("msg.approving"));
+            const txA = await state.nft.approve(ONECLICK_ADDR, tokenId);
+            appendStatus(`${t("msg.tx")}<a href="${explorerTx(txA.hash)}" target="_blank">${txA.hash}</a>`);
+            await txA.wait();
+            appendStatus(t("msg.approved"),"ok");
+        } else {
+            setStatus(t("msg.alreadyApproved"),"ok");
+        }
+        valueToSend = 0n;
+    } else if (status === 2) {
+        // NFT 已在合约里：跳过 approve
+        valueToSend = 0n;
+    } else if (status === 3) {
+        // 未铸造，走代购：不需要 approve
+        valueToSend = priceIfBuy;
     } else {
-      setStatus(t("msg.alreadyApproved"),"ok");
+        // status === 4：他人持有
+        setStatus("此 tokenId 已被他人持有", "err");
+        return;
     }
+
     // 3) Launch with BNB premium
-    const price = await state.oneclick.quotePremiumPrice(tokenId);
-    appendStatus(t("msg.launching") + " value=" + ethers.formatEther(price) + " BNB");
-    const tx = await state.oneclick.launch(tokenId, name, symbol, { value: price });
+    appendStatus(t("msg.launching") + " value=" + ethers.formatEther(valueToSend) + " BNB");
+    const tx = await state.oneclick.launch(tokenId, name, symbol, { value: valueToSend });
     appendStatus(`${t("msg.tx")}<a href="${explorerTx(tx.hash)}" target="_blank">${tx.hash}</a>`);
     const rcpt = await tx.wait();
     let tokenAddr = null;
