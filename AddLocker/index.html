@@ -87,6 +87,10 @@
   details summary{cursor:pointer;color:#ddd;font-size:13px}
   .spinner{display:inline-block;width:14px;height:14px;border:2px solid #fff3;border-top-color:var(--orange);border-radius:50%;animation:sp 0.8s linear infinite;vertical-align:-2px;margin-right:6px}
   @keyframes sp{to{transform:rotate(360deg)}}
+  .owner-only{display:none !important}
+  body.is-owner .owner-only{display:revert !important}
+  body.is-owner .owner-only.flex{display:flex !important}
+  body.is-owner .owner-only.grid{display:grid !important}
 </style>
 </head>
 <body>
@@ -111,10 +115,10 @@
         <span class="badge">🔒 <span data-i18n="lockNFT">Lock NFT</span></span>
       </div>
       <h1><span class="accent">Much Lock.</span> <span data-i18n="heroTitle">Very Trust. Wow.</span></h1>
-      <p data-i18n="heroDesc">Lock your PancakeSwap V3 liquidity positions into the Shiba Locker. Once locked, NFTs cannot be withdrawn — but anyone can trigger fee collection, sent directly to the project beneficiary.</p>
+      <p data-i18n="heroDesc">Lock your PancakeSwap V3 liquidity positions into the Shiba Locker. Once locked, NFTs cannot be withdrawn.</p>
       <div class="row">
         <a class="btn" href="#lockSection" data-i18n="ctaLock">🔒 Lock a Position</a>
-        <a class="btn ghost" href="#collectSection" data-i18n="ctaCollect">💰 Collect Fees</a>
+        <a class="btn ghost owner-only" href="#collectSection" data-i18n="ctaCollect">💰 Collect Fees</a>
       </div>
     </div>
     <div class="hero-card">
@@ -129,7 +133,7 @@
       <h2 data-i18n="lockerTitle">Locker Info</h2>
       <div class="sub" data-i18n="lockerSub">On-chain status of this locker contract.</div>
       <div class="kv"><span data-i18n="addr">Locker Address</span><b class="mono" id="lockerAddr">—</b></div>
-      <div class="kv"><span data-i18n="benef">Beneficiary</span><b class="mono" id="benefAddr">—</b></div>
+      <div class="kv owner-only flex"><span data-i18n="benef">Beneficiary</span><b class="mono" id="benefAddr">—</b></div>
       <div class="kv"><span data-i18n="lockedCount">Total Locked NFTs</span><b id="lockedCount">—</b></div>
       <div class="kv"><span data-i18n="ownerLbl">Owner</span><b class="mono" id="ownerAddr">—</b></div>
       <div class="switch-row">
@@ -168,7 +172,7 @@
     </details>
   </section>
 
-  <section class="card" id="collectSection" style="margin-top:20px">
+  <section class="card owner-only" id="collectSection" style="margin-top:20px">
     <h2>💰 <span data-i18n="collectTitle">Collect Fees</span></h2>
     <div class="sub" data-i18n="collectSub">Anyone can trigger fee collection. Collected fees are always sent to the beneficiary, never to the caller.</div>
     <div class="row">
@@ -238,7 +242,7 @@ const ERC20_ABI = [
 const I18N = {
   en:{
     brand:"Shiba Locker",connect:"Connect Wallet",net:"BSC Mainnet",lockNFT:"Lock NFT",
-    heroTitle:"Very Trust. Wow.",heroDesc:"Lock your PancakeSwap V3 liquidity positions into the Shiba Locker. Once locked, NFTs cannot be withdrawn — but anyone can trigger fee collection, sent directly to the project beneficiary.",
+    heroTitle:"Very Trust. Wow.",heroDesc:"Lock your PancakeSwap V3 liquidity positions into the Shiba Locker. Once locked, NFTs cannot be withdrawn.",
     ctaLock:"🔒 Lock a Position",ctaCollect:"💰 Collect Fees",heroFoot:"Powered by an immutable on-chain locker",
     lockerTitle:"Locker Info",lockerSub:"On-chain status of this locker contract.",
     addr:"Locker Address",benef:"Beneficiary",lockedCount:"Total Locked NFTs",ownerLbl:"Owner",refresh:"↻ Refresh",
@@ -246,7 +250,7 @@ const I18N = {
     account:"Account",chain:"Chain",bnb:"BNB Balance",nftCount:"PancakeV3 NFTs Owned",
     lockTitle:"Lock a PancakeSwap V3 Position",lockSub:"Select an NFT collection (defaults to PancakeSwap V3 on BSC) and load your positions. Locking transfers your NFT to the locker contract — this is permanent.",
     addNftBtn:"+ Add",loadBtn:"Load My NFTs",manualLock:"Lock by token ID manually",lockBtn:"Lock",
-    collectTitle:"Collect Fees",collectSub:"Anyone can trigger fee collection. Collected fees are always sent to the beneficiary, never to the caller.",
+    collectTitle:"Collect Fees",collectSub:"Owner-only panel to withdraw accumulated trading fees from locked positions to the beneficiary address.",
     loadLocked:"📋 Load Locked Positions",collectAll:"⚡ Collect All Fees",
     footWarn:"⚠️ Locking is permanent. Read the contract before interacting.",
     noNFTs:"No PancakeSwap V3 NFTs found in this wallet.",
@@ -264,7 +268,7 @@ const I18N = {
   },
   zh:{
     brand:"柴犬锁仓",connect:"连接钱包",net:"BSC 主网",lockNFT:"锁定 NFT",
-    heroTitle:"信任拉满。哇哦。",heroDesc:"把你的 PancakeSwap V3 流动性头寸锁进柴犬锁仓合约。一旦锁定将无法取回，但任何人都可以触发手续费提取，资金会直接发送到项目受益人地址。",
+    heroTitle:"信任拉满。哇哦。",heroDesc:"把你的 PancakeSwap V3 流动性头寸锁进柴犬锁仓合约。一旦锁定将无法取回。",
     ctaLock:"🔒 锁定头寸",ctaCollect:"💰 提取手续费",heroFoot:"由不可升级的链上锁仓合约驱动",
     lockerTitle:"锁仓合约信息",lockerSub:"该锁仓合约的链上实时状态。",
     addr:"合约地址",benef:"受益人",lockedCount:"已锁定 NFT 数量",ownerLbl:"所有者",refresh:"↻ 刷新",
@@ -272,7 +276,7 @@ const I18N = {
     account:"账户",chain:"链",bnb:"BNB 余额",nftCount:"持有的 PancakeV3 NFT",
     lockTitle:"锁定 PancakeSwap V3 头寸",lockSub:"选择 NFT 合约（默认 BSC 上的 PancakeSwap V3）并加载你的头寸。锁定会把 NFT 转入锁仓合约——这是不可逆操作。",
     addNftBtn:"+ 添加",loadBtn:"加载我的 NFT",manualLock:"手动按 Token ID 锁定",lockBtn:"锁定",
-    collectTitle:"提取手续费",collectSub:"任何人都能触发手续费提取，资金始终发往受益人地址，不会发给调用者。",
+    collectTitle:"提取手续费",collectSub:"仅 Owner 可见面板：把锁仓头寸中累积的交易手续费提取到受益人地址。",
     loadLocked:"📋 加载已锁仓头寸",collectAll:"⚡ 一键提取全部手续费",
     footWarn:"⚠️ 锁仓不可逆，请在交互前阅读合约源码。",
     noNFTs:"该钱包没有 PancakeSwap V3 NFT。",
@@ -323,7 +327,7 @@ function toast(msg, type=""){
 const state = {
   provider:null, signer:null, account:null, chainId:null,
   locker:null, lockerRO:null,
-  beneficiary:null, ownerAddr:null,
+  beneficiary:null, ownerAddr:null, isOwner:false,
   nftAddrs: DEFAULT_NFTS.map(x=>x.addr),
   tokenMeta: {}, // tokenAddr -> {symbol, decimals}
   myNFTsRendered:null, lockedRendered:null,
@@ -360,6 +364,12 @@ function readOnlyProvider(){
   }
   return state._roProv;
 }
+function updateOwnerMode(){
+  const isOwn = !!(state.account && state.ownerAddr && state.account.toLowerCase() === state.ownerAddr.toLowerCase());
+  state.isOwner = isOwn;
+  document.body.classList.toggle("is-owner", isOwn);
+  if(state.lockedRendered) renderLocked(state.lockedRendered);
+}
 
 /* ===================== Wallet ===================== */
 async function ensureBSC(){
@@ -392,6 +402,7 @@ async function connect(){
     document.getElementById("connectBtn").textContent = short(state.account);
     await refreshWallet();
     await refreshLocker();
+    updateOwnerMode();
     toast("✅ Wallet connected","ok");
     // auto-load user's NFTs and locked positions
     document.getElementById("loadMyNFTs").click();
@@ -420,6 +431,7 @@ async function refreshLocker(){
     setText("benefAddr", short(b));
     setText("ownerAddr", short(o));
     setText("lockedCount", len.toString());
+    updateOwnerMode();
   }catch(e){
     console.error(e);
     setText("benefAddr","—");setText("ownerAddr","—");setText("lockedCount","err");
@@ -563,14 +575,19 @@ function renderLocked(items){
   items.forEach(p=>{
     const el = document.createElement("div");
     el.className = "nft";
+    const ownerBlock = state.isOwner
+      ? `<small>${t("pending")}: ${fmt(p.owed0,p.t0.decimals||18)} ${p.t0.symbol} · ${fmt(p.owed1,p.t1.decimals||18)} ${p.t1.symbol}</small>
+         <div class="actions">
+           <button class="btn sm" data-act="collect" data-id="${p.id}">💰 ${t("collect")}</button>
+           <a class="btn sm ghost" href="https://bscscan.com/token/${p.nftAddr}?a=${p.id}" target="_blank">${t("details")}</a>
+         </div>`
+      : `<div class="actions">
+           <a class="btn sm ghost" href="https://bscscan.com/token/${p.nftAddr}?a=${p.id}" target="_blank">${t("details")}</a>
+         </div>`;
     el.innerHTML = `
       <div class="tid">#${p.id}</div>
       <small>${p.t0.symbol} / ${p.t1.symbol} <span class="pill">${(p.fee/10000).toFixed(2)}%</span></small>
-      <small>${t("pending")}: ${fmt(p.owed0,p.t0.decimals||18)} ${p.t0.symbol} · ${fmt(p.owed1,p.t1.decimals||18)} ${p.t1.symbol}</small>
-      <div class="actions">
-        <button class="btn sm" data-act="collect" data-id="${p.id}">💰 ${t("collect")}</button>
-        <a class="btn sm ghost" href="https://bscscan.com/token/${p.nftAddr}?a=${p.id}" target="_blank">${t("details")}</a>
-      </div>`;
+      ${ownerBlock}`;
     c.appendChild(el);
   });
   c.querySelectorAll("button[data-act=collect]").forEach(b=>{
