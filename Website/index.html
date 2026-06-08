@@ -122,9 +122,9 @@ select option{background:var(--bg2);color:var(--text)}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn .35s ease}
 
-/* AddMeme Isolated Styles */
+/* Isolated AddMeme Styles */
 
-  :root {
+#panel-launch   :root {
     --bg: #0b0e14;
     --panel: #141925;
     --panel-2: #1b2230;
@@ -137,133 +137,116 @@ select option{background:var(--bg2);color:var(--text)}
     --red: #f6465d;
     --blue: #5b8cff;
   }
-  * { box-sizing: border-box; }
-  #panel-launch {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-      "Microsoft YaHei", Roboto, sans-serif;
-    background: radial-gradient(1200px 600px at 80% -10%, #1b2438 0%, transparent 60%),
-                radial-gradient(800px 500px at -10% 110%, #2a1f0a 0%, transparent 60%),
-                var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
-  #panel-launch {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 18px 28px; border-bottom: 1px solid var(--line);
-    backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10;
-    background: rgba(11,14,20,.7);
-  }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
-  .logo {
+  
+  
+  
+#panel-launch   .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+#panel-launch   .logo {
     width: 28px; height: 28px; border-radius: 8px;
     background: linear-gradient(135deg, var(--accent), #ff8a00);
     display: grid; place-items: center; color: #111; font-weight: 800;
   }
-  .net-pill {
+#panel-launch   .net-pill {
     font-size: 12px; padding: 4px 10px; border-radius: 999px;
     background: #1f2a1d; color: var(--green); border: 1px solid #2a3b27;
     margin-left: 10px;
   }
-  .net-pill.warn { background:#3a1f1f; color:var(--red); border-color:#5a2a2a;}
-  button {
+#panel-launch   .net-pill.warn { background:#3a1f1f; color:var(--red); border-color:#5a2a2a;}
+#panel-launch   button {
     cursor: pointer; border: none; font-weight: 600;
     transition: transform .05s ease, opacity .2s ease;
   }
-  button:active { transform: translateY(1px); }
-  button:disabled { opacity: .5; cursor: not-allowed; }
-  .btn {
+#panel-launch   button:active { transform: translateY(1px); }
+#panel-launch   button:disabled { opacity: .5; cursor: not-allowed; }
+#panel-launch   .m-btn {
     background: var(--accent); color: #111;
     padding: 10px 18px; border-radius: 10px; font-size: 14px;
   }
-  .btn:hover:not(:disabled) { background: var(--accent-2); }
-  .btn-ghost {
+#panel-launch   .m-btn:hover:not(:disabled) { background: var(--accent-2); }
+#panel-launch   .m-btn-ghost {
     background: transparent; color: var(--text);
     border: 1px solid var(--line); padding: 8px 14px; border-radius: 10px;
   }
-  .btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent);}
-  .btn-block { width: 100%; padding: 14px; font-size: 15px; border-radius: 12px; }
-  #panel-launch { max-width: 1080px; margin: 0 auto; padding: 28px 20px 80px; }
-  #panel-launch .hero { text-align: center; margin: 24px 0 36px; }
-  #panel-launch .hero h1 {
+#panel-launch   .m-btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent);}
+#panel-launch   .m-btn-block { width: 100%; padding: 14px; font-size: 15px; border-radius: 12px; }
+  
+#panel-launch   .m-hero { text-align: center; margin: 24px 0 36px; }
+#panel-launch   .m-hero h1 {
     margin: 0 0 8px; font-size: 34px; letter-spacing: .5px;
     background: linear-gradient(120deg, #fff, var(--accent));
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  #panel-launch .hero p { margin: 0; color: var(--mute); font-size: 14px; }
-  #panel-launch .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-  @media (min-width: 880px) { #panel-launch .grid { grid-template-columns: 1.05fr .95fr; } }
-  #panel-launch .card {
+#panel-launch   .m-hero p { margin: 0; color: var(--mute); font-size: 14px; }
+#panel-launch   .m-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 880px) { .m-grid { grid-template-columns: 1.05fr .95fr; } }
+#panel-launch   .m-card {
     background: var(--panel); border: 1px solid var(--line);
     border-radius: 16px; padding: 22px;
   }
-  #panel-launch .card h2 { margin: 0 0 16px; font-size: 16px; letter-spacing: .3px;}
-  .row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px;}
-  .row label { color: var(--mute); font-size: 12px; }
-  .row input {
+#panel-launch   .m-card h2 { margin: 0 0 16px; font-size: 16px; letter-spacing: .3px;}
+#panel-launch   .m-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px;}
+#panel-launch   .m-row label { color: var(--mute); font-size: 12px; }
+#panel-launch   .m-row input {
     background: var(--panel-2); border: 1px solid var(--line);
     color: var(--text); padding: 12px 14px; border-radius: 10px;
     font-size: 14px; outline: none; font-family: inherit;
   }
-  .row input:focus { border-color: var(--accent); }
-  .twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .status-card {
+#panel-launch   .m-row input:focus { border-color: var(--accent); }
+#panel-launch   .twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+#panel-launch   .m-status-card {
     background: var(--panel-2); border: 1px dashed var(--line);
     padding: 14px; border-radius: 12px; margin: 4px 0 16px;
     font-size: 13px; color: var(--mute);
   }
-  .status-card.ok    { border-color: #2a3b27; color: var(--green);}
-  .status-card.warn  { border-color: #5a4a2a; color: var(--accent);}
-  .status-card.error { border-color: #5a2a2a; color: var(--red);  }
-  .status-card.info  { border-color: #2a3a5a; color: var(--blue); }
-  .kv { display: flex; justify-content: space-between; margin: 6px 0; color: var(--text);}
-  .kv span:first-child { color: var(--mute); }
-  .addr {
+#panel-launch   .m-status-card.ok    { border-color: #2a3b27; color: var(--green);}
+#panel-launch   .m-status-card.warn  { border-color: #5a4a2a; color: var(--accent);}
+#panel-launch   .m-status-card.error { border-color: #5a2a2a; color: var(--red);  }
+#panel-launch   .m-status-card.info  { border-color: #2a3a5a; color: var(--blue); }
+#panel-launch   .m-kv { display: flex; justify-content: space-between; margin: 6px 0; color: var(--text);}
+#panel-launch   .m-kv span:first-child { color: var(--mute); }
+#panel-launch   .m-addr {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px; color: var(--mute);
   }
-  .log {
+#panel-launch   .m-log {
     max-height: 320px; overflow-y: auto;
     background: var(--panel-2); border-radius: 10px; padding: 10px 14px;
     font-family: ui-monospace, monospace; font-size: 12px;
     border: 1px solid var(--line);
   }
-  .log-item { padding: 4px 0; border-bottom: 1px dashed var(--line);}
-  .log-item:last-child { border-bottom: none; }
-  .log-item a { color: var(--accent); text-decoration: none; }
-  .log-item a:hover { text-decoration: underline; }
-  .tag { display: inline-block; padding: 2px 8px; border-radius: 999px;
+#panel-launch   .m-log-item { padding: 4px 0; border-bottom: 1px dashed var(--line);}
+#panel-launch   .m-log-item:last-child { border-bottom: none; }
+#panel-launch   .m-log-item a { color: var(--accent); text-decoration: none; }
+#panel-launch   .m-log-item a:hover { text-decoration: underline; }
+#panel-launch   .m-tag { display: inline-block; padding: 2px 8px; border-radius: 999px;
          font-size: 11px; margin-left: 6px;}
-  .tag.s1 { background:#1a2a3a; color: var(--blue);}
-  .tag.s2 { background:#2a2a1a; color: var(--accent);}
-  .tag.s3 { background:#1a2a1a; color: var(--green);}
-  .tag.s4 { background:#2a1a1a; color: var(--red);}
-  .footer { text-align: center; color: var(--mute); font-size: 12px; margin-top: 30px;}
-  .footer a { color: var(--accent); text-decoration: none;}
-  .spinner {
+#panel-launch   .m-tag.s1 { background:#1a2a3a; color: var(--blue);}
+#panel-launch   .m-tag.s2 { background:#2a2a1a; color: var(--accent);}
+#panel-launch   .m-tag.s3 { background:#1a2a1a; color: var(--green);}
+#panel-launch   .m-tag.s4 { background:#2a1a1a; color: var(--red);}
+#panel-launch   .m-footer { text-align: center; color: var(--mute); font-size: 12px; margin-top: 30px;}
+#panel-launch   .m-footer a { color: var(--accent); text-decoration: none;}
+#panel-launch   .m-spinner {
     display: inline-block; width: 12px; height: 12px;
     border: 2px solid #555; border-top: 2px solid var(--accent);
     border-radius: 50%; animation: spin .8s linear infinite;
     vertical-align: middle; margin-right: 6px;
   }
   @keyframes spin { to { transform: rotate(360deg);} }
-  .toast {
+#panel-launch   .m-toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
     background: var(--panel); border: 1px solid var(--line);
     padding: 12px 18px; border-radius: 10px; font-size: 13px;
     box-shadow: 0 8px 30px rgba(0,0,0,.5); z-index: 99;
     opacity: 0; transition: opacity .2s ease;
   }
-  .toast.show { opacity: 1; }
-  .toast.ok { border-color: #2a3b27; }
-  .toast.err { border-color: #5a2a2a; }
+#panel-launch   .m-toast.show { opacity: 1; }
+#panel-launch   .m-toast.ok { border-color: #2a3b27; }
+#panel-launch   .m-toast.err { border-color: #5a2a2a; }
 
-    #panel-launch { width: 100%; max-width: 480px; margin: 0 auto; }
-    #panel-launch .grid { display: block; }
-    #panel-launch .card { margin-bottom: 16px; width: 100%; }
-    #panel-launch .hero h1 { font-size: 24px; }
-    #panel-launch .twoCol { grid-template-columns: 1fr; }
-    </style>
+
+#panel-launch .m-grid { display: block; }
+</style>
 </head>
 <body>
 <div class="app">
@@ -377,32 +360,32 @@ select option{background:var(--bg2);color:var(--text)}
 </ul>
 </div>
 </div>
-<div class_="panel" id="panel-launch"><div class_="fade-in"><div class="hero">
+<div class_="panel" id="panel-launch"><div class_="fade-in"><div class="m-hero">
 <h1 data-i18n="memeTitle">一键发币</h1>
 <p data-i18n="memeDesc">使用 Premium 地址 NFT 在 BSC 上部署你的代币并自动注入流动性</p>
-</div><div class="grid">
+</div><div class="m-grid">
 <!-- Launch panel -->
-<section class="card">
+<section class="m-card">
 <h2 data-i18n="launchToken">发射代币</h2>
-<div class="row">
+<div class="m-row">
 <label>Premium NFT ID</label>
 <input data-manus_click_id="2" data-manus_clickable="true" id="tokenIdInput" inputmode="numeric" placeholder="例如 12345"/>
 </div>
-<div class="status-card info" id="statusBox">
+<div class="m-status-card m-info" id="statusBox">
         输入一个 NFT ID 并点击「检查状态」
       </div>
-<button class="btn-ghost" data-i18n="checkStatus" data-manus_click_id="3" data-manus_clickable="true" id="checkBtn" style="margin-bottom:16px;">检查状态</button>
-<div class="twoCol">
-<div class="row">
+<button class="m-btn-ghost" data-i18n="checkStatus" data-manus_click_id="3" data-manus_clickable="true" id="checkBtn" style="margin-bottom:16px;">检查状态</button>
+<div class="m-twoCol">
+<div class="m-row">
 <label data-i18n="tokenName">代币名称 (Name)</label>
 <input data-manus_click_id="4" data-manus_clickable="true" id="nameInput" placeholder="My Token"/>
 </div>
-<div class="row">
+<div class="m-row">
 <label data-i18n="tokenSymbol">代币符号 (Symbol)</label>
 <input data-manus_click_id="5" data-manus_clickable="true" id="symbolInput" maxlength="11" placeholder="MYT"/>
 </div>
 </div>
-<button class="btn btn-block" data-manus_click_id="6" data-manus_clickable="true" disabled="" id="actionBtn">请先连接钱包</button>
+<button class="m-btn m-btn-block" data-manus_click_id="6" data-manus_clickable="true" disabled="" id="actionBtn">请先连接钱包</button>
 <p style="font-size:12px;color:var(--mute);margin:14px 0 0;line-height:1.6;">
         · 自动总供应：1,000,000,000 ／ 流动性：990M ／ 创建者份额：10M (1%)<br/>
         · 持有者自己 NFT 需先 approve 给本合约<br/>
@@ -410,23 +393,23 @@ select option{background:var(--bg2);color:var(--text)}
       </p>
 </section>
 <!-- Right column -->
-<section class="card">
+<section class="m-card">
 <h2 data-i18n="myLaunchHistory">我的发射记录</h2>
-<button class="btn-ghost" data-i18n="refresh" data-manus_click_id="7" data-manus_clickable="true" id="refreshBtn" style="margin-bottom:12px;">刷新</button>
-<div class="log" id="historyBox">
-<div class="log-item" style="color:var(--mute)">未连接钱包</div>
+<button class="m-btn-ghost" data-i18n="refresh" data-manus_click_id="7" data-manus_clickable="true" id="refreshBtn" style="margin-bottom:12px;">刷新</button>
+<div class="m-log" id="historyBox">
+<div class="m-log-item" style="color:var(--mute)">未连接钱包</div>
 </div>
 <h2 data-i18n="contractInfoMeme" style="margin-top:24px;">合约信息</h2>
-<div class="kv"><span>OneClickLaunch</span>
-<a class="addr" data-manus_click_id="8" data-manus_clickable="true" href="https://bscscan.com/address/0x558232C46e3b8f125385aF127b95D6f602dFE81D#code" id="ocAddrLink" target="_blank">
+<div class="m-kv"><span>OneClickLaunch</span>
+<a class="m-addr" data-manus_click_id="8" data-manus_clickable="true" href="https://bscscan.com/address/0x558232C46e3b8f125385aF127b95D6f602dFE81D#code" id="ocAddrLink" target="_blank">
           0x5582...E81D
         </a></div>
-<div class="kv"><span>AddressManager NFT</span>
-<a class="addr" data-manus_click_id="9" data-manus_clickable="true" href="https://bscscan.com/address/0x78B11198268619728E4b53c642E8d68941004c11" target="_blank">
+<div class="m-kv"><span>AddressManager NFT</span>
+<a class="m-addr" data-manus_click_id="9" data-manus_clickable="true" href="https://bscscan.com/address/0x78B11198268619728E4b53c642E8d68941004c11" target="_blank">
           0x78B1...4c11
         </a></div>
-<div class="kv"><span>Factory</span>
-<a class="addr" data-manus_click_id="10" data-manus_clickable="true" href="https://bscscan.com/address/0x78127790105D75D31b2634cd474cEA18FcF6Aa5B" target="_blank">
+<div class="m-kv"><span>Factory</span>
+<a class="m-addr" data-manus_click_id="10" data-manus_clickable="true" href="https://bscscan.com/address/0x78127790105D75D31b2634cd474cEA18FcF6Aa5B" target="_blank">
           0x7812...Aa5B
         </a></div>
 </section>
@@ -455,7 +438,7 @@ select option{background:var(--bg2);color:var(--text)}
 /* === I18N === */
 const LANG = {
   en: {
-    connect:'Connect', notConnected:'Not Connected', connected:'Connected', checkStatusFirst:'Check status first',
+    connect:'Connect', notConnected:'Not Connected', connected:'Connected',
     marketplace:'Marketplace', marketDesc:'Browse premium addresses. Unclaimed ones can be purchased with BNB.',
     allTiers:'All Tiers', allDigits:'Digit', allPatterns:'Pattern', allStatus:'All',
     unclaimed:'Unclaimed', claimed:'Claimed', newest:'Newest', streak:'Streak', price:'Price', search:'Search', buy:'Buy',
@@ -463,11 +446,7 @@ const LANG = {
     myAddresses:'My Addresses', noNfts:'No premium addresses owned yet',
     transferADD:'Transfer ADD', recipient:'Recipient', amount:'Amount', transferBtn:'Transfer',
     globalStats:'Global Stats', networkStatus:'Network Status', contractInfo:'Contract Info',
-    network:'Network', tabMarket:'Market', tabLeaderboard:'Rank', tabMyNfts:'My NFTs', tabInfo:'Info', 
-    tabLaunch:'Launch', memeTitle:'One Click Launch', memeDesc:'Deploy your token on BSC and auto-add liquidity using Premium Address NFT',
-    launchToken:'Launch Token', myLaunchHistory:'My Launch History', contractInfoMeme:'Contract Info',
-    tokenName:'Token Name', tokenSymbol:'Token Symbol', checkStatus:'Check Status', refresh:'Refresh',
-    
+    network:'Network', tabMarket:'Market', tabLeaderboard:'Rank', tabMyNfts:'My NFTs', tabInfo:'Info', tabLaunch:'Launch', memeTitle:'One Click Launch', memeDesc:'Deploy your token on BSC and auto-add liquidity using Premium Address NFT', launchToken:'Launch Token', myLaunchHistory:'My Launch History', contractInfoMeme:'Contract Info', tokenName:'Token Name', tokenSymbol:'Token Symbol', checkStatus:'Check Status', refresh:'Refresh', checkStatusFirst:'Check status first',
     claim:'Buy', view:'View', owner:'Owner', digit:'Digit', pattern:'Pattern',
     occurrences:'Occurrences', tier:'Tier', trailing:'Trailing', leading:'Leading',
     toastConnected:'Wallet Connected', toastNoMM:'Please install MetaMask',
@@ -489,7 +468,7 @@ const LANG = {
     myNFTs:'My NFTs', info:'Info', rankTab:'Rank'
   },
   zh: {
-    connect:'连接钱包', notConnected:'未连接', connected:'已连接', checkStatusFirst:'检查状态后即可发射',
+    connect:'连接钱包', notConnected:'未连接', connected:'已连接',
     marketplace:'靓号市场', marketDesc:'浏览靓号地址。未认领的可以用 BNB 购买。',
     allTiers:'全部等级', allDigits:'数字', allPatterns:'模式', allStatus:'全部',
     unclaimed:'未认领', claimed:'已认领', newest:'最新', streak:'连数', price:'价格', search:'搜索', buy:'购买',
@@ -497,11 +476,7 @@ const LANG = {
     myAddresses:'我的靓号', noNfts:'还没有拥有靓号地址',
     transferADD:'转账 ADD', recipient:'接收地址', amount:'数量', transferBtn:'转账',
     globalStats:'全局统计', networkStatus:'网络状态', contractInfo:'合约信息',
-    network:'网络', tabMarket:'市场', tabLeaderboard:'排行', tabMyNfts:'我的NFT', tabInfo:'信息', 
-    tabLaunch:'发射', memeTitle:'一键发币', memeDesc:'使用 Premium 地址 NFT 在 BSC 上部署你的代币并自动注入流动性',
-    launchToken:'发射代币', myLaunchHistory:'我的发射记录', contractInfoMeme:'合约信息',
-    tokenName:'代币名称 (Name)', tokenSymbol:'代币符号 (Symbol)', checkStatus:'检查状态', refresh:'刷新',
-    
+    network:'网络', tabMarket:'市场', tabLeaderboard:'排行', tabMyNfts:'我的NFT', tabInfo:'信息', tabLaunch:'发射', memeTitle:'一键发币', memeDesc:'使用 Premium 地址 NFT 在 BSC 上部署你的代币并自动注入流动性', launchToken:'发射代币', myLaunchHistory:'我的发射记录', contractInfoMeme:'合约信息', tokenName:'代币名称 (Name)', tokenSymbol:'代币符号 (Symbol)', checkStatus:'检查状态', refresh:'刷新', checkStatusFirst:'检查状态后即可发射',
     claim:'购买', view:'查看', owner:'拥有者', digit:'数字', pattern:'模式',
     occurrences:'出现次数', tier:'等级', trailing:'后缀', leading:'前缀',
     toastConnected:'钱包已连接', toastNoMM:'请安装 MetaMask',
@@ -585,7 +560,6 @@ async function connectWallet(){
     if(cid!==BSC_CHAIN){try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_CHAIN}]})}catch(e){showToast(t('toastSwitchBSC'),'error');return}}
     provider=new ethers.BrowserProvider(window.ethereum);
     signer=await provider.getSigner();
-      // Init Meme Contracts
       if(typeof OC_ADDRESS !== 'undefined') {
           oc = new ethers.Contract(OC_ADDRESS, OC_ABI, signer);
           nft = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
