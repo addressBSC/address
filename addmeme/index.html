@@ -3,443 +3,510 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>OneClickLaunch 一键发币 · BSC</title>
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+<title>OneClickLaunch · 一键发币</title>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
 <style>
   :root {
-    --bg: #0b0f17;
-    --card: #131a26;
-    --border: #1f2a3a;
-    --text: #e6edf3;
-    --muted: #8b97a8;
-    --primary: #f3ba2f;
-    --primary-hover: #ffd34d;
-    --danger: #ef4444;
-    --success: #22c55e;
+    --bg: #0b0e14;
+    --panel: #141925;
+    --panel-2: #1b2230;
+    --line: #232b3d;
+    --text: #e6edf7;
+    --mute: #8a93a6;
+    --accent: #f0b90b;
+    --accent-2: #ffd35a;
+    --green: #2ebd85;
+    --red: #f6465d;
+    --blue: #5b8cff;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-    background: var(--bg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Microsoft YaHei", Roboto, sans-serif;
+    background: radial-gradient(1200px 600px at 80% -10%, #1b2438 0%, transparent 60%),
+                radial-gradient(800px 500px at -10% 110%, #2a1f0a 0%, transparent 60%),
+                var(--bg);
     color: var(--text);
-    line-height: 1.6;
+    min-height: 100vh;
   }
-  .container { max-width: 880px; margin: 0 auto; padding: 24px; }
   header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-    gap: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 28px; border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10;
+    background: rgba(11,14,20,.7);
   }
-  h1 { font-size: 22px; margin: 0; }
-  h2 { font-size: 16px; margin: 0 0 12px; color: var(--primary); }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .logo {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), #ff8a00);
+    display: grid; place-items: center; color: #111; font-weight: 800;
   }
-  .row { display: flex; gap: 12px; flex-wrap: wrap; }
-  .row > * { flex: 1; min-width: 0; }
-  label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
-  input {
-    width: 100%;
-    background: #0b1220;
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 10px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: inherit;
+  .net-pill {
+    font-size: 12px; padding: 4px 10px; border-radius: 999px;
+    background: #1f2a1d; color: var(--green); border: 1px solid #2a3b27;
+    margin-left: 10px;
   }
-  input:focus { outline: none; border-color: var(--primary); }
+  .net-pill.warn { background:#3a1f1f; color:var(--red); border-color:#5a2a2a;}
   button {
-    background: var(--primary);
-    color: #1a1a1a;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.15s;
+    cursor: pointer; border: none; font-weight: 600;
+    transition: transform .05s ease, opacity .2s ease;
   }
-  button:hover:not(:disabled) { background: var(--primary-hover); }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
-  button.secondary {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
+  button:active { transform: translateY(1px); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .btn {
+    background: var(--accent); color: #111;
+    padding: 10px 18px; border-radius: 10px; font-size: 14px;
   }
-  button.secondary:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
-  .badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    background: #1f2a3a;
-    color: var(--muted);
+  .btn:hover:not(:disabled) { background: var(--accent-2); }
+  .btn-ghost {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--line); padding: 8px 14px; border-radius: 10px;
   }
-  .badge.ok { background: rgba(34,197,94,0.15); color: var(--success); }
-  .badge.warn { background: rgba(239,68,68,0.15); color: var(--danger); }
-  .kv { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
-  .kv:last-child { border: none; }
-  .kv span:first-child { color: var(--muted); }
-  .kv code { font-family: SFMono-Regular, Menlo, monospace; font-size: 12px; }
+  .btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent);}
+  .btn-block { width: 100%; padding: 14px; font-size: 15px; border-radius: 12px; }
+  main { max-width: 1080px; margin: 0 auto; padding: 28px 20px 80px; }
+  .hero { text-align: center; margin: 24px 0 36px; }
+  .hero h1 {
+    margin: 0 0 8px; font-size: 34px; letter-spacing: .5px;
+    background: linear-gradient(120deg, #fff, var(--accent));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p { margin: 0; color: var(--mute); font-size: 14px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 880px) { .grid { grid-template-columns: 1.05fr .95fr; } }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; padding: 22px;
+  }
+  .card h2 { margin: 0 0 16px; font-size: 16px; letter-spacing: .3px;}
+  .row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px;}
+  .row label { color: var(--mute); font-size: 12px; }
+  .row input {
+    background: var(--panel-2); border: 1px solid var(--line);
+    color: var(--text); padding: 12px 14px; border-radius: 10px;
+    font-size: 14px; outline: none; font-family: inherit;
+  }
+  .row input:focus { border-color: var(--accent); }
+  .twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .status-card {
+    background: var(--panel-2); border: 1px dashed var(--line);
+    padding: 14px; border-radius: 12px; margin: 4px 0 16px;
+    font-size: 13px; color: var(--mute);
+  }
+  .status-card.ok    { border-color: #2a3b27; color: var(--green);}
+  .status-card.warn  { border-color: #5a4a2a; color: var(--accent);}
+  .status-card.error { border-color: #5a2a2a; color: var(--red);  }
+  .status-card.info  { border-color: #2a3a5a; color: var(--blue); }
+  .kv { display: flex; justify-content: space-between; margin: 6px 0; color: var(--text);}
+  .kv span:first-child { color: var(--mute); }
+  .addr {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; color: var(--mute);
+  }
   .log {
-    font-family: SFMono-Regular, Menlo, monospace;
-    font-size: 12px;
-    background: #06090f;
-    padding: 12px;
-    border-radius: 8px;
-    max-height: 220px;
-    overflow-y: auto;
-    border: 1px solid var(--border);
-    white-space: pre-wrap;
-    word-break: break-all;
+    max-height: 320px; overflow-y: auto;
+    background: var(--panel-2); border-radius: 10px; padding: 10px 14px;
+    font-family: ui-monospace, monospace; font-size: 12px;
+    border: 1px solid var(--line);
   }
-  .step {
-    background: #0b1220;
-    border-left: 3px solid var(--primary);
-    padding: 10px 14px;
-    margin: 8px 0;
-    border-radius: 4px;
-    font-size: 13px;
+  .log-item { padding: 4px 0; border-bottom: 1px dashed var(--line);}
+  .log-item:last-child { border-bottom: none; }
+  .log-item a { color: var(--accent); text-decoration: none; }
+  .log-item a:hover { text-decoration: underline; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 999px;
+         font-size: 11px; margin-left: 6px;}
+  .tag.s1 { background:#1a2a3a; color: var(--blue);}
+  .tag.s2 { background:#2a2a1a; color: var(--accent);}
+  .tag.s3 { background:#1a2a1a; color: var(--green);}
+  .tag.s4 { background:#2a1a1a; color: var(--red);}
+  .footer { text-align: center; color: var(--mute); font-size: 12px; margin-top: 30px;}
+  .footer a { color: var(--accent); text-decoration: none;}
+  .spinner {
+    display: inline-block; width: 12px; height: 12px;
+    border: 2px solid #555; border-top: 2px solid var(--accent);
+    border-radius: 50%; animation: spin .8s linear infinite;
+    vertical-align: middle; margin-right: 6px;
   }
-  a { color: var(--primary); }
-  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-  .small { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  @keyframes spin { to { transform: rotate(360deg);} }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--panel); border: 1px solid var(--line);
+    padding: 12px 18px; border-radius: 10px; font-size: 13px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.5); z-index: 99;
+    opacity: 0; transition: opacity .2s ease;
+  }
+  .toast.show { opacity: 1; }
+  .toast.ok { border-color: #2a3b27; }
+  .toast.err { border-color: #5a2a2a; }
 </style>
 </head>
 <body>
-<div class="container">
+<header>
+  <div class="brand">
+    <div class="logo">B</div>
+    <span>OneClickLaunch</span>
+    <span id="netPill" class="net-pill" style="display:none;">BSC</span>
+  </div>
+  <div>
+    <button id="connectBtn" class="btn">连接钱包</button>
+  </div>
+</header>
 
-  <header>
-    <h1>🚀 OneClickLaunch · 一键发币</h1>
-    <div>
-      <span id="netBadge" class="badge">未连接</span>
-      <button id="connectBtn">连接钱包</button>
-    </div>
-  </header>
-
-  <div class="card">
-    <h2>📌 合约信息</h2>
-    <div class="kv"><span>网络</span><code>BNB Smart Chain (chainId 56)</code></div>
-    <div class="kv"><span>合约地址</span><code id="contractAddr">0x8a751f42DbA35946Cd0Aad34E827dE6a41085914</code></div>
-    <div class="kv"><span>BscScan</span><a id="bscLink" href="https://bscscan.com/address/0x8a751f42DbA35946Cd0Aad34E827dE6a41085914#code" target="_blank">点击查看已开源源码</a></div>
-    <div class="kv"><span>钱包地址</span><code id="userAddr">—</code></div>
-    <div class="kv"><span>BNB 余额</span><code id="userBal">—</code></div>
+<main>
+  <div class="hero">
+    <h1>一键发币</h1>
+    <p>使用 Premium 地址 NFT 在 BSC 上部署你的代币并自动注入流动性</p>
   </div>
 
-  <div class="card">
-    <h2>📖 怎么发币（步骤说明）</h2>
-    <div class="step">1. 点右上角"连接钱包"，连上 MetaMask / OKX 钱包，自动切换到 BSC 主网。</div>
-    <div class="step">2. 准备一个 PAD 域名 NFT 的 tokenId（你已经拥有的 NFT），或者一个还没人占的 Premium 名字（合约会替你购买）。</div>
-    <div class="step">3. 在下面"查询状态"先查 tokenId 的状态：
-      <br>· status=1 → 你已经持有这个 NFT，需先 approve 给本合约
-      <br>· status=2 → 你之前已经存入本合约
-      <br>· status=3 → 还没人占（Premium 可购买，需附带 BNB）
-      <br>· status=4 → 被别人占了 / 你管不了
-    </div>
-    <div class="step">4. status=1 的情况，先在 PAD NFT 合约上 approve 把这个 tokenId 授权给本合约地址，否则 launch 会 revert "NFT not approved"。</div>
-    <div class="step">5. 填写 tokenId / 代币名 / 代币符号，点"一键发币"，附带的 BNB ≥ 查询返回的 priceIfBuy 即可（status=1/2 可填 0）。</div>
-    <div class="step">6. 交易成功后：合约会自动 mint 10 亿代币 → 9.9 亿加 LP 锁仓 → 1000 万打给你的钱包 → NFT 还回你的钱包。多余 BNB 自动退回。</div>
+  <div class="grid">
+    <!-- Launch panel -->
+    <section class="card">
+      <h2>发射代币</h2>
+
+      <div class="row">
+        <label>Premium NFT ID</label>
+        <input id="tokenIdInput" placeholder="例如 12345" inputmode="numeric"/>
+      </div>
+
+      <div id="statusBox" class="status-card info">
+        输入一个 NFT ID 并点击「检查状态」
+      </div>
+
+      <button id="checkBtn" class="btn-ghost" style="margin-bottom:16px;">检查状态</button>
+
+      <div class="twoCol">
+        <div class="row">
+          <label>代币名称 (Name)</label>
+          <input id="nameInput" placeholder="My Token"/>
+        </div>
+        <div class="row">
+          <label>代币符号 (Symbol)</label>
+          <input id="symbolInput" placeholder="MYT" maxlength="11"/>
+        </div>
+      </div>
+
+      <button id="actionBtn" class="btn btn-block" disabled>请先连接钱包</button>
+
+      <p style="font-size:12px;color:var(--mute);margin:14px 0 0;line-height:1.6;">
+        · 自动总供应：1,000,000,000 ／ 流动性：990M ／ 创建者份额：10M (1%)<br/>
+        · 持有者自己 NFT 需先 approve 给本合约<br/>
+        · 未被认领的号将走 claim 流程，需自带 BNB
+      </p>
+    </section>
+
+    <!-- Right column -->
+    <section class="card">
+      <h2>我的发射记录</h2>
+      <button id="refreshBtn" class="btn-ghost" style="margin-bottom:12px;">刷新</button>
+      <div id="historyBox" class="log">
+        <div class="log-item" style="color:var(--mute)">未连接钱包</div>
+      </div>
+
+      <h2 style="margin-top:24px;">合约信息</h2>
+      <div class="kv"><span>OneClickLaunch</span>
+        <a class="addr" id="ocAddrLink" target="_blank"
+           href="https://bscscan.com/address/0x558232C46e3b8f125385aF127b95D6f602dFE81D#code">
+          0x5582...E81D
+        </a></div>
+      <div class="kv"><span>AddressManager NFT</span>
+        <a class="addr" target="_blank"
+           href="https://bscscan.com/address/0x78B11198268619728E4b53c642E8d68941004c11">
+          0x78B1...4c11
+        </a></div>
+      <div class="kv"><span>Factory</span>
+        <a class="addr" target="_blank"
+           href="https://bscscan.com/address/0x78127790105D75D31b2634cd474cEA18FcF6Aa5B">
+          0x7812...Aa5B
+        </a></div>
+    </section>
   </div>
 
-  <div class="card">
-    <h2>🔎 1. 查询 tokenId 状态</h2>
-    <div class="row">
-      <div style="flex:3">
-        <label>NFT tokenId</label>
-        <input id="qTokenId" placeholder="例如 12345" />
-      </div>
-      <div style="flex:1; display:flex; align-items:flex-end">
-        <button id="queryBtn" class="secondary" style="width:100%">查询</button>
-      </div>
-    </div>
-    <div id="queryResult" class="log" style="margin-top:12px; display:none"></div>
+  <div class="footer">
+    BSC Mainnet · Chain 56 · 请自行评估合约风险后再使用
   </div>
+</main>
 
-  <div class="card">
-    <h2>✅ 2. (可选) 把 NFT approve 给本合约</h2>
-    <div class="row">
-      <div style="flex:3">
-        <label>NFT tokenId</label>
-        <input id="aTokenId" placeholder="如果是 status=1，先点这里授权" />
-      </div>
-      <div style="flex:1; display:flex; align-items:flex-end">
-        <button id="approveBtn" class="secondary" style="width:100%">Approve</button>
-      </div>
-    </div>
-    <div class="small">会调用 PAD NFT 合约 (0x78B1...4c11) 的 approve，把 tokenId 授权给 OneClickLaunch 合约。</div>
-  </div>
-
-  <div class="card">
-    <h2>🚀 3. 一键发币</h2>
-    <div class="row">
-      <div>
-        <label>NFT tokenId</label>
-        <input id="lTokenId" placeholder="同上" />
-      </div>
-      <div>
-        <label>代币名称 (name)</label>
-        <input id="lName" placeholder="例如 My Token" />
-      </div>
-      <div>
-        <label>代币符号 (symbol)</label>
-        <input id="lSymbol" placeholder="例如 MYT" />
-      </div>
-    </div>
-    <div class="row" style="margin-top:12px">
-      <div style="flex:2">
-        <label>附带 BNB (status=3 必填，其它可填 0)</label>
-        <input id="lValue" value="0" />
-      </div>
-      <div style="flex:1; display:flex; align-items:flex-end">
-        <button id="launchBtn" style="width:100%">🔥 一键发币</button>
-      </div>
-    </div>
-    <div class="small">合约写死：总量 10 亿，9.9 亿进 LP 锁仓，1000 万到你钱包。Gas 大约 0.005~0.01 BNB。</div>
-  </div>
-
-  <div class="card">
-    <h2>📜 日志</h2>
-    <div id="log" class="log">等待操作...</div>
-  </div>
-
-</div>
+<div id="toast" class="toast"></div>
 
 <script>
-const CONTRACT_ADDRESS = "0x8a751f42DbA35946Cd0Aad34E827dE6a41085914";
-const NFT_ADDRESS = "0x78B11198268619728E4b53c642E8d68941004c11";
-const BSC_CHAIN_ID = "0x38"; // 56
+  // ===== Constants =====
+  const OC_ADDRESS  = "0x558232C46e3b8f125385aF127b95D6f602dFE81D";
+  const NFT_ADDRESS = "0x78B11198268619728E4b53c642E8d68941004c11";
+  const BSC_CHAIN_ID_HEX = "0x38"; // 56
+  const EXPLORER = "https://bscscan.com";
 
-const CONTRACT_ABI = [
-  "function launch(uint256 tokenId, string name_, string symbol_) payable returns (uint256, address, uint256)",
-  "function quotePremiumPrice(uint256 tokenId) view returns (uint256)",
-  "function previewStatus(uint256 tokenId, address user) view returns (uint8, uint256, address)",
-  "function rescueNFT(uint256 tokenId)",
-  "function totalLaunched() view returns (uint256)",
-  "function getUserLaunches(address) view returns (uint256[])",
-  "event Launched(uint256 indexed launchId, address indexed user, uint256 indexed nftTokenId, address token, uint256 lpNftId, uint256 bnbPaid, uint256 devShare)"
-];
+  const OC_ABI = [
+    "function launch(uint256 tokenId, string name_, string symbol_) payable returns (uint256, address, uint256)",
+    "function previewStatus(uint256 tokenId, address user) view returns (uint8 status, uint256 priceIfBuy, address predictedToken)",
+    "function quotePremiumPrice(uint256 tokenId) view returns (uint256)",
+    "function rescueNFT(uint256 tokenId)",
+    "function getUserLaunches(address user) view returns (uint256[])",
+    "function getLaunch(uint256 launchId) view returns (tuple(uint256 launchId,address user,uint256 nftTokenId,address token,uint256 lpNftId,uint256 bnbPaid,uint256 timestamp))",
+    "event Launched(uint256 indexed launchId,address indexed user,uint256 indexed nftTokenId,address token,uint256 lpNftId,uint256 bnbPaid,uint256 devShare)"
+  ];
 
-const NFT_ABI = [
-  "function approve(address to, uint256 tokenId)",
-  "function getApproved(uint256 tokenId) view returns (address)",
-  "function ownerOf(uint256 tokenId) view returns (address)"
-];
+  const NFT_ABI = [
+    "function ownerOf(uint256 tokenId) view returns (address)",
+    "function getApproved(uint256 tokenId) view returns (address)",
+    "function isApprovedForAll(address owner, address operator) view returns (bool)",
+    "function approve(address to, uint256 tokenId)",
+    "function setApprovalForAll(address operator, bool approved)"
+  ];
 
-let provider, signer, contract, nft, userAddress;
+  // ===== State =====
+  let provider = null;
+  let signer = null;
+  let userAddr = null;
+  let oc = null, nft = null;
+  let currentStatus = null; // { status, priceIfBuy, predicted, approved }
 
-const $ = (id) => document.getElementById(id);
-const log = (msg, type = "info") => {
-  const time = new Date().toLocaleTimeString();
-  const prefix = type === "error" ? "[X]" : type === "ok" ? "[OK]" : "[i]";
-  $("log").textContent = `${time} ${prefix} ${msg}\n` + $("log").textContent;
-};
-
-async function connect() {
-  if (!window.ethereum) {
-    alert("请先安装 MetaMask / OKX 钱包");
-    return;
+  // ===== Utils =====
+  const $ = (id) => document.getElementById(id);
+  const short = (a) => a ? a.slice(0,6) + "..." + a.slice(-4) : "";
+  function toast(msg, type="ok") {
+    const t = $("toast"); t.textContent = msg;
+    t.className = "toast show " + (type === "err" ? "err" : "ok");
+    setTimeout(() => t.classList.remove("show"), 3500);
   }
-  try {
-    await window.ethereum.request({ method: "eth_requestAccounts" });
-    // switch to BSC
+  function setStatusBox(html, cls="info") {
+    const box = $("statusBox");
+    box.className = "status-card " + cls;
+    box.innerHTML = html;
+  }
+  function fmtBNB(wei) {
+    try { return ethers.formatEther(wei); } catch { return "?"; }
+  }
+  function fmtTime(ts) {
+    const d = new Date(Number(ts) * 1000);
+    return d.toLocaleString();
+  }
+
+  // ===== Wallet =====
+  async function connect() {
+    if (!window.ethereum) {
+      toast("未检测到 MetaMask 等钱包", "err");
+      return;
+    }
     try {
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: BSC_CHAIN_ID }]
-      });
-    } catch (e) {
-      if (e.code === 4902) {
-        await window.ethereum.request({
-          method: "wallet_addEthereumChain",
-          params: [{
-            chainId: BSC_CHAIN_ID,
-            chainName: "BNB Smart Chain",
-            nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
-            rpcUrls: ["https://bsc-dataseed.bnbchain.org"],
-            blockExplorerUrls: ["https://bscscan.com"]
-          }]
-        });
-      } else { throw e; }
-    }
-    provider = new ethers.BrowserProvider(window.ethereum);
-    signer = await provider.getSigner();
-    userAddress = await signer.getAddress();
-    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-    nft = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-
-    $("connectBtn").textContent = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
-    $("netBadge").textContent = "BSC 已连接";
-    $("netBadge").className = "badge ok";
-    $("userAddr").textContent = userAddress;
-    const bal = await provider.getBalance(userAddress);
-    $("userBal").textContent = ethers.formatEther(bal) + " BNB";
-    log("钱包已连接: " + userAddress, "ok");
-  } catch (e) {
-    log("连接失败: " + (e.message || e), "error");
-  }
-}
-
-async function query() {
-  if (!contract) return alert("请先连接钱包");
-  const tokenId = $("qTokenId").value.trim();
-  if (!tokenId) return alert("请填 tokenId");
-  try {
-    log("查询 tokenId=" + tokenId + " ...");
-    const [status, priceIfBuy, predictedToken] = await contract.previewStatus(tokenId, userAddress);
-    const statusMap = {
-      1: "1 - 你已持有该 NFT (需 approve 给合约)",
-      2: "2 - 你之前已存入合约",
-      3: "3 - Premium 可购买 (需附 BNB)",
-      4: "4 - 被他人占用 / 不可用"
-    };
-    const result =
-`tokenId:        ${tokenId}
-状态 status:    ${statusMap[Number(status)] || status}
-所需 BNB:       ${ethers.formatEther(priceIfBuy)} BNB
-预测代币地址:   ${predictedToken}`;
-    $("queryResult").style.display = "block";
-    $("queryResult").textContent = result;
-    log("查询完成", "ok");
-    // auto-fill value field
-    if (Number(status) === 3) {
-      $("lValue").value = ethers.formatEther(priceIfBuy);
-    }
-  } catch (e) {
-    log("查询失败: " + (e.shortMessage || e.message), "error");
-  }
-}
-
-async function approve() {
-  if (!nft) return alert("请先连接钱包");
-  const tokenId = $("aTokenId").value.trim();
-  if (!tokenId) return alert("请填 tokenId");
-  try {
-    log("发送 approve 交易 ...");
-    const tx = await nft.approve(CONTRACT_ADDRESS, tokenId);
-    log("已发送: " + tx.hash);
-    await tx.wait();
-    log("Approve 成功", "ok");
-  } catch (e) {
-    log("Approve 失败: " + (e.shortMessage || e.message), "error");
-  }
-}
-
-async function launch() {
-  log("===== 点击一键发币 =====");
-  if (!contract) { log("未连接钱包", "error"); return alert("请先连接钱包"); }
-
-  const tokenId = $("lTokenId").value.trim();
-  const name_ = $("lName").value.trim();
-  const symbol_ = $("lSymbol").value.trim();
-  const valueStr = $("lValue").value.trim() || "0";
-
-  log(`输入: tokenId="${tokenId}", name="${name_}", symbol="${symbol_}", value="${valueStr}"`);
-
-  if (!tokenId || !name_ || !symbol_) {
-    log("必填项缺失", "error");
-    return alert("tokenId / name / symbol 必填");
-  }
-
-  let value;
-  try { value = ethers.parseEther(valueStr); }
-  catch (e) { log("BNB 金额格式错误: " + e.message, "error"); return; }
-
-  // chain check
-  try {
-    const net = await provider.getNetwork();
-    log("当前链 chainId=" + net.chainId);
-    if (Number(net.chainId) !== 56) {
-      log("不在 BSC 主网, 请切到 chainId=56", "error");
-      return;
-    }
-  } catch (e) {
-    log("读取网络失败: " + e.message, "error");
-  }
-
-  // pre-flight: staticCall to surface revert reason BEFORE wallet popup
-  log("预检 staticCall ...");
-  try {
-    await contract.launch.staticCall(tokenId, name_, symbol_, { value });
-    log("预检通过", "ok");
-  } catch (e) {
-    const reason = e.reason || e.shortMessage || e.message;
-    log("预检失败 (合约会 revert): " + reason, "error");
-    if (e.data) log("revert data: " + e.data, "error");
-    return;
-  }
-
-  // estimate gas
-  let gasLimit;
-  try {
-    const est = await contract.launch.estimateGas(tokenId, name_, symbol_, { value });
-    gasLimit = (est * 130n) / 100n; // +30% buffer
-    log("预估 gas=" + est.toString() + ", 使用 gasLimit=" + gasLimit.toString());
-  } catch (e) {
-    log("Gas 预估失败: " + (e.shortMessage || e.message), "error");
-    return;
-  }
-
-  log("调起钱包签名 ... (请看 MetaMask / OKX 弹窗)");
-  let tx;
-  try {
-    tx = await contract.launch(tokenId, name_, symbol_, { value, gasLimit });
-  } catch (e) {
-    log("用户取消或钱包报错: " + (e.shortMessage || e.message), "error");
-    return;
-  }
-  log("已发送: " + tx.hash);
-  log("https://bscscan.com/tx/" + tx.hash);
-  log("等待打包 ...");
-
-  try {
-    const rcpt = await tx.wait();
-    if (rcpt.status === 0) {
-      log("交易上链但失败 (status=0)", "error");
-      return;
-    }
-    log("发币成功! 区块: " + rcpt.blockNumber, "ok");
-    for (const lg of rcpt.logs) {
-      try {
-        const parsed = contract.interface.parseLog(lg);
-        if (parsed && parsed.name === "Launched") {
-          log("launchId=" + parsed.args.launchId, "ok");
-          log("代币地址=" + parsed.args.token, "ok");
-          log("LP NFT id=" + parsed.args.lpNftId, "ok");
-          log("实付 BNB=" + ethers.formatEther(parsed.args.bnbPaid), "ok");
-          log("你拿到代币=" + ethers.formatEther(parsed.args.devShare), "ok");
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const chainId = await window.ethereum.request({ method: "eth_chainId" });
+      if (chainId !== BSC_CHAIN_ID_HEX) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: BSC_CHAIN_ID_HEX }],
+          });
+        } catch (e) {
+          if (e.code === 4902) {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [{
+                chainId: BSC_CHAIN_ID_HEX,
+                chainName: "BNB Smart Chain",
+                nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
+                rpcUrls: ["https://bsc-dataseed.bnbchain.org"],
+                blockExplorerUrls: [EXPLORER],
+              }],
+            });
+          } else { throw e; }
         }
-      } catch {}
+      }
+      provider = new ethers.BrowserProvider(window.ethereum);
+      signer = await provider.getSigner();
+      userAddr = await signer.getAddress();
+      oc  = new ethers.Contract(OC_ADDRESS,  OC_ABI,  signer);
+      nft = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
+
+      $("connectBtn").textContent = short(userAddr);
+      $("netPill").style.display = "inline-block";
+      $("netPill").textContent = "BSC · " + short(userAddr);
+      $("netPill").className = "net-pill";
+      $("actionBtn").disabled = false;
+      $("actionBtn").textContent = "检查状态后即可发射";
+      await loadHistory();
+    } catch (e) {
+      console.error(e);
+      toast(e.shortMessage || e.message || "连接失败", "err");
     }
-  } catch (e) {
-    log("等待回执失败: " + (e.shortMessage || e.message), "error");
   }
-}
 
-$("connectBtn").onclick = connect;
-$("queryBtn").onclick = () => { log("===== 点击查询 ====="); query(); };
-$("approveBtn").onclick = () => { log("===== 点击 approve ====="); approve(); };
-$("launchBtn").onclick = launch;
+  if (window.ethereum) {
+    window.ethereum.on?.("accountsChanged", () => location.reload());
+    window.ethereum.on?.("chainChanged",    () => location.reload());
+  }
 
-window.addEventListener("error", (e) => {
-  log("JS 错误: " + e.message + " @ " + e.filename + ":" + e.lineno, "error");
-});
-window.addEventListener("unhandledrejection", (e) => {
-  log("未捕获 Promise: " + (e.reason && (e.reason.message || e.reason)), "error");
-});
+  // ===== Check Status =====
+  async function checkStatus() {
+    const idStr = $("tokenIdInput").value.trim();
+    if (!idStr) { toast("请输入 NFT ID", "err"); return; }
+    if (!userAddr) { toast("请先连接钱包", "err"); return; }
+    const tokenId = BigInt(idStr);
 
-if (window.ethereum) {
-  window.ethereum.on("accountsChanged", () => location.reload());
-  window.ethereum.on("chainChanged", () => location.reload());
-}
+    setStatusBox('<span class="spinner"></span>查询中...', "info");
+    $("actionBtn").disabled = true;
+
+    try {
+      const r = await oc.previewStatus(tokenId, userAddr);
+      const status = Number(r[0]);
+      const price  = r[1];
+      const predicted = r[2];
+
+      let approved = false;
+      if (status === 1) {
+        const ga = await nft.getApproved(tokenId);
+        const all = await nft.isApprovedForAll(userAddr, OC_ADDRESS);
+        approved = (ga.toLowerCase() === OC_ADDRESS.toLowerCase()) || all;
+      }
+
+      currentStatus = { status, priceIfBuy: price, predicted, approved, tokenId };
+
+      const predLink = `<a class="addr" target="_blank" href="${EXPLORER}/address/${predicted}">${short(predicted)}</a>`;
+      const baseInfo =
+        `<div class="kv"><span>预测代币地址</span>${predLink}</div>`;
+
+      if (status === 1) {
+        setStatusBox(
+          `<b>状态 1</b>：你已持有该 NFT${approved ? "（已授权）" : "（需 approve）"}
+           ${baseInfo}`,
+          "ok"
+        );
+        $("actionBtn").textContent = approved
+          ? "发射代币（无需支付 BNB）"
+          : "1. 授权 NFT 给合约";
+      } else if (status === 2) {
+        setStatusBox(
+          `<b>状态 2</b>：NFT 已托管在合约中（是你的）${baseInfo}`,
+          "ok"
+        );
+        $("actionBtn").textContent = "发射代币（无需支付 BNB）";
+      } else if (status === 3) {
+        setStatusBox(
+          `<b>状态 3</b>：未被认领，可购买 + 发射<br/>
+           <div class="kv"><span>需要支付</span><b>${fmtBNB(price)} BNB</b></div>
+           ${baseInfo}`,
+          "warn"
+        );
+        $("actionBtn").textContent = `发射（支付 ${fmtBNB(price)} BNB）`;
+      } else {
+        setStatusBox(
+          `<b>状态 4</b>：该 NFT 已被他人持有，无法发射 ${baseInfo}`,
+          "error"
+        );
+        $("actionBtn").textContent = "无法发射";
+        $("actionBtn").disabled = true;
+        return;
+      }
+      $("actionBtn").disabled = false;
+    } catch (e) {
+      console.error(e);
+      setStatusBox("查询失败：" + (e.shortMessage || e.message), "error");
+      $("actionBtn").disabled = true;
+    }
+  }
+
+  // ===== Action (approve or launch) =====
+  async function doAction() {
+    if (!currentStatus) { toast("请先检查状态", "err"); return; }
+    const { status, priceIfBuy, approved, tokenId } = currentStatus;
+
+    // Step 1: approve if needed
+    if (status === 1 && !approved) {
+      try {
+        $("actionBtn").disabled = true;
+        $("actionBtn").innerHTML = '<span class="spinner"></span>发送授权交易...';
+        const tx = await nft.approve(OC_ADDRESS, tokenId);
+        toast("授权交易已提交：" + short(tx.hash));
+        await tx.wait();
+        toast("授权成功，请再点一次发射");
+        currentStatus.approved = true;
+        $("actionBtn").textContent = "发射代币（无需支付 BNB）";
+        $("actionBtn").disabled = false;
+      } catch (e) {
+        console.error(e);
+        toast(e.shortMessage || e.message || "授权失败", "err");
+        $("actionBtn").disabled = false;
+        $("actionBtn").textContent = "1. 授权 NFT 给合约";
+      }
+      return;
+    }
+
+    // Step 2: launch
+    const name = $("nameInput").value.trim();
+    const symbol = $("symbolInput").value.trim();
+    if (!name || !symbol) { toast("请填写代币名称和符号", "err"); return; }
+
+    try {
+      $("actionBtn").disabled = true;
+      $("actionBtn").innerHTML = '<span class="spinner"></span>发送发射交易...';
+
+      const overrides = {};
+      if (status === 3) {
+        overrides.value = priceIfBuy + (priceIfBuy / 50n); // +2% buffer
+      }
+
+      const tx = await oc.launch(tokenId, name, symbol, overrides);
+      toast("交易已提交：" + short(tx.hash));
+      const rcpt = await tx.wait();
+
+      setStatusBox(
+        `<b>✅ 发射成功！</b><br/>
+         <div class="kv"><span>交易</span>
+           <a class="addr" target="_blank" href="${EXPLORER}/tx/${rcpt.hash}">${short(rcpt.hash)}</a>
+         </div>`,
+        "ok"
+      );
+      toast("发射成功！");
+      $("actionBtn").textContent = "再发一个";
+      $("actionBtn").disabled = false;
+      await loadHistory();
+    } catch (e) {
+      console.error(e);
+      const msg = e.shortMessage || e.reason || e.message || "发射失败";
+      toast(msg.length > 80 ? msg.slice(0, 80) + "..." : msg, "err");
+      $("actionBtn").disabled = false;
+      $("actionBtn").textContent = "重试";
+    }
+  }
+
+  // ===== History =====
+  async function loadHistory() {
+    if (!userAddr) return;
+    const box = $("historyBox");
+    box.innerHTML = '<div class="log-item" style="color:var(--mute)"><span class="spinner"></span>加载中...</div>';
+    try {
+      const ids = await oc.getUserLaunches(userAddr);
+      if (ids.length === 0) {
+        box.innerHTML = '<div class="log-item" style="color:var(--mute)">暂无发射记录</div>';
+        return;
+      }
+      const rows = [];
+      for (let i = ids.length - 1; i >= 0; i--) {
+        const info = await oc.getLaunch(ids[i]);
+        rows.push(`
+          <div class="log-item">
+            <div><b>#${info.launchId}</b>
+              <span class="tag s3">NFT ${info.nftTokenId}</span></div>
+            <div class="kv"><span>Token</span>
+              <a class="addr" target="_blank" href="${EXPLORER}/token/${info.token}">${short(info.token)}</a></div>
+            <div class="kv"><span>LP NFT</span><span>#${info.lpNftId}</span></div>
+            <div class="kv"><span>支付</span><span>${fmtBNB(info.bnbPaid)} BNB</span></div>
+            <div class="kv"><span>时间</span><span>${fmtTime(info.timestamp)}</span></div>
+          </div>
+        `);
+      }
+      box.innerHTML = rows.join("");
+    } catch (e) {
+      console.error(e);
+      box.innerHTML = '<div class="log-item" style="color:var(--red)">加载失败</div>';
+    }
+  }
+
+  // ===== Events =====
+  $("connectBtn").addEventListener("click", connect);
+  $("checkBtn").addEventListener("click", checkStatus);
+  $("actionBtn").addEventListener("click", doAction);
+  $("refreshBtn").addEventListener("click", loadHistory);
 </script>
 </body>
 </html>
