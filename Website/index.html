@@ -1,8 +1,10 @@
-<html lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>PADD - Premium Address</title>
-<link href="https://raw.githubusercontent.com/addressBSC/address/refs/heads/main/owner/padd.png" rel="icon" type="image/png"/>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PADD - Premium Address & OneClickLaunch</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/addressBSC/address/refs/heads/main/owner/padd.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -121,319 +123,198 @@ select option{background:var(--bg2);color:var(--text)}
 @media(min-width:600px){.app{border-left:1px solid var(--border);border-right:1px solid var(--border)}html{background:#05080f}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn .35s ease}
-
-/* Isolated AddMeme Styles */
-
-#panel-launch   :root {
-    --bg: #0b0e14;
-    --panel: #141925;
-    --panel-2: #1b2230;
-    --line: #232b3d;
-    --text: #e6edf7;
-    --mute: #8a93a6;
-    --accent: #f0b90b;
-    --accent-2: #ffd35a;
-    --green: #2ebd85;
-    --red: #f6465d;
-    --blue: #5b8cff;
-  }
-  
-  
-  
-#panel-launch   .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
-#panel-launch   .logo {
-    width: 28px; height: 28px; border-radius: 8px;
-    background: linear-gradient(135deg, var(--accent), #ff8a00);
-    display: grid; place-items: center; color: #111; font-weight: 800;
-  }
-#panel-launch   .net-pill {
-    font-size: 12px; padding: 4px 10px; border-radius: 999px;
-    background: #1f2a1d; color: var(--green); border: 1px solid #2a3b27;
-    margin-left: 10px;
-  }
-#panel-launch   .net-pill.warn { background:#3a1f1f; color:var(--red); border-color:#5a2a2a;}
-#panel-launch   button {
-    cursor: pointer; border: none; font-weight: 600;
-    transition: transform .05s ease, opacity .2s ease;
-  }
-#panel-launch   button:active { transform: translateY(1px); }
-#panel-launch   button:disabled { opacity: .5; cursor: not-allowed; }
-#panel-launch   .m-btn {
-    background: var(--accent); color: #111;
-    padding: 10px 18px; border-radius: 10px; font-size: 14px;
-  }
-#panel-launch   .m-btn:hover:not(:disabled) { background: var(--accent-2); }
-#panel-launch   .m-btn-ghost {
-    background: transparent; color: var(--text);
-    border: 1px solid var(--line); padding: 8px 14px; border-radius: 10px;
-  }
-#panel-launch   .m-btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent);}
-#panel-launch   .m-btn-block { width: 100%; padding: 14px; font-size: 15px; border-radius: 12px; }
-  
-#panel-launch   .m-hero { text-align: center; margin: 24px 0 36px; }
-#panel-launch   .m-hero h1 {
-    margin: 0 0 8px; font-size: 34px; letter-spacing: .5px;
-    background: linear-gradient(120deg, #fff, var(--accent));
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
-#panel-launch   .m-hero p { margin: 0; color: var(--mute); font-size: 14px; }
-#panel-launch   .m-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-  @media (min-width: 880px) { .m-grid { grid-template-columns: 1.05fr .95fr; } }
-#panel-launch   .m-card {
-    background: var(--panel); border: 1px solid var(--line);
-    border-radius: 16px; padding: 22px;
-  }
-#panel-launch   .m-card h2 { margin: 0 0 16px; font-size: 16px; letter-spacing: .3px;}
-#panel-launch   .m-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px;}
-#panel-launch   .m-row label { color: var(--mute); font-size: 12px; }
-#panel-launch   .m-row input {
-    background: var(--panel-2); border: 1px solid var(--line);
-    color: var(--text); padding: 12px 14px; border-radius: 10px;
-    font-size: 14px; outline: none; font-family: inherit;
-  }
-#panel-launch   .m-row input:focus { border-color: var(--accent); }
-#panel-launch   .twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-#panel-launch   .m-status-card {
-    background: var(--panel-2); border: 1px dashed var(--line);
-    padding: 14px; border-radius: 12px; margin: 4px 0 16px;
-    font-size: 13px; color: var(--mute);
-  }
-#panel-launch   .m-status-card.ok    { border-color: #2a3b27; color: var(--green);}
-#panel-launch   .m-status-card.warn  { border-color: #5a4a2a; color: var(--accent);}
-#panel-launch   .m-status-card.error { border-color: #5a2a2a; color: var(--red);  }
-#panel-launch   .m-status-card.info  { border-color: #2a3a5a; color: var(--blue); }
-#panel-launch   .m-kv { display: flex; justify-content: space-between; margin: 6px 0; color: var(--text);}
-#panel-launch   .m-kv span:first-child { color: var(--mute); }
-#panel-launch   .m-addr {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 12px; color: var(--mute);
-  }
-#panel-launch   .m-log {
-    max-height: 320px; overflow-y: auto;
-    background: var(--panel-2); border-radius: 10px; padding: 10px 14px;
-    font-family: ui-monospace, monospace; font-size: 12px;
-    border: 1px solid var(--line);
-  }
-#panel-launch   .m-log-item { padding: 4px 0; border-bottom: 1px dashed var(--line);}
-#panel-launch   .m-log-item:last-child { border-bottom: none; }
-#panel-launch   .m-log-item a { color: var(--accent); text-decoration: none; }
-#panel-launch   .m-log-item a:hover { text-decoration: underline; }
-#panel-launch   .m-tag { display: inline-block; padding: 2px 8px; border-radius: 999px;
-         font-size: 11px; margin-left: 6px;}
-#panel-launch   .m-tag.s1 { background:#1a2a3a; color: var(--blue);}
-#panel-launch   .m-tag.s2 { background:#2a2a1a; color: var(--accent);}
-#panel-launch   .m-tag.s3 { background:#1a2a1a; color: var(--green);}
-#panel-launch   .m-tag.s4 { background:#2a1a1a; color: var(--red);}
-#panel-launch   .m-footer { text-align: center; color: var(--mute); font-size: 12px; margin-top: 30px;}
-#panel-launch   .m-footer a { color: var(--accent); text-decoration: none;}
-#panel-launch   .m-spinner {
-    display: inline-block; width: 12px; height: 12px;
-    border: 2px solid #555; border-top: 2px solid var(--accent);
-    border-radius: 50%; animation: spin .8s linear infinite;
-    vertical-align: middle; margin-right: 6px;
-  }
-  @keyframes spin { to { transform: rotate(360deg);} }
-#panel-launch   .m-toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: var(--panel); border: 1px solid var(--line);
-    padding: 12px 18px; border-radius: 10px; font-size: 13px;
-    box-shadow: 0 8px 30px rgba(0,0,0,.5); z-index: 99;
-    opacity: 0; transition: opacity .2s ease;
-  }
-#panel-launch   .m-toast.show { opacity: 1; }
-#panel-launch   .m-toast.ok { border-color: #2a3b27; }
-#panel-launch   .m-toast.err { border-color: #5a2a2a; }
-
-
-#panel-launch .m-grid { display: block; }
 </style>
 </head>
 <body>
 <div class="app">
-<div class="header">
-<div class="header-logo">
-<img alt="PADD" class="logo-box" src="https://raw.githubusercontent.com/addressBSC/address/refs/heads/main/owner/padd.png"/>
-<span>PADD</span>
-</div>
-<div class="header-right">
-<button class="lang-btn" data-manus_click_id="1" data-manus_clickable="true" id="langBtn" onclick="toggleLang()">CN</button>
-<button class="wallet-btn" data-i18n="connect" data-manus_click_id="2" data-manus_clickable="true" id="connectBtn" onclick="connectWallet()">Connect</button>
-</div>
-</div>
-<div class="tab-content">
-<!-- ====== MARKET ====== -->
-<div class="panel active" id="panel-market">
-<div class="card fade-in">
-<div class="card-title"><span class="dot"></span><span data-i18n="marketplace">Marketplace</span></div>
-<p data-i18n="marketDesc" style="font-size:.78rem;color:var(--text2);margin-bottom:12px;line-height:1.5">Browse premium addresses. Unclaimed ones can be purchased with BNB.</p>
-<!-- Overview Stats -->
-<div class="stat-grid-4" id="marketOverview" style="margin-bottom:14px"><div class="stat-card"><div class="sc-val">35963</div><div class="sc-label">Total</div></div><div class="stat-card"><div class="sc-val green">0</div><div class="sc-label">Available</div></div><div class="stat-card"><div class="sc-val"><span class="badge badge-green">--</span></div><div class="sc-label">Price</div></div><div class="stat-card"><div class="sc-val accent">0</div><div class="sc-label">Total Mined</div></div></div>
-<!-- Filters -->
-<div class="filter-bar">
-<select data-manus_click_id="3" data-manus_clickable="true" id="fTier" onchange="loadMarket()">
-<option data-i18n="allTiers" value="">All</option>
-<option data-i18n="common" value="Common">Common</option>
-<option data-i18n="rare" value="Rare">Rare</option>
-<option data-i18n="epic" value="Epic">Epic</option>
-<option data-i18n="legendary" value="Legendary">Legendary</option>
-</select>
-<select data-manus_click_id="4" data-manus_clickable="true" id="fDigit" onchange="loadMarket()">
-<option data-i18n="allDigits" value="">Digit</option>
-<option value="0">0</option><option value="1">1</option><option value="2">2</option>
-<option value="3">3</option><option value="4">4</option><option value="5">5</option>
-<option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option>
-</select>
-<select data-manus_click_id="5" data-manus_clickable="true" id="fPattern" onchange="loadMarket()">
-<option data-i18n="allPatterns" value="">Pattern</option>
-<option data-i18n="trailing" value="Trailing">Trailing</option>
-<option data-i18n="leading" value="Leading">Leading</option>
-</select>
-<select data-manus_click_id="6" data-manus_clickable="true" id="fStatus" onchange="loadMarket()">
-<option data-i18n="allStatus" value="">All</option>
-<option data-i18n="unclaimed" value="true">Unclaimed</option>
-<option data-i18n="claimed" value="false">Claimed</option>
-</select>
-</div>
-<!-- Search by ID / Buy by ID -->
-<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
-<input data-manus_click_id="7" data-manus_clickable="true" id="searchId" onkeydown="if(event.key==='Enter')searchById()" placeholder="# ID search" style="flex:1;min-width:80px;padding:9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.75rem;font-weight:600;outline:none" type="number"/>
-<button class="btn-secondary" data-i18n="search" data-manus_click_id="8" data-manus_clickable="true" onclick="searchById()" style="flex:none;padding:9px 14px;width:auto;font-size:.75rem">Search</button>
-<input data-manus_click_id="9" data-manus_clickable="true" id="buyIdInput" onkeydown="if(event.key==='Enter')buyById()" placeholder="# ID buy" style="flex:1;min-width:80px;padding:9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.75rem;font-weight:600;outline:none" type="number"/>
-<button class="btn-primary" data-i18n="buy" data-manus_click_id="10" data-manus_clickable="true" onclick="buyById()" style="flex:none;padding:9px 14px;width:auto;font-size:.75rem">Buy</button>
-</div>
-<!-- List -->
-<div id="marketList"><div class="addr-card"><div class="addr-id">#35963</div><div class="addr-display" data-manus_click_id="11" data-manus_clickable="true" onclick="copyAddr('0x0000000009DaC3ba35cB50C9E73eB55E83b55bAD')">0x<span class="hl-digit">000000000</span>9DaC3ba35cB50C9E73eB55E83b55bAD<svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 0</span><span>Streak: 9</span><span>Leading</span><span>Occurrences: 10</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="12" data-manus_clickable="true" onclick="buyByWid(35963)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="13" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0x0000000009DaC3ba35cB50C9E73eB55E83b55bAD','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35962</div><div class="addr-display" data-manus_click_id="14" data-manus_clickable="true" onclick="copyAddr('0xc085EED78875EB9FFEbBeB3a5105E6F444444444')">0xc085EED78875EB9FFEbBeB3a5105E6F<span class="hl-digit">444444444</span><svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 4</span><span>Streak: 9</span><span>Trailing</span><span>Occurrences: 9</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="15" data-manus_clickable="true" onclick="buyByWid(35962)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="16" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0xc085EED78875EB9FFEbBeB3a5105E6F444444444','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35961</div><div class="addr-display" data-manus_click_id="17" data-manus_clickable="true" onclick="copyAddr('0x3333333337CfF5C9a60d6Aa1dED5000d94329230')">0x<span class="hl-digit">333333333</span>7CfF5C9a60d6Aa1dED5000d94329230<svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 3</span><span>Streak: 9</span><span>Leading</span><span>Occurrences: 11</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="18" data-manus_clickable="true" onclick="buyByWid(35961)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="19" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0x3333333337CfF5C9a60d6Aa1dED5000d94329230','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35960</div><div class="addr-display" data-manus_click_id="20" data-manus_clickable="true" onclick="copyAddr('0x555555555F02684523219d58C33eA1d893061538')">0x<span class="hl-digit">555555555</span>F02684523219d58C33eA1d893061538<svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 5</span><span>Streak: 9</span><span>Leading</span><span>Occurrences: 12</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="21" data-manus_clickable="true" onclick="buyByWid(35960)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="22" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0x555555555F02684523219d58C33eA1d893061538','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35959</div><div class="addr-display" data-manus_click_id="23" data-manus_clickable="true" onclick="copyAddr('0x11111111147Bb27c79CFD659bD244AB42a13381c')">0x<span class="hl-digit">111111111</span>47Bb27c79CFD659bD244AB42a13381c<svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 1</span><span>Streak: 9</span><span>Leading</span><span>Occurrences: 11</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="24" data-manus_clickable="true" onclick="buyByWid(35959)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="25" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0x11111111147Bb27c79CFD659bD244AB42a13381c','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35958</div><div class="addr-display" data-manus_click_id="26" data-manus_clickable="true" onclick="copyAddr('0x888888888b7184252f629ce8aa006744b9607451')">0x<span class="hl-digit">888888888</span>b7184252f629ce8aa006744b9607451<svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 8</span><span>Streak: 9</span><span>Leading</span><span>Occurrences: 11</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="27" data-manus_clickable="true" onclick="buyByWid(35958)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="28" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0x888888888b7184252f629ce8aa006744b9607451','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35957</div><div class="addr-display" data-manus_click_id="29" data-manus_clickable="true" onclick="copyAddr('0x222222222344cfb3166E59e32533C866Fc4aD2BA')">0x<span class="hl-digit">222222222</span>344cfb3166E59e32533C866Fc4aD2BA<svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 2</span><span>Streak: 9</span><span>Leading</span><span>Occurrences: 11</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="30" data-manus_clickable="true" onclick="buyByWid(35957)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="31" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0x222222222344cfb3166E59e32533C866Fc4aD2BA','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35956</div><div class="addr-display" data-manus_click_id="32" data-manus_clickable="true" onclick="copyAddr('0xceBef569a3E9C16145119A24A28A6f3555555555')">0xceBef569a3E9C16145119A24A28A6f3<span class="hl-digit">555555555</span><svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 5</span><span>Streak: 9</span><span>Trailing</span><span>Occurrences: 11</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="33" data-manus_clickable="true" onclick="buyByWid(35956)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="34" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0xceBef569a3E9C16145119A24A28A6f3555555555','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35955</div><div class="addr-display" data-manus_click_id="35" data-manus_clickable="true" onclick="copyAddr('0x9999999992C0485794Fb7C7D9eE0E5AB755b02a4')">0x<span class="hl-digit">999999999</span>2C0485794Fb7C7D9eE0E5AB755b02a4<svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 9</span><span>Streak: 9</span><span>Leading</span><span>Occurrences: 11</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="36" data-manus_clickable="true" onclick="buyByWid(35955)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="37" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0x9999999992C0485794Fb7C7D9eE0E5AB755b02a4','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35954</div><div class="addr-display" data-manus_click_id="38" data-manus_clickable="true" onclick="copyAddr('0x888888888A93268Ba21998fE6Ba8b77A833A450b')">0x<span class="hl-digit">888888888</span>A93268Ba21998fE6Ba8b77A833A450b<svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 8</span><span>Streak: 9</span><span>Leading</span><span>Occurrences: 13</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="39" data-manus_clickable="true" onclick="buyByWid(35954)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="40" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0x888888888A93268Ba21998fE6Ba8b77A833A450b','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35953</div><div class="addr-display" data-manus_click_id="41" data-manus_clickable="true" onclick="copyAddr('0x2222222223843972B1D3B35a8E7CCf60c9be35a2')">0x<span class="hl-digit">222222222</span>3843972B1D3B35a8E7CCf60c9be35a2<svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 2</span><span>Streak: 9</span><span>Leading</span><span>Occurrences: 11</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="42" data-manus_clickable="true" onclick="buyByWid(35953)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="43" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0x2222222223843972B1D3B35a8E7CCf60c9be35a2','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35952</div><div class="addr-display" data-manus_click_id="44" data-manus_clickable="true" onclick="copyAddr('0xAF2C5F9972e2C1f96A1E606d8980732111111111')">0xAF2C5F9972e2C1f96A1E606d8980732<span class="hl-digit">111111111</span><svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 1</span><span>Streak: 9</span><span>Trailing</span><span>Occurrences: 11</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="45" data-manus_clickable="true" onclick="buyByWid(35952)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="46" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0xAF2C5F9972e2C1f96A1E606d8980732111111111','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35951</div><div class="addr-display" data-manus_click_id="47" data-manus_clickable="true" onclick="copyAddr('0xA073A744C418363debd12944cd8e10A444444444')">0xA073A744C418363debd12944cd8e10A<span class="hl-digit">444444444</span><svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 4</span><span>Streak: 9</span><span>Trailing</span><span>Occurrences: 14</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="48" data-manus_clickable="true" onclick="buyByWid(35951)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="49" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0xA073A744C418363debd12944cd8e10A444444444','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35950</div><div class="addr-display" data-manus_click_id="50" data-manus_clickable="true" onclick="copyAddr('0xF0624395f975A967FfdE58bFCF29C87777777777')">0xF0624395f975A967FfdE58bFCF29C8<span class="hl-digit">7777777777</span><svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-r">Rare</span><span>Digit: 7</span><span>Streak: 10</span><span>Trailing</span><span>Occurrences: 12</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="51" data-manus_clickable="true" onclick="buyByWid(35950)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="52" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0xF0624395f975A967FfdE58bFCF29C87777777777','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35949</div><div class="addr-display" data-manus_click_id="53" data-manus_clickable="true" onclick="copyAddr('0xaA4c7240c662B4db4ca84acaFfE6E04333333333')">0xaA4c7240c662B4db4ca84acaFfE6E04<span class="hl-digit">333333333</span><svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 3</span><span>Streak: 9</span><span>Trailing</span><span>Occurrences: 9</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="54" data-manus_clickable="true" onclick="buyByWid(35949)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="55" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0xaA4c7240c662B4db4ca84acaFfE6E04333333333','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35948</div><div class="addr-display" data-manus_click_id="56" data-manus_clickable="true" onclick="copyAddr('0xA3131D8A1DC78387E1234D417527410555555555')">0xA3131D8A1DC78387E1234D417527410<span class="hl-digit">555555555</span><svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 5</span><span>Streak: 9</span><span>Trailing</span><span>Occurrences: 10</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="57" data-manus_clickable="true" onclick="buyByWid(35948)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="58" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0xA3131D8A1DC78387E1234D417527410555555555','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35947</div><div class="addr-display" data-manus_click_id="59" data-manus_clickable="true" onclick="copyAddr('0x333333333C760c0701B39202a3ba1b30E1f84973')">0x<span class="hl-digit">333333333</span>C760c0701B39202a3ba1b30E1f84973<svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 3</span><span>Streak: 9</span><span>Leading</span><span>Occurrences: 13</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="60" data-manus_clickable="true" onclick="buyByWid(35947)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="61" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0x333333333C760c0701B39202a3ba1b30E1f84973','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35946</div><div class="addr-display" data-manus_click_id="62" data-manus_clickable="true" onclick="copyAddr('0x22222222242A1bDfD98371158EDe365e0cf14276')">0x<span class="hl-digit">222222222</span>42A1bDfD98371158EDe365e0cf14276<svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 2</span><span>Streak: 9</span><span>Leading</span><span>Occurrences: 11</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="63" data-manus_clickable="true" onclick="buyByWid(35946)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="64" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0x22222222242A1bDfD98371158EDe365e0cf14276','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35945</div><div class="addr-display" data-manus_click_id="65" data-manus_clickable="true" onclick="copyAddr('0x2222222229b7c98dEce7bd85a5d2d46B3d9bd2AD')">0x<span class="hl-digit">222222222</span>9b7c98dEce7bd85a5d2d46B3d9bd2AD<svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 2</span><span>Streak: 9</span><span>Leading</span><span>Occurrences: 11</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="66" data-manus_clickable="true" onclick="buyByWid(35945)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="67" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0x2222222229b7c98dEce7bd85a5d2d46B3d9bd2AD','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div><div class="addr-card"><div class="addr-id">#35944</div><div class="addr-display" data-manus_click_id="68" data-manus_clickable="true" onclick="copyAddr('0x777777777C8749a4bF1339a3bc26F0bccb8A2a70')">0x<span class="hl-digit">777777777</span>C8749a4bF1339a3bc26F0bccb8A2a70<svg class="copy-icon" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg></div><div class="addr-meta"><span class="badge badge-tier-c">Common</span><span>Digit: 7</span><span>Streak: 9</span><span>Leading</span><span>Occurrences: 11</span></div><div class="addr-actions"><button class="btn-primary" data-manus_click_id="69" data-manus_clickable="true" onclick="buyByWid(35944)" style="font-size:.78rem;padding:9px">Buy 0.005 BNB</button><button class="btn-secondary" data-manus_click_id="70" data-manus_clickable="true" onclick="window.open('https://bscscan.com/address/0x777777777C8749a4bF1339a3bc26F0bccb8A2a70','_blank')" style="font-size:.78rem;padding:9px;flex:none;width:auto;padding:9px 10px">BscScan</button></div></div></div>
-<div class="pagination" id="marketPagination"><button data-manus_click_id="71" data-manus_clickable="true" disabled="" onclick="marketPage=Math.max(1,marketPage-1);loadMarket()">‹</button><span class="page-info">1 / 1799</span><button data-manus_click_id="72" data-manus_clickable="true" onclick="marketPage=Math.min(1799,marketPage+1);loadMarket()">›</button></div>
-</div>
-</div>
-<!-- ====== LEADERBOARD ====== -->
-<div class="panel" id="panel-leaderboard">
-<div class="card fade-in">
-<div class="card-title"><span class="dot"></span><span data-i18n="leaderboard">Leaderboard</span></div>
-<div id="leaderboardContent"><div class="fade-in"><div class="lb-item"><div class="rank-num gold">1</div><div class="lb-info"><div class="lb-name">0xdc4dC9...999999</div><div class="lb-detail">Streak 12 | Occurrences 16 | #29026</div></div><div class="lb-val"><span class="badge badge-tier-e">Epic</span></div></div><div class="lb-item"><div class="rank-num silver">2</div><div class="lb-info"><div class="lb-name">0x4b35DC...333333</div><div class="lb-detail">Streak 12 | Occurrences 15 | #22137</div></div><div class="lb-val"><span class="badge badge-tier-e">Epic</span></div></div><div class="lb-item"><div class="rank-num bronze">3</div><div class="lb-info"><div class="lb-name">0x000000...8a77A6</div><div class="lb-detail">Streak 12 | Occurrences 15 | #153</div></div><div class="lb-val"><span class="badge badge-tier-e">Epic</span></div></div><div class="lb-item"><div class="rank-num">4</div><div class="lb-info"><div class="lb-name">0x555555...5B62F2</div><div class="lb-detail">Streak 12 | Occurrences 14 | #6504</div></div><div class="lb-val"><span class="badge badge-tier-e">Epic</span></div></div><div class="lb-item"><div class="rank-num">5</div><div class="lb-info"><div class="lb-name">0x555555...64711b</div><div class="lb-detail">Streak 12 | Occurrences 14 | #20351</div></div><div class="lb-val"><span class="badge badge-tier-e">Epic</span></div></div><div class="lb-item"><div class="rank-num">6</div><div class="lb-info"><div class="lb-name">0x98d45E...222222</div><div class="lb-detail">Streak 12 | Occurrences 13 | #9494</div></div><div class="lb-val"><span class="badge badge-tier-e">Epic</span></div></div><div class="lb-item"><div class="rank-num">7</div><div class="lb-info"><div class="lb-name">0xBD1006...999999</div><div class="lb-detail">Streak 12 | Occurrences 13 | #22389</div></div><div class="lb-val"><span class="badge badge-tier-e">Epic</span></div></div><div class="lb-item"><div class="rank-num">8</div><div class="lb-info"><div class="lb-name">0x111111...9Bf7dD</div><div class="lb-detail">Streak 12 | Occurrences 12 | #22356</div></div><div class="lb-val"><span class="badge badge-tier-e">Epic</span></div></div><div class="lb-item"><div class="rank-num">9</div><div class="lb-info"><div class="lb-name">0x999999...E2dBB2</div><div class="lb-detail">Streak 12 | Occurrences 12 | #3931</div></div><div class="lb-val"><span class="badge badge-tier-e">Epic</span></div></div><div class="lb-item"><div class="rank-num">10</div><div class="lb-info"><div class="lb-name">0x7a2186...888888</div><div class="lb-detail">Streak 11 | Occurrences 16 | #21834</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">11</div><div class="lb-info"><div class="lb-name">0x777777...c75C7B</div><div class="lb-detail">Streak 11 | Occurrences 16 | #865</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">12</div><div class="lb-info"><div class="lb-name">0xF0E27f...222222</div><div class="lb-detail">Streak 11 | Occurrences 15 | #6915</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">13</div><div class="lb-info"><div class="lb-name">0xBC17DE...777777</div><div class="lb-detail">Streak 11 | Occurrences 15 | #8991</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">14</div><div class="lb-info"><div class="lb-name">0x666666...D64721</div><div class="lb-detail">Streak 11 | Occurrences 15 | #22843</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">15</div><div class="lb-info"><div class="lb-name">0x222222...d22920</div><div class="lb-detail">Streak 11 | Occurrences 15 | #20039</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">16</div><div class="lb-info"><div class="lb-name">0x6c68d5...888888</div><div class="lb-detail">Streak 11 | Occurrences 15 | #867</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">17</div><div class="lb-info"><div class="lb-name">0x138F89...888888</div><div class="lb-detail">Streak 11 | Occurrences 15 | #32632</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">18</div><div class="lb-info"><div class="lb-name">0x444444...Fbb560</div><div class="lb-detail">Streak 11 | Occurrences 15 | #28823</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">19</div><div class="lb-info"><div class="lb-name">0x666666...c6C6D2</div><div class="lb-detail">Streak 11 | Occurrences 15 | #18591</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">20</div><div class="lb-info"><div class="lb-name">0x333333...9F4c95</div><div class="lb-detail">Streak 11 | Occurrences 15 | #14267</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">21</div><div class="lb-info"><div class="lb-name">0xc142F0...999999</div><div class="lb-detail">Streak 11 | Occurrences 14 | #28939</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">22</div><div class="lb-info"><div class="lb-name">0x855B9A...999999</div><div class="lb-detail">Streak 11 | Occurrences 14 | #24347</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">23</div><div class="lb-info"><div class="lb-name">0x43Fabd...222222</div><div class="lb-detail">Streak 11 | Occurrences 14 | #29219</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">24</div><div class="lb-info"><div class="lb-name">0x777777...b8D7D7</div><div class="lb-detail">Streak 11 | Occurrences 14 | #34854</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">25</div><div class="lb-info"><div class="lb-name">0x888888...3e5F31</div><div class="lb-detail">Streak 11 | Occurrences 14 | #24103</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">26</div><div class="lb-info"><div class="lb-name">0x333333...dea565</div><div class="lb-detail">Streak 11 | Occurrences 14 | #10540</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">27</div><div class="lb-info"><div class="lb-name">0xB14880...111111</div><div class="lb-detail">Streak 11 | Occurrences 14 | #820</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">28</div><div class="lb-info"><div class="lb-name">0xb01D3d...666666</div><div class="lb-detail">Streak 11 | Occurrences 14 | #22325</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">29</div><div class="lb-info"><div class="lb-name">0x999999...16cc04</div><div class="lb-detail">Streak 11 | Occurrences 14 | #32568</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">30</div><div class="lb-info"><div class="lb-name">0x872E80...999999</div><div class="lb-detail">Streak 11 | Occurrences 14 | #17229</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">31</div><div class="lb-info"><div class="lb-name">0x444444...b2B19D</div><div class="lb-detail">Streak 11 | Occurrences 14 | #28772</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">32</div><div class="lb-info"><div class="lb-name">0x555555...dB555C</div><div class="lb-detail">Streak 11 | Occurrences 14 | #23912</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">33</div><div class="lb-info"><div class="lb-name">0x222222...E6F262</div><div class="lb-detail">Streak 11 | Occurrences 14 | #19313</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">34</div><div class="lb-info"><div class="lb-name">0xE5fE3D...999999</div><div class="lb-detail">Streak 11 | Occurrences 14 | #28788</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">35</div><div class="lb-info"><div class="lb-name">0x777777...8B2111</div><div class="lb-detail">Streak 11 | Occurrences 14 | #32380</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">36</div><div class="lb-info"><div class="lb-name">0x111111...AE0c51</div><div class="lb-detail">Streak 11 | Occurrences 14 | #8604</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">37</div><div class="lb-info"><div class="lb-name">0x666666...b6eF5A</div><div class="lb-detail">Streak 11 | Occurrences 14 | #3999</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">38</div><div class="lb-info"><div class="lb-name">0x999999...Ca980b</div><div class="lb-detail">Streak 11 | Occurrences 14 | #28837</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">39</div><div class="lb-info"><div class="lb-name">0xDdA5B0...555555</div><div class="lb-detail">Streak 11 | Occurrences 14 | #22972</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">40</div><div class="lb-info"><div class="lb-name">0xE5e9e9...222222</div><div class="lb-detail">Streak 11 | Occurrences 14 | #17088</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">41</div><div class="lb-info"><div class="lb-name">0x5c6097...777777</div><div class="lb-detail">Streak 11 | Occurrences 14 | #25283</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">42</div><div class="lb-info"><div class="lb-name">0x4240Cd...000000</div><div class="lb-detail">Streak 11 | Occurrences 14 | #20168</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">43</div><div class="lb-info"><div class="lb-name">0x000000...e05b32</div><div class="lb-detail">Streak 11 | Occurrences 14 | #4811</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">44</div><div class="lb-info"><div class="lb-name">0x62E414...999999</div><div class="lb-detail">Streak 11 | Occurrences 14 | #15822</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">45</div><div class="lb-info"><div class="lb-name">0xc68F4e...444444</div><div class="lb-detail">Streak 11 | Occurrences 14 | #7376</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">46</div><div class="lb-info"><div class="lb-name">0x555555...0E390a</div><div class="lb-detail">Streak 11 | Occurrences 14 | #21475</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">47</div><div class="lb-info"><div class="lb-name">0x000000...300904</div><div class="lb-detail">Streak 11 | Occurrences 14 | #20454</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">48</div><div class="lb-info"><div class="lb-name">0x111111...dF1CB4</div><div class="lb-detail">Streak 11 | Occurrences 14 | #20461</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">49</div><div class="lb-info"><div class="lb-name">0x353997...777777</div><div class="lb-detail">Streak 11 | Occurrences 14 | #6639</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div><div class="lb-item"><div class="rank-num">50</div><div class="lb-info"><div class="lb-name">0x0f7F6f...555555</div><div class="lb-detail">Streak 11 | Occurrences 14 | #8176</div></div><div class="lb-val"><span class="badge badge-tier-r">Rare</span></div></div></div></div>
-</div>
-</div>
-<!-- ====== MY NFTS ====== -->
-<div class="panel" id="panel-mynfts">
-<div class="card fade-in">
-<div class="card-title"><span class="dot"></span><span data-i18n="wallet">Wallet</span></div>
-<ul class="info-list">
-<li><span class="label" data-i18n="address">Address</span><span class="value mono" data-i18n="notConnected" id="walletAddr">Not Connected</span></li>
-<li><span class="label">ADD <span data-i18n="balance">Balance</span></span><span class="value" id="addBalance">--</span></li>
-<li><span class="label">BNB <span data-i18n="balance">Balance</span></span><span class="value" id="bnbBalance">--</span></li>
-<li><span class="label" data-i18n="nftCount">NFT Count</span><span class="value" id="nftCount">0</span></li>
-</ul>
-</div>
-<div class="card fade-in">
-<div class="card-title"><span class="dot"></span><span data-i18n="myAddresses">My Addresses</span></div>
-<div id="myAddressesList"><div class="empty-state"><p data-i18n="noNfts">No premium addresses owned yet</p></div></div>
-</div>
-<div class="card fade-in">
-<div class="card-title"><span class="dot"></span><span data-i18n="transferADD">Transfer ADD</span></div>
-<div class="input-group"><label data-i18n="recipient">Recipient</label><input id="transferToInput" placeholder="0x..." type="text"/></div>
-<div class="input-group"><label data-i18n="amount">Amount</label><input id="transferAmtInput" placeholder="0.00" type="number"/></div>
-<button class="btn-primary" data-i18n="transferBtn" onclick="transferADD()">Transfer</button>
-</div>
-</div>
-<!-- ====== INFO ====== -->
-<div class="panel" id="panel-info">
-<div class="card fade-in">
-<div class="card-title"><span class="dot"></span><span data-i18n="globalStats">Global Stats</span></div>
-<div id="globalStatsContent"><div class="stat-grid-4 fade-in"><div class="stat-card"><div class="sc-val">21,000,000</div><div class="sc-label">Max Supply</div></div><div class="stat-card"><div class="sc-val">35963</div><div class="sc-label">Total Mined</div></div><div class="stat-card"><div class="sc-val">1,465,600</div><div class="sc-label">Total Minted</div></div><div class="stat-card"><div class="sc-val">1,465,600</div><div class="sc-label">Total Supply</div></div><div class="stat-card"><div class="sc-val">50 ADD</div><div class="sc-label">Current Reward</div></div><div class="stat-card"><div class="sc-val">0</div><div class="sc-label">Era</div></div></div></div>
-</div>
-<div class="card fade-in">
-<div class="card-title"><span class="dot"></span><span data-i18n="stats">Statistics</span></div>
-<div id="statsContent"><div class="stat-grid-4 fade-in"><div class="stat-card"><div class="sc-val">35963</div><div class="sc-label">Total</div></div><div class="stat-card"><div class="sc-val green">35947</div><div class="sc-label">Available</div></div><div class="stat-card"><div class="sc-val accent">16</div><div class="sc-label">Claimed</div></div><div class="stat-card"><div class="sc-val">33201 / 2753 / 9 / 0</div><div class="sc-label">C / R / E / L</div></div></div></div>
-</div>
-<div class="card fade-in">
-<div class="card-title"><span class="dot"></span><span data-i18n="networkStatus">Network Status</span></div>
-<div id="networkStatus"><ul class="info-list fade-in"><li><span class="label">status</span><span class="value"><span class="badge badge-green">Synced</span></span></li><li><span class="label">Block Number</span><span class="value mono">35963</span></li><li><span class="label">Updated</span><span class="value">6/8/2026, 3:43:17 PM</span></li></ul></div>
-</div>
-<div class="card fade-in">
-<div class="card-title"><span class="dot"></span><span data-i18n="contractInfo">Contract Info</span></div>
-<ul class="info-list">
-<li><span class="label">ADD Token</span><span class="value mono"><a href="https://bscscan.com/address/0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8" target="_blank">0x1805...E6d8</a></span></li>
-<li><span class="label">AddressManager</span><span class="value mono"><a href="https://bscscan.com/address/0x78B11198268619728E4b53c642E8d68941004c11" target="_blank">0x78B1...4c11</a></span></li>
-<li><span class="label">Query</span><span class="value mono"><a href="https://bscscan.com/address/0x86719c4337b8BF7d54aa73df7e3d460efD076405" target="_blank">0x8671...6405</a></span></li>
-<li><span class="label" data-i18n="network">Network</span><span class="value">BSC Mainnet</span></li>
-<li><span class="label">API</span><span class="value mono"><a href="https://address.shibclaw.xyz" target="_blank">address.shibclaw.xyz</a></span></li>
-</ul>
-</div>
-</div>
-<div class_="panel" id="panel-launch"><div class_="fade-in"><div class="m-hero">
-<h1 data-i18n="memeTitle">一键发币</h1>
-<p data-i18n="memeDesc">使用 Premium 地址 NFT 在 BSC 上部署你的代币并自动注入流动性</p>
-</div><div class="m-grid">
-<!-- Launch panel -->
-<section class="m-card">
-<h2 data-i18n="launchToken">发射代币</h2>
-<div class="m-row">
-<label>Premium NFT ID</label>
-<input data-manus_click_id="2" data-manus_clickable="true" id="tokenIdInput" inputmode="numeric" placeholder="例如 12345"/>
-</div>
-<div class="m-status-card m-info" id="statusBox">
-        输入一个 NFT ID 并点击「检查状态」
+  <div class="header">
+    <div class="header-logo">
+      <img class="logo-box" src="https://raw.githubusercontent.com/addressBSC/address/refs/heads/main/owner/padd.png" alt="PADD">
+      <span>PADD</span>
+    </div>
+    <div class="header-right">
+      <button class="lang-btn" id="langBtn" onclick="toggleLang()">CN</button>
+      <button class="wallet-btn" id="connectBtn" onclick="connectWallet()" data-i18n="connect">Connect</button>
+    </div>
+  </div>
+
+  <div class="tab-content">
+    <!-- ====== MARKET ====== -->
+    <div class="panel active" id="panel-market">
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="marketplace">Marketplace</span></div>
+        <p style="font-size:.78rem;color:var(--text2);margin-bottom:12px;line-height:1.5" data-i18n="marketDesc">Browse premium addresses. Unclaimed ones can be purchased with BNB.</p>
+        <!-- Overview Stats -->
+        <div id="marketOverview" class="stat-grid-4" style="margin-bottom:14px"></div>
+        <!-- Filters -->
+        <div class="filter-bar">
+          <select id="fTier" onchange="loadMarket()">
+            <option value="" data-i18n="allTiers">All</option>
+            <option value="Common" data-i18n="common">Common</option>
+            <option value="Rare" data-i18n="rare">Rare</option>
+            <option value="Epic" data-i18n="epic">Epic</option>
+            <option value="Legendary" data-i18n="legendary">Legendary</option>
+          </select>
+          <select id="fDigit" onchange="loadMarket()">
+            <option value="" data-i18n="allDigits">Digit</option>
+            <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+            <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+            <option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option>
+          </select>
+          <select id="fPattern" onchange="loadMarket()">
+            <option value="" data-i18n="allPatterns">Pattern</option>
+            <option value="Trailing" data-i18n="trailing">Trailing</option>
+            <option value="Leading" data-i18n="leading">Leading</option>
+          </select>
+          <select id="fStatus" onchange="loadMarket()">
+            <option value="" data-i18n="allStatus">All</option>
+            <option value="true" data-i18n="unclaimed">Unclaimed</option>
+            <option value="false" data-i18n="claimed">Claimed</option>
+          </select>
+        </div>
+        <!-- Search by ID / Buy by ID -->
+        <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+          <input type="number" id="searchId" placeholder="# ID search" style="flex:1;min-width:80px;padding:9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.75rem;font-weight:600;outline:none" onkeydown="if(event.key==='Enter')searchById()">
+          <button class="btn-secondary" onclick="searchById()" style="flex:none;padding:9px 14px;width:auto;font-size:.75rem" data-i18n="search">Search</button>
+          <input type="number" id="buyIdInput" placeholder="# ID buy" style="flex:1;min-width:80px;padding:9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.75rem;font-weight:600;outline:none" onkeydown="if(event.key==='Enter')buyById()">
+          <button class="btn-primary" onclick="buyById()" style="flex:none;padding:9px 14px;width:auto;font-size:.75rem" data-i18n="buy">Buy</button>
+        </div>
+        <!-- List -->
+        <div id="marketList"></div>
+        <div class="pagination" id="marketPagination"></div>
       </div>
-<button class="m-btn-ghost" data-i18n="checkStatus" data-manus_click_id="3" data-manus_clickable="true" id="checkBtn" style="margin-bottom:16px;">检查状态</button>
-<div class="m-twoCol">
-<div class="m-row">
-<label data-i18n="tokenName">代币名称 (Name)</label>
-<input data-manus_click_id="4" data-manus_clickable="true" id="nameInput" placeholder="My Token"/>
+    </div>
+
+    <!-- ====== LEADERBOARD ====== -->
+    <div class="panel" id="panel-leaderboard">
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="leaderboard">Leaderboard</span></div>
+        <div id="leaderboardContent"><div class="skeleton"><div class="sk-line w70"></div><div class="sk-line w50"></div><div class="sk-line w70"></div><div class="sk-line w50"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ====== MY NFTS ====== -->
+    <div class="panel" id="panel-mynfts">
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="wallet">Wallet</span></div>
+        <ul class="info-list">
+          <li><span class="label" data-i18n="address">Address</span><span class="value mono" id="walletAddr" data-i18n="notConnected">Not Connected</span></li>
+          <li><span class="label">ADD <span data-i18n="balance">Balance</span></span><span class="value" id="addBalance">--</span></li>
+          <li><span class="label">BNB <span data-i18n="balance">Balance</span></span><span class="value" id="bnbBalance">--</span></li>
+          <li><span class="label" data-i18n="nftCount">NFT Count</span><span class="value" id="nftCount">0</span></li>
+        </ul>
+      </div>
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="myAddresses">My Addresses</span></div>
+        <div id="myAddressesList"><div class="empty-state"><p data-i18n="noNfts">No premium addresses owned yet</p></div></div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="transferADD">Transfer ADD</span></div>
+        <div class="input-group"><label data-i18n="recipient">Recipient</label><input type="text" id="transferToInput" placeholder="0x..."></div>
+        <div class="input-group"><label data-i18n="amount">Amount</label><input type="number" id="transferAmtInput" placeholder="0.00"></div>
+        <button class="btn-primary" onclick="transferADD()" data-i18n="transferBtn">Transfer</button>
+      </div>
+    </div>
+
+    <!-- ====== LAUNCH ====== -->
+    <div class="panel" id="panel-launch">
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="oneClickLaunch">OneClickLaunch</span></div>
+        <p style="font-size:.78rem;color:var(--text2);margin-bottom:14px;line-height:1.5" data-i18n="launchDesc">Use a Premium Address NFT to deploy your token on BSC and auto-add liquidity.</p>
+
+        <div class="input-group">
+          <label data-i18n="nftIdLabel">Premium NFT ID</label>
+          <input type="number" id="launchTokenId" placeholder="e.g. 12345" inputmode="numeric">
+        </div>
+
+        <div id="launchStatusBox" style="padding:12px;background:var(--bg3);border:1px dashed var(--border);border-radius:var(--radius-sm);font-size:.78rem;color:var(--text2);margin-bottom:12px" data-i18n="launchStatusHint">
+          Enter an NFT ID and click "Check Status"
+        </div>
+
+        <button class="btn-secondary" id="launchCheckBtn" onclick="launchCheckStatus()" style="margin-bottom:14px" data-i18n="checkStatus">Check Status</button>
+
+        <div class="input-group">
+          <label data-i18n="tokenName">Token Name</label>
+          <input type="text" id="launchName" placeholder="My Token">
+        </div>
+        <div class="input-group">
+          <label data-i18n="tokenSymbol">Token Symbol</label>
+          <input type="text" id="launchSymbol" placeholder="MYT" maxlength="11">
+        </div>
+
+        <button class="btn-primary" id="launchActionBtn" onclick="launchAction()" disabled data-i18n="launchConnectFirst">Connect wallet first</button>
+
+        <p style="font-size:.72rem;color:var(--text3);margin-top:14px;line-height:1.6" data-i18n="launchNote">
+          · Supply: 1,000,000,000 / Liquidity: 990M / Creator: 10M (1%)<br>
+          · NFT held by you must be approve'd to the launcher<br>
+          · Unclaimed NFTs go via claim flow (requires BNB)
+        </p>
+      </div>
+
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="myLaunches">My Launches</span></div>
+        <button class="btn-secondary" onclick="loadLaunchHistory()" style="margin-bottom:12px" data-i18n="refresh">Refresh</button>
+        <div id="launchHistoryBox">
+          <div class="empty-state"><p data-i18n="launchNoHistory">No launches yet</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== INFO ====== -->
+    <div class="panel" id="panel-info">
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="globalStats">Global Stats</span></div>
+        <div id="globalStatsContent"><div class="skeleton"><div class="sk-line w70"></div><div class="sk-line w50"></div></div></div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="stats">Statistics</span></div>
+        <div id="statsContent"><div class="skeleton"><div class="sk-line w70"></div><div class="sk-line w50"></div></div></div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="networkStatus">Network Status</span></div>
+        <div id="networkStatus"><div class="skeleton"><div class="sk-line w70"></div></div></div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="contractInfo">Contract Info</span></div>
+        <ul class="info-list">
+          <li><span class="label">ADD Token</span><span class="value mono"><a href="https://bscscan.com/address/0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8" target="_blank">0x1805...E6d8</a></span></li>
+          <li><span class="label">AddressManager</span><span class="value mono"><a href="https://bscscan.com/address/0x78B11198268619728E4b53c642E8d68941004c11" target="_blank">0x78B1...4c11</a></span></li>
+          <li><span class="label">Query</span><span class="value mono"><a href="https://bscscan.com/address/0x86719c4337b8BF7d54aa73df7e3d460efD076405" target="_blank">0x8671...6405</a></span></li>
+          <li><span class="label">OneClickLaunch</span><span class="value mono"><a href="https://bscscan.com/address/0x558232C46e3b8f125385aF127b95D6f602dFE81D#code" target="_blank">0x5582...E81D</a></span></li>
+          <li><span class="label">Factory</span><span class="value mono"><a href="https://bscscan.com/address/0x78127790105D75D31b2634cd474cEA18FcF6Aa5B" target="_blank">0x7812...Aa5B</a></span></li>
+          <li><span class="label" data-i18n="network">Network</span><span class="value">BSC Mainnet</span></li>
+          <li><span class="label">API</span><span class="value mono"><a href="https://address.shibclaw.xyz" target="_blank">address.shibclaw.xyz</a></span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="active" onclick="switchTab('market',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <span data-i18n="tabMarket">Market</span>
+    </button>
+    <button onclick="switchTab('leaderboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 6 9 6 9z"/><path d="M18 9h1.5a2.5 2.5 0 000-5C17 4 18 9 18 9z"/><path d="M4 22h16"/><path d="M10 22V8h4v14"/></svg>
+      <span data-i18n="tabLeaderboard">Rank</span>
+    </button>
+    <button onclick="switchTab('mynfts',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span data-i18n="tabMyNfts">My NFTs</span>
+    </button>
+    <button onclick="switchTab('launch',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+      <span data-i18n="tabLaunch">Launch</span>
+    </button>
+    <button onclick="switchTab('info',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      <span data-i18n="tabInfo">Info</span>
+    </button>
+  </div>
 </div>
-<div class="m-row">
-<label data-i18n="tokenSymbol">代币符号 (Symbol)</label>
-<input data-manus_click_id="5" data-manus_clickable="true" id="symbolInput" maxlength="11" placeholder="MYT"/>
-</div>
-</div>
-<button class="m-btn m-btn-block" data-manus_click_id="6" data-manus_clickable="true" disabled="" id="actionBtn">请先连接钱包</button>
-<p style="font-size:12px;color:var(--mute);margin:14px 0 0;line-height:1.6;">
-        · 自动总供应：1,000,000,000 ／ 流动性：990M ／ 创建者份额：10M (1%)<br/>
-        · 持有者自己 NFT 需先 approve 给本合约<br/>
-        · 未被认领的号将走 claim 流程，需自带 BNB
-      </p>
-</section>
-<!-- Right column -->
-<section class="m-card">
-<h2 data-i18n="myLaunchHistory">我的发射记录</h2>
-<button class="m-btn-ghost" data-i18n="refresh" data-manus_click_id="7" data-manus_clickable="true" id="refreshBtn" style="margin-bottom:12px;">刷新</button>
-<div class="m-log" id="historyBox">
-<div class="m-log-item" style="color:var(--mute)">未连接钱包</div>
-</div>
-<h2 data-i18n="contractInfoMeme" style="margin-top:24px;">合约信息</h2>
-<div class="m-kv"><span>OneClickLaunch</span>
-<a class="m-addr" data-manus_click_id="8" data-manus_clickable="true" href="https://bscscan.com/address/0x558232C46e3b8f125385aF127b95D6f602dFE81D#code" id="ocAddrLink" target="_blank">
-          0x5582...E81D
-        </a></div>
-<div class="m-kv"><span>AddressManager NFT</span>
-<a class="m-addr" data-manus_click_id="9" data-manus_clickable="true" href="https://bscscan.com/address/0x78B11198268619728E4b53c642E8d68941004c11" target="_blank">
-          0x78B1...4c11
-        </a></div>
-<div class="m-kv"><span>Factory</span>
-<a class="m-addr" data-manus_click_id="10" data-manus_clickable="true" href="https://bscscan.com/address/0x78127790105D75D31b2634cd474cEA18FcF6Aa5B" target="_blank">
-          0x7812...Aa5B
-        </a></div>
-</section>
-</div></div></div></div>
-<div class="tab-bar">
-<button class="active" data-manus_click_id="73" data-manus_clickable="true" onclick="switchTab('market',this)">
-<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 01-8 0"></path></svg>
-<span data-i18n="tabMarket">Market</span>
-</button>
-<button data-manus_click_id="74" data-manus_clickable="true" onclick="switchTab('leaderboard',this)">
-<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 6 9 6 9z"></path><path d="M18 9h1.5a2.5 2.5 0 000-5C17 4 18 9 18 9z"></path><path d="M4 22h16"></path><path d="M10 22V8h4v14"></path></svg>
-<span data-i18n="tabLeaderboard">Rank</span>
-</button>
-<button data-manus_click_id="75" data-manus_clickable="true" onclick="switchTab('mynfts',this)">
-<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-<span data-i18n="tabMyNfts">My NFTs</span>
-</button>
-<button id="tab-launch" onclick="switchTab('launch',this)"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg><span data-i18n="tabLaunch">Launch</span></button><button data-manus_click_id="76" data-manus_clickable="true" onclick="switchTab('info',this)">
-<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
-<span data-i18n="tabInfo">Info</span>
-</button>
-</div>
-</div>
+
 <div class="toast" id="toast"></div>
+
 <script>
 /* === I18N === */
 const LANG = {
@@ -446,7 +327,7 @@ const LANG = {
     myAddresses:'My Addresses', noNfts:'No premium addresses owned yet',
     transferADD:'Transfer ADD', recipient:'Recipient', amount:'Amount', transferBtn:'Transfer',
     globalStats:'Global Stats', networkStatus:'Network Status', contractInfo:'Contract Info',
-    network:'Network', tabMarket:'Market', tabLeaderboard:'Rank', tabMyNfts:'My NFTs', tabInfo:'Info', tabLaunch:'Launch', memeTitle:'One Click Launch', memeDesc:'Deploy your token on BSC and auto-add liquidity using Premium Address NFT', launchToken:'Launch Token', myLaunchHistory:'My Launch History', contractInfoMeme:'Contract Info', tokenName:'Token Name', tokenSymbol:'Token Symbol', checkStatus:'Check Status', refresh:'Refresh', checkStatusFirst:'Check status first',
+    network:'Network', tabMarket:'Market', tabLeaderboard:'Rank', tabMyNfts:'My NFTs', tabInfo:'Info',
     claim:'Buy', view:'View', owner:'Owner', digit:'Digit', pattern:'Pattern',
     occurrences:'Occurrences', tier:'Tier', trailing:'Trailing', leading:'Leading',
     toastConnected:'Wallet Connected', toastNoMM:'Please install MetaMask',
@@ -465,7 +346,26 @@ const LANG = {
     noLeaderboard:'No leaderboard data available', searchByID:'Search by ID',
     common:'Common', rare:'Rare', epic:'Epic', legendary:'Legendary',
     overview:'Overview', total:'Total', available:'Available', priceLabel:'Price',
-    myNFTs:'My NFTs', info:'Info', rankTab:'Rank'
+    myNFTs:'My NFTs', info:'Info', rankTab:'Rank',
+    tabLaunch:'Launch', oneClickLaunch:'OneClickLaunch',
+    launchDesc:'Use a Premium Address NFT to deploy your token on BSC and auto-add liquidity.',
+    nftIdLabel:'Premium NFT ID', launchStatusHint:'Enter an NFT ID and click "Check Status"',
+    checkStatus:'Check Status', tokenName:'Token Name', tokenSymbol:'Token Symbol',
+    launchConnectFirst:'Connect wallet first', launchAfterCheck:'Check status to launch',
+    launchNote:'· Supply: 1,000,000,000 / Liquidity: 990M / Creator: 10M (1%)<br>· NFT held by you must be approved to the launcher first<br>· Unclaimed NFTs go via claim flow (requires BNB)',
+    myLaunches:'My Launches', refresh:'Refresh', launchNoHistory:'No launches yet',
+    launchStatus1:'You hold this NFT', launchStatus2:'NFT custodied in contract (yours)',
+    launchStatus3:'Unclaimed — buy & launch', launchStatus4:'Owned by someone else — cannot launch',
+    approved:'Approved', needApprove:'Need approve', predictedToken:'Predicted token',
+    needsPay:'You pay', launchNow:'Launch token (no BNB)', approveBtn:'1. Approve NFT to launcher',
+    launchWithPay:'Launch (pay {bnb} BNB)', cannotLaunch:'Cannot launch',
+    sendingApprove:'Sending approve...', approveOk:'Approved, click launch again',
+    approveFail:'Approve failed', sendingLaunch:'Sending launch...',
+    txSubmitted:'Tx submitted', launchOk:'Launch success!', launchAgain:'Launch another',
+    retry:'Retry', launchFail:'Launch failed', enterNameSym:'Enter name and symbol',
+    statusFailed:'Status query failed', loadingMsg:'Loading...',
+    pleaseEnterNftId:'Please enter NFT ID', launchHistFail:'Failed to load history',
+    payNothing:'(no BNB)', tabLaunchShort:'Launch'
   },
   zh: {
     connect:'连接钱包', notConnected:'未连接', connected:'已连接',
@@ -476,7 +376,7 @@ const LANG = {
     myAddresses:'我的靓号', noNfts:'还没有拥有靓号地址',
     transferADD:'转账 ADD', recipient:'接收地址', amount:'数量', transferBtn:'转账',
     globalStats:'全局统计', networkStatus:'网络状态', contractInfo:'合约信息',
-    network:'网络', tabMarket:'市场', tabLeaderboard:'排行', tabMyNfts:'我的NFT', tabInfo:'信息', tabLaunch:'发射', memeTitle:'一键发币', memeDesc:'使用 Premium 地址 NFT 在 BSC 上部署你的代币并自动注入流动性', launchToken:'发射代币', myLaunchHistory:'我的发射记录', contractInfoMeme:'合约信息', tokenName:'代币名称 (Name)', tokenSymbol:'代币符号 (Symbol)', checkStatus:'检查状态', refresh:'刷新', checkStatusFirst:'检查状态后即可发射',
+    network:'网络', tabMarket:'市场', tabLeaderboard:'排行', tabMyNfts:'我的NFT', tabInfo:'信息',
     claim:'购买', view:'查看', owner:'拥有者', digit:'数字', pattern:'模式',
     occurrences:'出现次数', tier:'等级', trailing:'后缀', leading:'前缀',
     toastConnected:'钱包已连接', toastNoMM:'请安装 MetaMask',
@@ -496,7 +396,26 @@ const LANG = {
     noLeaderboard:'暂无排行榜数据', searchByID:'按ID搜索',
     common:'普通', rare:'稀有', epic:'史诗', legendary:'传说',
     overview:'概览', total:'总计', available:'可购买', priceLabel:'当前价格',
-    myNFTs:'我的NFT', info:'信息', rankTab:'排行'
+    myNFTs:'我的NFT', info:'信息', rankTab:'排行',
+    tabLaunch:'发币', oneClickLaunch:'一键发币',
+    launchDesc:'使用 Premium 地址 NFT 在 BSC 上部署你的代币并自动注入流动性。',
+    nftIdLabel:'Premium NFT ID', launchStatusHint:'输入一个 NFT ID 并点击「检查状态」',
+    checkStatus:'检查状态', tokenName:'代币名称 (Name)', tokenSymbol:'代币符号 (Symbol)',
+    launchConnectFirst:'请先连接钱包', launchAfterCheck:'检查状态后即可发射',
+    launchNote:'· 自动总供应：1,000,000,000 ／ 流动性：990M ／ 创建者份额：10M (1%)<br>· 持有者自己 NFT 需先 approve 给本合约<br>· 未被认领的号将走 claim 流程，需自带 BNB',
+    myLaunches:'我的发射记录', refresh:'刷新', launchNoHistory:'暂无发射记录',
+    launchStatus1:'你已持有该 NFT', launchStatus2:'NFT 已托管在合约中（是你的）',
+    launchStatus3:'未被认领，可购买 + 发射', launchStatus4:'该 NFT 已被他人持有，无法发射',
+    approved:'已授权', needApprove:'需 approve', predictedToken:'预测代币地址',
+    needsPay:'需要支付', launchNow:'发射代币（无需支付 BNB）', approveBtn:'1. 授权 NFT 给合约',
+    launchWithPay:'发射（支付 {bnb} BNB）', cannotLaunch:'无法发射',
+    sendingApprove:'发送授权交易...', approveOk:'授权成功，请再点一次发射',
+    approveFail:'授权失败', sendingLaunch:'发送发射交易...',
+    txSubmitted:'交易已提交', launchOk:'发射成功！', launchAgain:'再发一个',
+    retry:'重试', launchFail:'发射失败', enterNameSym:'请填写代币名称和符号',
+    statusFailed:'查询失败', loadingMsg:'加载中...',
+    pleaseEnterNftId:'请输入 NFT ID', launchHistFail:'加载失败',
+    payNothing:'（无需 BNB）', tabLaunchShort:'发币'
   }
 };
 let curLang = 'en';
@@ -514,29 +433,50 @@ function applyLang(){
   if(userAddr)document.getElementById('connectBtn').textContent=userAddr.slice(0,6)+'...'+userAddr.slice(-4);
 }
 
-function toggleLang(){curLang=curLang==='en'?'zh':'en';applyLang();const a=document.querySelector('.panel.active');if(a){const id=a.id;if(id==='panel-market')loadMarket();else if(id==='panel-leaderboard')loadLeaderboard();else if(id==='panel-mynfts')refreshMyNfts();else if(id==='panel-info')loadInfo(); else if(id==='panel-launch')loadHistory()}}
+function toggleLang(){curLang=curLang==='en'?'zh':'en';applyLang();const a=document.querySelector('.panel.active');if(a){const id=a.id;if(id==='panel-market')loadMarket();else if(id==='panel-leaderboard')loadLeaderboard();else if(id==='panel-mynfts')refreshMyNfts();else if(id==='panel-launch')loadLaunchHistory();else if(id==='panel-info')loadInfo()}}
 
 /* === CONTRACTS === */
 const PN_ADDR='0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8';
 const AM_ADDR='0x78B11198268619728E4b53c642E8d68941004c11';
 const PQ_ADDR='0x86719c4337b8BF7d54aa73df7e3d460efD076405';
+const OC_ADDR='0x558232C46e3b8f125385aF127b95D6f602dFE81D';
 const BSC_CHAIN='0x38';
 const API_BASE='https://address.shibclaw.xyz';
+const BSC_EXPLORER='https://bscscan.com';
 
 const PN_ABI=['function balanceOf(address) view returns (uint256)','function transfer(address,uint256) returns (bool)','function totalSupply() view returns (uint256)','function totalMinted() view returns (uint256)','function currentReward() view returns (uint256)','function era() view returns (uint256)','function requiredRun() view returns (uint256)','function windowCount() view returns (uint256)','function totalMined() view returns (uint256)','function MAX_SUPPLY() view returns (uint256)'];
 const AM_ABI=['function claim(uint256 salt) payable','function claimById(uint256 walletId) payable','function purchasePrice() view returns (uint256)','function currentPrice(uint256 salt) view returns (uint256)','function balanceOf(address) view returns (uint256)','function nextWalletId() view returns (uint256)','function getAddressInfo(uint256 salt) view returns (uint256 walletId, address wallet, address currentOwner, uint256 streak, uint256 occurrences)','function getAddressInfoById(uint256 walletId) view returns (uint256 salt, address wallet, address currentOwner, uint256 streak, uint256 occurrences)'];
 const PQ_ABI=['function getUserDashboard(address user) view returns (uint256 tokenBalance, uint256 bnbBalance)','function getByWalletIdRange(uint256 fromId, uint256 toId) view returns (tuple(uint256 walletId, uint256 tokenId, uint256 salt, address currentOwner, uint256 streak, uint256 occurrences, address walletAddr, address approved, bool purchasable, uint256 price)[])'];
+const OC_ABI=[
+  'function launch(uint256 tokenId, string name_, string symbol_) payable returns (uint256, address, uint256)',
+  'function previewStatus(uint256 tokenId, address user) view returns (uint8 status, uint256 priceIfBuy, address predictedToken)',
+  'function quotePremiumPrice(uint256 tokenId) view returns (uint256)',
+  'function rescueNFT(uint256 tokenId)',
+  'function getUserLaunches(address user) view returns (uint256[])',
+  'function getLaunch(uint256 launchId) view returns (tuple(uint256 launchId,address user,uint256 nftTokenId,address token,uint256 lpNftId,uint256 bnbPaid,uint256 timestamp))',
+  'event Launched(uint256 indexed launchId,address indexed user,uint256 indexed nftTokenId,address token,uint256 lpNftId,uint256 bnbPaid,uint256 devShare)'
+];
+// AddressManager NFT 额外的 ERC721 方法（用于 approve）
+const AM_NFT_ABI=[
+  'function ownerOf(uint256 tokenId) view returns (address)',
+  'function getApproved(uint256 tokenId) view returns (address)',
+  'function isApprovedForAll(address owner, address operator) view returns (bool)',
+  'function approve(address to, uint256 tokenId)',
+  'function setApprovalForAll(address operator, bool approved)'
+];
 // 不再创建全局只读 RPC 实例 — 所有数据通过 API 获取，RPC 仅在钱包操作时使用用户的 provider
 
 let provider,signer,userAddr;
 let pnContract,amContract,pqContract;
+let ocContract,amNftContract;
+let launchCurrent=null; // { status, priceIfBuy, predicted, approved, tokenId }
 
 /* === TABS === */
 function switchTab(name,btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');btn.classList.add('active');
-  if(name==='market')loadMarket();else if(name==='leaderboard')loadLeaderboard();else if(name==='mynfts')refreshMyNfts();else if(name==='info')loadInfo(); else if(name==='launch')loadHistory()
+  if(name==='market')loadMarket();else if(name==='leaderboard')loadLeaderboard();else if(name==='mynfts')refreshMyNfts();else if(name==='launch')loadLaunchHistory();else if(name==='info')loadInfo()
 }
 
 /* === TOAST === */
@@ -559,19 +499,19 @@ async function connectWallet(){
     const cid=await window.ethereum.request({method:'eth_chainId'});
     if(cid!==BSC_CHAIN){try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_CHAIN}]})}catch(e){showToast(t('toastSwitchBSC'),'error');return}}
     provider=new ethers.BrowserProvider(window.ethereum);
-    signer=await provider.getSigner();
-      if(typeof OC_ADDRESS !== 'undefined') {
-          oc = new ethers.Contract(OC_ADDRESS, OC_ABI, signer);
-          nft = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-          if(document.getElementById('panel-launch') && document.getElementById('panel-launch').classList.contains('active')) loadHistory();
-      }
-    userAddr=await signer.getAddress();
+    signer=await provider.getSigner();userAddr=await signer.getAddress();
     pnContract=new ethers.Contract(PN_ADDR,PN_ABI,signer);
     amContract=new ethers.Contract(AM_ADDR,AM_ABI,signer);
     pqContract=new ethers.Contract(PQ_ADDR,PQ_ABI,signer);
+    ocContract=new ethers.Contract(OC_ADDR,OC_ABI,signer);
+    amNftContract=new ethers.Contract(AM_ADDR,AM_NFT_ABI,signer);
     document.getElementById('connectBtn').textContent=userAddr.slice(0,6)+'...'+userAddr.slice(-4);
     showToast(t('toastConnected'),'success');
+    // 解锁发币按钮
+    const lab=document.getElementById('launchActionBtn');
+    if(lab){lab.disabled=false;lab.textContent=t('launchAfterCheck')}
     if(document.getElementById('panel-mynfts').classList.contains('active'))refreshMyNfts();
+    if(document.getElementById('panel-launch').classList.contains('active'))loadLaunchHistory();
   }catch(e){showToast(t('toastConnFail'),'error');console.error(e)}
 }
 
@@ -800,7 +740,7 @@ async function refreshMyNfts(){
         h+='<div class="addr-card" style="border-color:var(--accent)"><div class="addr-id">#'+(item.walletId||item.tokenId||'?')+' <span class="badge badge-yellow">MINE</span></div>'+
           '<div class="addr-display" onclick="copyAddr(\''+wa+'\')">'+hl+'<svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div>'+
           '<div class="addr-meta">'+tierBadge(s)+'<span>'+t('digit')+': '+dVal+'</span><span>'+t('streak')+': '+s+'</span><span>'+t(pType.toLowerCase())+'</span></div>'+
-          '<div class="addr-actions"><button class="btn-secondary" style="font-size:.78rem;padding:9px" onclick="window.open(\'https://bscscan.com/address/'+wa+'\',\'_blank\')">BscScan</button></div></div>'}
+          '<div class="addr-actions"><button class="btn-primary" style="font-size:.78rem;padding:9px" onclick="gotoLaunchWithId('+(item.walletId||item.tokenId||0)+')">'+t('tabLaunch')+'</button><button class="btn-secondary" style="font-size:.78rem;padding:9px" onclick="window.open(\'https://bscscan.com/address/'+wa+'\',\'_blank\')">BscScan</button></div></div>'}
       myList.innerHTML=h
     }else{myList.innerHTML='<div class="empty-state"><p>'+t('noNfts')+'</p></div>'}
   }catch(e){console.error('MyNFTs error:',e)}
@@ -869,14 +809,159 @@ async function loadInfo(){
   }catch{document.getElementById('networkStatus').innerHTML='<ul class="info-list fade-in"><li><span class="label">'+t('network')+'</span><span class="value">BSC Mainnet</span></li><li><span class="label">Chain ID</span><span class="value">56</span></li></ul>'}
 }
 
+/* === ONECLICKLAUNCH === */
+function _launchSetStatus(html,kind){
+  const box=document.getElementById('launchStatusBox');
+  let bg='var(--bg3)',bd='var(--border)',cl='var(--text2)';
+  if(kind==='ok'){bg='rgba(16,185,129,.06)';bd='var(--green)';cl='var(--green)'}
+  else if(kind==='warn'){bg='var(--accent-glow)';bd='var(--accent)';cl='var(--accent)'}
+  else if(kind==='error'){bg='rgba(239,68,68,.06)';bd='var(--red)';cl='var(--red)'}
+  else if(kind==='info'){bg='rgba(59,130,246,.06)';bd='var(--blue)';cl='var(--blue)'}
+  box.style.background=bg;box.style.borderColor=bd;box.style.color=cl;box.style.borderStyle='solid';
+  box.innerHTML=html;
+}
+function _fmtBNB(wei){try{return parseFloat(ethers.formatEther(wei)).toLocaleString(undefined,{maximumFractionDigits:6})}catch{return '?'}}
+function _fmtTime(ts){return new Date(Number(ts)*1000).toLocaleString()}
+function _short(a){return a?a.slice(0,6)+'...'+a.slice(-4):''}
+
+async function launchCheckStatus(){
+  const idStr=document.getElementById('launchTokenId').value.trim();
+  if(!idStr){showToast(t('pleaseEnterNftId'),'error');return}
+  if(!userAddr){showToast(t('toastConnFirst'),'error');return}
+  const tokenId=BigInt(idStr);
+  _launchSetStatus(t('loadingMsg'),'info');
+  const actBtn=document.getElementById('launchActionBtn');
+  actBtn.disabled=true;
+  try{
+    await rpcThrottle();
+    const r=await ocContract.previewStatus(tokenId,userAddr);
+    const status=Number(r[0]);const price=r[1];const predicted=r[2];
+    let approved=false;
+    if(status===1){
+      await rpcThrottle();
+      const ga=await amNftContract.getApproved(tokenId);
+      await rpcThrottle();
+      const all=await amNftContract.isApprovedForAll(userAddr,OC_ADDR);
+      approved=(ga.toLowerCase()===OC_ADDR.toLowerCase())||all;
+    }
+    launchCurrent={status,priceIfBuy:price,predicted,approved,tokenId};
+    const predLink='<a class="addr" target="_blank" href="'+BSC_EXPLORER+'/address/'+predicted+'" style="color:var(--accent);word-break:break-all">'+_short(predicted)+'</a>';
+    const baseInfo='<div style="margin-top:6px;font-size:.78rem"><b>'+t('predictedToken')+':</b> '+predLink+'</div>';
+    if(status===1){
+      _launchSetStatus('<b>'+t('launchStatus1')+'</b>'+(approved?'（'+t('approved')+'）':'（'+t('needApprove')+'）')+baseInfo,'ok');
+      actBtn.textContent=approved?t('launchNow'):t('approveBtn');
+    }else if(status===2){
+      _launchSetStatus('<b>'+t('launchStatus2')+'</b>'+baseInfo,'ok');
+      actBtn.textContent=t('launchNow');
+    }else if(status===3){
+      _launchSetStatus('<b>'+t('launchStatus3')+'</b><div style="margin-top:4px;font-size:.78rem"><b>'+t('needsPay')+':</b> '+_fmtBNB(price)+' BNB</div>'+baseInfo,'warn');
+      actBtn.textContent=t('launchWithPay').replace('{bnb}',_fmtBNB(price));
+    }else{
+      _launchSetStatus('<b>'+t('launchStatus4')+'</b>'+baseInfo,'error');
+      actBtn.textContent=t('cannotLaunch');actBtn.disabled=true;return;
+    }
+    actBtn.disabled=false;
+  }catch(e){
+    console.error(e);
+    _launchSetStatus(t('statusFailed')+'：'+(e.shortMessage||e.message||''),'error');
+    actBtn.disabled=true;
+  }
+}
+
+async function launchAction(){
+  if(!launchCurrent){showToast(t('pleaseEnterNftId'),'error');return}
+  const{status,priceIfBuy,approved,tokenId}=launchCurrent;
+  const actBtn=document.getElementById('launchActionBtn');
+  // Step 1: approve
+  if(status===1&&!approved){
+    try{
+      actBtn.disabled=true;actBtn.textContent=t('sendingApprove');
+      const tx=await amNftContract.approve(OC_ADDR,tokenId);
+      showToast(t('txSubmitted')+': '+_short(tx.hash),'info');
+      await tx.wait();
+      showToast(t('approveOk'),'success');
+      launchCurrent.approved=true;
+      actBtn.textContent=t('launchNow');actBtn.disabled=false;
+    }catch(e){
+      console.error(e);
+      showToast(e.shortMessage||e.message||t('approveFail'),'error');
+      actBtn.disabled=false;actBtn.textContent=t('approveBtn');
+    }
+    return;
+  }
+  // Step 2: launch
+  const name=document.getElementById('launchName').value.trim();
+  const symbol=document.getElementById('launchSymbol').value.trim();
+  if(!name||!symbol){showToast(t('enterNameSym'),'error');return}
+  try{
+    actBtn.disabled=true;actBtn.textContent=t('sendingLaunch');
+    const overrides={};
+    if(status===3){overrides.value=priceIfBuy+(priceIfBuy/50n)} // +2% buffer
+    const tx=await ocContract.launch(tokenId,name,symbol,overrides);
+    showToast(t('txSubmitted')+': '+_short(tx.hash),'info');
+    const rcpt=await tx.wait();
+    _launchSetStatus('<b>✅ '+t('launchOk')+'</b><div style="margin-top:6px;font-size:.78rem"><a href="'+BSC_EXPLORER+'/tx/'+rcpt.hash+'" target="_blank" style="color:var(--accent);word-break:break-all">'+_short(rcpt.hash)+'</a></div>','ok');
+    showToast(t('launchOk'),'success');
+    actBtn.textContent=t('launchAgain');actBtn.disabled=false;
+    loadLaunchHistory();
+  }catch(e){
+    console.error(e);
+    const msg=e.shortMessage||e.reason||e.message||t('launchFail');
+    showToast(msg.length>80?msg.slice(0,80)+'...':msg,'error');
+    actBtn.disabled=false;actBtn.textContent=t('retry');
+  }
+}
+
+async function loadLaunchHistory(){
+  const box=document.getElementById('launchHistoryBox');
+  if(!userAddr){box.innerHTML='<div class="empty-state"><p>'+t('notConnected')+'</p></div>';return}
+  box.innerHTML=sk(1);
+  try{
+    await rpcThrottle();
+    const ids=await ocContract.getUserLaunches(userAddr);
+    if(ids.length===0){box.innerHTML='<div class="empty-state"><p>'+t('launchNoHistory')+'</p></div>';return}
+    const rows=[];
+    for(let i=ids.length-1;i>=0;i--){
+      await rpcThrottle();
+      const info=await ocContract.getLaunch(ids[i]);
+      rows.push(
+        '<div class="addr-card">'+
+          '<div class="addr-id">#'+info.launchId+' <span class="badge badge-yellow">NFT '+info.nftTokenId+'</span></div>'+
+          '<div style="font-size:.78rem;display:flex;flex-direction:column;gap:4px">'+
+            '<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Token</span><a class="addr" target="_blank" href="'+BSC_EXPLORER+'/token/'+info.token+'" style="color:var(--accent)">'+_short(info.token)+'</a></div>'+
+            '<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">LP NFT</span><span>#'+info.lpNftId+'</span></div>'+
+            '<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">'+t('needsPay')+'</span><span>'+_fmtBNB(info.bnbPaid)+' BNB</span></div>'+
+            '<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Time</span><span style="font-size:.72rem">'+_fmtTime(info.timestamp)+'</span></div>'+
+          '</div>'+
+        '</div>'
+      );
+    }
+    box.innerHTML=rows.join('');
+  }catch(e){
+    console.error(e);
+    box.innerHTML='<div class="empty-state"><p>'+t('launchHistFail')+'</p></div>';
+  }
+}
+
+// 在 My NFTs 卡片中点击「发币」时，跳到 Launch tab 并预填 NFT ID
+function gotoLaunchWithId(wid){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-launch').classList.add('active');
+  // 第 4 个 tab（索引 4）是 Launch
+  const tabs=document.querySelectorAll('.tab-bar button');
+  if(tabs[3])tabs[3].classList.add('active');
+  document.getElementById('launchTokenId').value=wid;
+  loadLaunchHistory();
+  launchCheckStatus();
+}
+
 /* === EVENTS === */
 if(window.ethereum){window.ethereum.on('accountsChanged',()=>location.reload());window.ethereum.on('chainChanged',()=>location.reload())}
 
 /* === AUTO LOAD === */
 setTimeout(()=>{loadMarket();loadMarketOverview();loadLeaderboard();loadInfo()},300);
-
-
-/* === LAUNCH LOGIC === */
 </script>
-<script crossorigin="anonymous" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' defer="" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447"></script>
-</body></html>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
