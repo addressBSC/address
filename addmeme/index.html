@@ -334,42 +334,107 @@ async function approve() {
 }
 
 async function launch() {
-  if (!contract) return alert("请先连接钱包");
+  log("===== 点击一键发币 =====");
+  if (!contract) { log("未连接钱包", "error"); return alert("请先连接钱包"); }
+
   const tokenId = $("lTokenId").value.trim();
   const name_ = $("lName").value.trim();
   const symbol_ = $("lSymbol").value.trim();
   const valueStr = $("lValue").value.trim() || "0";
-  if (!tokenId || !name_ || !symbol_) return alert("tokenId / name / symbol 必填");
+
+  log(`输入: tokenId="${tokenId}", name="${name_}", symbol="${symbol_}", value="${valueStr}"`);
+
+  if (!tokenId || !name_ || !symbol_) {
+    log("必填项缺失", "error");
+    return alert("tokenId / name / symbol 必填");
+  }
+
+  let value;
+  try { value = ethers.parseEther(valueStr); }
+  catch (e) { log("BNB 金额格式错误: " + e.message, "error"); return; }
+
+  // chain check
   try {
-    const value = ethers.parseEther(valueStr);
-    log(`一键发币: tokenId=${tokenId}, name=${name_}, symbol=${symbol_}, value=${valueStr} BNB`);
-    const tx = await contract.launch(tokenId, name_, symbol_, { value });
-    log("已发送: " + tx.hash);
-    log("等待确认 ...");
+    const net = await provider.getNetwork();
+    log("当前链 chainId=" + net.chainId);
+    if (Number(net.chainId) !== 56) {
+      log("不在 BSC 主网, 请切到 chainId=56", "error");
+      return;
+    }
+  } catch (e) {
+    log("读取网络失败: " + e.message, "error");
+  }
+
+  // pre-flight: staticCall to surface revert reason BEFORE wallet popup
+  log("预检 staticCall ...");
+  try {
+    await contract.launch.staticCall(tokenId, name_, symbol_, { value });
+    log("预检通过", "ok");
+  } catch (e) {
+    const reason = e.reason || e.shortMessage || e.message;
+    log("预检失败 (合约会 revert): " + reason, "error");
+    if (e.data) log("revert data: " + e.data, "error");
+    return;
+  }
+
+  // estimate gas
+  let gasLimit;
+  try {
+    const est = await contract.launch.estimateGas(tokenId, name_, symbol_, { value });
+    gasLimit = (est * 130n) / 100n; // +30% buffer
+    log("预估 gas=" + est.toString() + ", 使用 gasLimit=" + gasLimit.toString());
+  } catch (e) {
+    log("Gas 预估失败: " + (e.shortMessage || e.message), "error");
+    return;
+  }
+
+  log("调起钱包签名 ... (请看 MetaMask / OKX 弹窗)");
+  let tx;
+  try {
+    tx = await contract.launch(tokenId, name_, symbol_, { value, gasLimit });
+  } catch (e) {
+    log("用户取消或钱包报错: " + (e.shortMessage || e.message), "error");
+    return;
+  }
+  log("已发送: " + tx.hash);
+  log("https://bscscan.com/tx/" + tx.hash);
+  log("等待打包 ...");
+
+  try {
     const rcpt = await tx.wait();
+    if (rcpt.status === 0) {
+      log("交易上链但失败 (status=0)", "error");
+      return;
+    }
     log("发币成功! 区块: " + rcpt.blockNumber, "ok");
-    // parse Launched event
     for (const lg of rcpt.logs) {
       try {
         const parsed = contract.interface.parseLog(lg);
         if (parsed && parsed.name === "Launched") {
-          log("📦 launchId=" + parsed.args.launchId, "ok");
-          log("🪙 代币地址=" + parsed.args.token, "ok");
-          log("🔒 LP NFT id=" + parsed.args.lpNftId, "ok");
-          log("💸 实际付 BNB=" + ethers.formatEther(parsed.args.bnbPaid), "ok");
-          log("🎁 你拿到代币=" + ethers.formatEther(parsed.args.devShare), "ok");
+          log("launchId=" + parsed.args.launchId, "ok");
+          log("代币地址=" + parsed.args.token, "ok");
+          log("LP NFT id=" + parsed.args.lpNftId, "ok");
+          log("实付 BNB=" + ethers.formatEther(parsed.args.bnbPaid), "ok");
+          log("你拿到代币=" + ethers.formatEther(parsed.args.devShare), "ok");
         }
       } catch {}
     }
   } catch (e) {
-    log("发币失败: " + (e.shortMessage || e.message), "error");
+    log("等待回执失败: " + (e.shortMessage || e.message), "error");
   }
 }
 
 $("connectBtn").onclick = connect;
-$("queryBtn").onclick = query;
-$("approveBtn").onclick = approve;
+$("queryBtn").onclick = () => { log("===== 点击查询 ====="); query(); };
+$("approveBtn").onclick = () => { log("===== 点击 approve ====="); approve(); };
 $("launchBtn").onclick = launch;
+
+window.addEventListener("error", (e) => {
+  log("JS 错误: " + e.message + " @ " + e.filename + ":" + e.lineno, "error");
+});
+window.addEventListener("unhandledrejection", (e) => {
+  log("未捕获 Promise: " + (e.reason && (e.reason.message || e.reason)), "error");
+});
 
 if (window.ethereum) {
   window.ethereum.on("accountsChanged", () => location.reload());
