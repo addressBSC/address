@@ -258,10 +258,36 @@ select option{background:var(--bg2);color:var(--text)}
           <div class="empty-state"><p data-i18n="launchNoHistory">No launches yet</p></div>
         </div>
       </div>
+
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="allDeployed">All Deployed Tokens</span></div>
+        <div class="filter-bar">
+          <input type="text" id="ocSearch" data-i18n-ph="ocSearchPh" placeholder="Search address / name / symbol" style="flex:2 1 140px" onkeydown="if(event.key==='Enter'){ocPage=1;loadOcTokens()}">
+          <select id="ocSort" onchange="ocPage=1;loadOcTokens()">
+            <option value="newest" data-i18n="ocSortNewest">Newest</option>
+            <option value="oldest" data-i18n="ocSortOldest">Oldest</option>
+          </select>
+          <select id="ocScope" onchange="ocPage=1;loadOcTokens()">
+            <option value="all" data-i18n="ocFilterAll">All</option>
+            <option value="mine" data-i18n="ocFilterMine">Only Mine</option>
+          </select>
+        </div>
+        <div id="ocTokensList"></div>
+        <div class="pagination" id="ocTokensPagination"></div>
+      </div>
     </div>
 
     <!-- ====== INFO ====== -->
     <div class="panel" id="panel-info">
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="ocStats">OneClick Stats</span></div>
+        <div id="ocStatsContent"><div class="skeleton"><div class="sk-line w70"></div><div class="sk-line w50"></div></div></div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-title"><span class="dot"></span><span data-i18n="ocSyncStatus">Sync Status</span></div>
+        <div id="ocSyncStatusBox"><div class="skeleton"><div class="sk-line w70"></div></div></div>
+        <button class="btn-secondary" onclick="ocTriggerResync()" style="margin-top:10px" data-i18n="ocResync">Resync</button>
+      </div>
       <div class="card fade-in">
         <div class="card-title"><span class="dot"></span><span data-i18n="globalStats">Global Stats</span></div>
         <div id="globalStatsContent"><div class="skeleton"><div class="sk-line w70"></div><div class="sk-line w50"></div></div></div>
@@ -365,7 +391,22 @@ const LANG = {
     retry:'Retry', launchFail:'Launch failed', enterNameSym:'Enter name and symbol',
     statusFailed:'Status query failed', loadingMsg:'Loading...',
     pleaseEnterNftId:'Please enter NFT ID', launchHistFail:'Failed to load history',
-    payNothing:'(no BNB)', tabLaunchShort:'Launch'
+    payNothing:'(no BNB)', tabLaunchShort:'Launch',
+    /* OneClick tokens explorer */
+    launchedTokens:'Launched Tokens', allDeployed:'All Deployed Tokens',
+    ocSearchPh:'Search address / name / symbol',
+    ocFilterMine:'Only Mine', ocFilterAll:'All',
+    ocSortNewest:'Newest', ocSortOldest:'Oldest',
+    ocDeployer:'Deployer', ocToken:'Token', ocNftId:'NFT', ocPaid:'BNB Paid',
+    ocTime:'Time', ocLpNft:'LP NFT', ocLaunchId:'Launch #',
+    ocNoTokens:'No tokens launched yet', ocCopyTokenOk:'Token address copied',
+    ocStats:'OneClick Stats', ocTotalLaunches:'Total Launches',
+    ocUniqueDeployers:'Unique Deployers', ocLatestId:'Latest Launch ID',
+    ocSyncStatus:'Sync Status', ocSyncedBlock:'Synced Block',
+    ocLastUpdate:'Last Update', ocReady:'Healthy', ocLagging:'Lagging',
+    ocResync:'Resync', ocResyncOk:'Resync triggered',
+    ocViewTx:'Tx', ocViewToken:'View',
+    ocTrade:'Trade', ocChart:'Chart'
   },
   zh: {
     connect:'连接钱包', notConnected:'未连接', connected:'已连接',
@@ -415,7 +456,22 @@ const LANG = {
     retry:'重试', launchFail:'发射失败', enterNameSym:'请填写代币名称和符号',
     statusFailed:'查询失败', loadingMsg:'加载中...',
     pleaseEnterNftId:'请输入 NFT ID', launchHistFail:'加载失败',
-    payNothing:'（无需 BNB）', tabLaunchShort:'发币'
+    payNothing:'（无需 BNB）', tabLaunchShort:'发币',
+    /* OneClick tokens explorer */
+    launchedTokens:'已发射代币', allDeployed:'全网已发射代币',
+    ocSearchPh:'按地址 / 名称 / 符号搜索',
+    ocFilterMine:'只看我的', ocFilterAll:'全部',
+    ocSortNewest:'最新', ocSortOldest:'最早',
+    ocDeployer:'部署者', ocToken:'代币地址', ocNftId:'靓号NFT', ocPaid:'支付 BNB',
+    ocTime:'时间', ocLpNft:'流动性 NFT', ocLaunchId:'发射 #',
+    ocNoTokens:'暂无已发射的代币', ocCopyTokenOk:'已复制代币地址',
+    ocStats:'OneClick 统计', ocTotalLaunches:'累计发射数',
+    ocUniqueDeployers:'独立部署者', ocLatestId:'最新发射 ID',
+    ocSyncStatus:'同步器状态', ocSyncedBlock:'同步高度',
+    ocLastUpdate:'最近更新', ocReady:'健康', ocLagging:'滞后',
+    ocResync:'手动同步', ocResyncOk:'同步任务已触发',
+    ocViewTx:'交易哈希', ocViewToken:'查看',
+    ocTrade:'去交易', ocChart:'看K线'
   }
 };
 let curLang = 'en';
@@ -429,11 +485,16 @@ function applyLang(){
     const v=LANG[curLang][k]||LANG.en[k];
     if(v)el.textContent=v;
   });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const k=el.getAttribute('data-i18n-ph');
+    const v=LANG[curLang][k]||LANG.en[k];
+    if(v)el.setAttribute('placeholder',v);
+  });
   document.getElementById('langBtn').textContent=curLang==='en'?'CN':'EN';
   if(userAddr)document.getElementById('connectBtn').textContent=userAddr.slice(0,6)+'...'+userAddr.slice(-4);
 }
 
-function toggleLang(){curLang=curLang==='en'?'zh':'en';applyLang();const a=document.querySelector('.panel.active');if(a){const id=a.id;if(id==='panel-market')loadMarket();else if(id==='panel-leaderboard')loadLeaderboard();else if(id==='panel-mynfts')refreshMyNfts();else if(id==='panel-launch')loadLaunchHistory();else if(id==='panel-info')loadInfo()}}
+function toggleLang(){curLang=curLang==='en'?'zh':'en';applyLang();const a=document.querySelector('.panel.active');if(a){const id=a.id;if(id==='panel-market')loadMarket();else if(id==='panel-leaderboard')loadLeaderboard();else if(id==='panel-mynfts')refreshMyNfts();else if(id==='panel-launch'){loadLaunchHistory();loadOcTokens()}else if(id==='panel-info'){loadInfo();loadOcStats();loadOcSyncStatus()}}}
 
 /* === CONTRACTS === */
 const PN_ADDR='0x1805eE5F34d7434FefCFf0CA2d2383E06823E6d8';
@@ -476,7 +537,11 @@ function switchTab(name,btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');btn.classList.add('active');
-  if(name==='market')loadMarket();else if(name==='leaderboard')loadLeaderboard();else if(name==='mynfts')refreshMyNfts();else if(name==='launch')loadLaunchHistory();else if(name==='info')loadInfo()
+  if(name==='market')loadMarket();
+  else if(name==='leaderboard')loadLeaderboard();
+  else if(name==='mynfts')refreshMyNfts();
+  else if(name==='launch'){loadLaunchHistory();loadOcTokens()}
+  else if(name==='info'){loadInfo();loadOcStats();loadOcSyncStatus()}
 }
 
 /* === TOAST === */
@@ -916,6 +981,19 @@ async function loadLaunchHistory(){
   const box=document.getElementById('launchHistoryBox');
   if(!userAddr){box.innerHTML='<div class="empty-state"><p>'+t('notConnected')+'</p></div>';return}
   box.innerHTML=sk(1);
+  // 优先走 API（/api/oneclick/user/:address），失败时回退到 RPC
+  try{
+    const resp=await fetch(API_BASE+'/api/oneclick/user/'+userAddr);
+    if(resp.ok){
+      const raw=await resp.json();
+      const items=extractItems(raw);
+      if(!items.length){box.innerHTML='<div class="empty-state"><p>'+t('launchNoHistory')+'</p></div>';return}
+      // 按时间倒序
+      items.sort((a,b)=>Number(b.timestamp||b.blockTime||0)-Number(a.timestamp||a.blockTime||0));
+      box.innerHTML=items.map(renderOcLaunchCard).join('');
+      return;
+    }
+  }catch(_){/* fallthrough to RPC */}
   try{
     await rpcThrottle();
     const ids=await ocContract.getUserLaunches(userAddr);
@@ -924,23 +1002,135 @@ async function loadLaunchHistory(){
     for(let i=ids.length-1;i>=0;i--){
       await rpcThrottle();
       const info=await ocContract.getLaunch(ids[i]);
-      rows.push(
-        '<div class="addr-card">'+
-          '<div class="addr-id">#'+info.launchId+' <span class="badge badge-yellow">NFT '+info.nftTokenId+'</span></div>'+
-          '<div style="font-size:.78rem;display:flex;flex-direction:column;gap:4px">'+
-            '<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Token</span><a class="addr" target="_blank" href="'+BSC_EXPLORER+'/token/'+info.token+'" style="color:var(--accent)">'+_short(info.token)+'</a></div>'+
-            '<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">LP NFT</span><span>#'+info.lpNftId+'</span></div>'+
-            '<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">'+t('needsPay')+'</span><span>'+_fmtBNB(info.bnbPaid)+' BNB</span></div>'+
-            '<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Time</span><span style="font-size:.72rem">'+_fmtTime(info.timestamp)+'</span></div>'+
-          '</div>'+
-        '</div>'
-      );
+      rows.push(renderOcLaunchCard({
+        launchId:info.launchId,user:info.user,nftTokenId:info.nftTokenId,
+        token:info.token,lpNftId:info.lpNftId,bnbPaid:info.bnbPaid,timestamp:info.timestamp
+      }));
     }
     box.innerHTML=rows.join('');
   }catch(e){
     console.error(e);
     box.innerHTML='<div class="empty-state"><p>'+t('launchHistFail')+'</p></div>';
   }
+}
+
+/* === ONECLICK TOKENS EXPLORER === */
+let ocPage=1;const OC_PER_PAGE=10;
+function renderOcLaunchCard(info){
+  const lid=info.launchId!=null?info.launchId:'';
+  const token=info.token||info.tokenAddress||info.tokenAddr||'';
+  const name=info.name||info.tokenName||'';
+  const symbol=info.symbol||info.tokenSymbol||'';
+  const nftId=info.nftTokenId!=null?info.nftTokenId:(info.nftId!=null?info.nftId:'');
+  const lpNft=info.lpNftId!=null?info.lpNftId:'';
+  const paid=info.bnbPaid||0;
+  const ts=info.timestamp||info.blockTime||0;
+  const user=info.user||info.deployer||'';
+  const txHash=info.txHash||info.transactionHash||'';
+  const isMine=userAddr&&user&&user.toLowerCase()===userAddr.toLowerCase();
+  return '<div class="addr-card"'+(isMine?' style="border-color:var(--accent)"':'')+'>'+
+    '<div class="addr-id">#'+lid+
+      (nftId!==''?' <span class="badge badge-yellow">'+t('ocNftId')+' '+nftId+'</span>':'')+
+      (isMine?' <span class="badge badge-green">MINE</span>':'')+'</div>'+
+    (name||symbol?'<div style="font-weight:800;font-size:.92rem;margin:4px 0 6px">'+(name||'')+(symbol?' <span style="color:var(--text3);font-weight:600">('+symbol+')</span>':'')+'</div>':'')+
+    '<div style="font-size:.78rem;display:flex;flex-direction:column;gap:4px">'+
+      (token?'<div style="display:flex;justify-content:space-between;gap:8px"><span style="color:var(--text2)">'+t('ocToken')+'</span><span class="value mono" style="cursor:pointer" onclick="copyOcToken(\''+token+'\')">'+_short(token)+'</span></div>':'')+
+      (user?'<div style="display:flex;justify-content:space-between;gap:8px"><span style="color:var(--text2)">'+t('ocDeployer')+'</span><span class="value mono">'+_short(user)+'</span></div>':'')+
+      (lpNft!==''?'<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">'+t('ocLpNft')+'</span><span>#'+lpNft+'</span></div>':'')+
+      '<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">'+t('ocPaid')+'</span><span>'+_fmtBNB(paid)+' BNB</span></div>'+
+      (ts?'<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">'+t('ocTime')+'</span><span style="font-size:.72rem">'+_fmtTime(ts)+'</span></div>':'')+
+    '</div>'+
+    '<div class="addr-actions" style="margin-top:8px">'+
+      (token?'<button class="btn-primary" style="font-size:.74rem;padding:8px" onclick="window.open(\'https://pancakeswap.finance/swap?outputCurrency='+token+'\',\'_blank\')">'+t('ocTrade')+'</button>':'')+
+      (token?'<button class="btn-secondary" style="font-size:.74rem;padding:8px" onclick="window.open(\'https://dexscreener.com/bsc/'+token+'\',\'_blank\')">'+t('ocChart')+'</button>':'')+
+    '</div></div>';
+}
+
+function copyOcToken(addr){copyAddr(addr)}
+
+async function loadOcTokens(){
+  const listEl=document.getElementById('ocTokensList');const pagEl=document.getElementById('ocTokensPagination');
+  if(!listEl)return;
+  listEl.innerHTML=sk(2);
+  try{
+    const scope=document.getElementById('ocScope').value;
+    const sort=document.getElementById('ocSort').value;
+    const search=document.getElementById('ocSearch').value.trim();
+    const params=new URLSearchParams({page:ocPage,limit:OC_PER_PAGE,sort});
+    if(search)params.set('search',search);
+    if(scope==='mine'){
+      if(!userAddr){listEl.innerHTML='<div class="empty-state"><p>'+t('toastConnFirst')+'</p></div>';pagEl.innerHTML='';return}
+      params.set('user',userAddr);
+    }
+    const resp=await fetch(API_BASE+'/api/oneclick/tokens?'+params.toString());
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    const data=await resp.json();
+    const items=extractItems(data);
+    const total=extractTotal(data)||items.length;
+    if(!items.length){listEl.innerHTML='<div class="empty-state"><p>'+t('ocNoTokens')+'</p></div>';pagEl.innerHTML='';return}
+    listEl.innerHTML=items.map(renderOcLaunchCard).join('');
+    const pages=Math.max(1,Math.ceil(total/OC_PER_PAGE));
+    pagEl.innerHTML='<button onclick="ocPage=Math.max(1,ocPage-1);loadOcTokens()" '+(ocPage<=1?'disabled':'')+'>‹</button>'+
+      '<span class="page-info">'+ocPage+' / '+pages+' &middot; '+total+'</span>'+
+      '<button onclick="ocPage=Math.min('+pages+',ocPage+1);loadOcTokens()" '+(ocPage>=pages?'disabled':'')+'>›</button>';
+  }catch(e){
+    console.error('loadOcTokens',e);
+    listEl.innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>';
+    pagEl.innerHTML='';
+  }
+}
+
+/* === ONECLICK STATS + SYNC STATUS === */
+async function loadOcStats(){
+  const el=document.getElementById('ocStatsContent');
+  if(!el)return;
+  try{
+    const resp=await fetch(API_BASE+'/api/oneclick/stats');
+    if(!resp.ok)throw new Error();
+    const d=await resp.json();const info=extractObj(d);
+    const total=info.totalLaunches||info.total||info.count||0;
+    const uniq=info.uniqueDeployers||info.uniqueUsers||info.deployers||0;
+    const latest=info.latestLaunchId||info.lastLaunchId||info.latestId||info.maxLaunchId||'--';
+    const onchain=info.onchainTotal||info.chainTotal||info.totalOnchain;
+    let h='<div class="stat-grid-4 fade-in">'+
+      '<div class="stat-card"><div class="sc-val accent">'+total+'</div><div class="sc-label">'+t('ocTotalLaunches')+'</div></div>'+
+      '<div class="stat-card"><div class="sc-val green">'+uniq+'</div><div class="sc-label">'+t('ocUniqueDeployers')+'</div></div>'+
+      '<div class="stat-card"><div class="sc-val">'+latest+'</div><div class="sc-label">'+t('ocLatestId')+'</div></div>';
+    if(onchain!=null)h+='<div class="stat-card"><div class="sc-val">'+onchain+'</div><div class="sc-label">On-chain</div></div>';
+    h+='</div>';
+    el.innerHTML=h;
+  }catch{
+    el.innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>';
+  }
+}
+
+async function loadOcSyncStatus(){
+  const el=document.getElementById('ocSyncStatusBox');
+  if(!el)return;
+  try{
+    const resp=await fetch(API_BASE+'/api/oneclick/status');
+    if(!resp.ok)throw new Error();
+    const d=await resp.json();const st=extractObj(d);
+    const ready=st.ready===true||st.healthy===true||st.ok===true;
+    const block=st.lastSyncedBlock||st.lastBlock||st.blockNumber||st.syncedBlock||'--';
+    const upd=st.lastUpdateTime||st.updatedAt||st.lastUpdate;
+    el.innerHTML='<ul class="info-list fade-in">'+
+      '<li><span class="label">'+t('status')+'</span><span class="value"><span class="badge '+(ready?'badge-green':'badge-yellow')+'">'+(ready?t('ocReady'):t('ocLagging'))+'</span></span></li>'+
+      '<li><span class="label">'+t('ocSyncedBlock')+'</span><span class="value mono">'+block+'</span></li>'+
+      (upd?'<li><span class="label">'+t('ocLastUpdate')+'</span><span class="value">'+new Date(upd).toLocaleString()+'</span></li>':'')+
+      '</ul>';
+  }catch{
+    el.innerHTML='<div class="empty-state"><p>'+t('toastFetchFail')+'</p></div>';
+  }
+}
+
+async function ocTriggerResync(){
+  try{
+    showToast(t('loadingMsg'),'info');
+    const resp=await fetch(API_BASE+'/api/oneclick/resync',{method:'POST'}).catch(()=>fetch(API_BASE+'/api/oneclick/resync'));
+    if(resp&&resp.ok){showToast(t('ocResyncOk'),'success');setTimeout(loadOcSyncStatus,1500)}
+    else{showToast(t('toastFetchFail'),'error')}
+  }catch{showToast(t('toastFetchFail'),'error')}
 }
 
 // 在 My NFTs 卡片中点击「发币」时，跳到 Launch tab 并预填 NFT ID
@@ -960,7 +1150,7 @@ function gotoLaunchWithId(wid){
 if(window.ethereum){window.ethereum.on('accountsChanged',()=>location.reload());window.ethereum.on('chainChanged',()=>location.reload())}
 
 /* === AUTO LOAD === */
-setTimeout(()=>{loadMarket();loadMarketOverview();loadLeaderboard();loadInfo()},300);
+setTimeout(()=>{loadMarket();loadMarketOverview();loadLeaderboard();loadInfo();loadOcTokens();loadOcStats();loadOcSyncStatus()},300);
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
